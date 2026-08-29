@@ -75,7 +75,8 @@ h2 {
   color: var(--primary-dark);
 }
 
-.tagline {
+.tagline,
+.selected-age {
   margin: 14px 0 24px;
   font-size: 1.05rem;
   font-weight: 700;
@@ -84,6 +85,7 @@ h2 {
 
 #start-button,
 .age-button,
+.category-button,
 .secondary-button {
   border: none;
   border-radius: 999px;
@@ -107,6 +109,8 @@ h2 {
 #start-button:focus-visible,
 .age-button:hover,
 .age-button:focus-visible,
+.category-button:hover,
+.category-button:focus-visible,
 .secondary-button:hover,
 .secondary-button:focus-visible {
   transform: translateY(-2px);
@@ -114,18 +118,21 @@ h2 {
 
 #start-button:active,
 .age-button:active,
+.category-button:active,
 .secondary-button:active {
   transform: translateY(0);
 }
 
-.age-list {
+.age-list,
+.category-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin: 22px 0 18px;
 }
 
-.age-button {
+.age-button,
+.category-button {
   width: 100%;
   background: linear-gradient(180deg, #fff5d9 0%, #ffe6a3 100%);
   color: var(--text);
@@ -133,6 +140,10 @@ h2 {
   font-weight: 700;
   padding: 16px 18px;
   box-shadow: 0 8px 18px rgba(255, 182, 52, 0.22);
+}
+
+.category-button {
+  font-size: 1.1rem;
 }
 
 .secondary-button {
@@ -156,7 +167,8 @@ h2 {
     padding: 36px 28px 26px;
   }
 
-  .tagline {
+  .tagline,
+  .selected-age {
     font-size: 1.25rem;
   }
 }
