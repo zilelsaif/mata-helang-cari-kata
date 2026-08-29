@@ -7,6 +7,8 @@
   --text: #1a2a3b;
   --muted: #5d6f86;
   --shadow: rgba(15, 67, 130, 0.18);
+  --success: #7bcf9c;
+  --board-bg: #eaf5ff;
 }
 
 * {
@@ -67,16 +69,22 @@ body {
 }
 
 h1,
-h2 {
+h2,
+h3 {
   margin: 0;
-  font-size: clamp(2rem, 7vw, 3.2rem);
   line-height: 1.1;
   letter-spacing: -0.04em;
   color: var(--primary-dark);
 }
 
+h1,
+h2 {
+  font-size: clamp(2rem, 7vw, 3.2rem);
+}
+
 .tagline,
-.selected-age {
+.selected-age,
+.category-message {
   margin: 14px 0 24px;
   font-size: 1.05rem;
   font-weight: 700;
@@ -86,7 +94,8 @@ h2 {
 #start-button,
 .age-button,
 .category-button,
-.secondary-button {
+.secondary-button,
+.primary-button {
   border: none;
   border-radius: 999px;
   cursor: pointer;
@@ -112,14 +121,17 @@ h2 {
 .category-button:hover,
 .category-button:focus-visible,
 .secondary-button:hover,
-.secondary-button:focus-visible {
+.secondary-button:focus-visible,
+.primary-button:hover,
+.primary-button:focus-visible {
   transform: translateY(-2px);
 }
 
 #start-button:active,
 .age-button:active,
 .category-button:active,
-.secondary-button:active {
+.secondary-button:active,
+.primary-button:active {
   transform: translateY(0);
 }
 
@@ -146,13 +158,26 @@ h2 {
   font-size: 1.1rem;
 }
 
-.secondary-button {
+.category-message {
+  min-height: 1.5em;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #b85c0d;
+}
+
+.secondary-button,
+.primary-button {
   background: #eaf3ff;
   color: var(--primary-dark);
   font-size: 1rem;
   font-weight: 700;
   padding: 12px 20px;
   box-shadow: 0 8px 18px rgba(29, 111, 214, 0.12);
+}
+
+.primary-button {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
 }
 
 .version {
@@ -162,13 +187,144 @@ h2 {
   color: var(--muted);
 }
 
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.word-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  background: var(--board-bg);
+  border-radius: 18px;
+  padding: 12px;
+  border: 2px solid rgba(29, 111, 214, 0.12);
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  background: #fff;
+  border: 1px solid #d7e8ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: 700;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.cell.selected {
+  background: var(--accent);
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px rgba(13, 78, 163, 0.24);
+}
+
+.cell.found {
+  background: var(--success);
+  color: #113f2d;
+  box-shadow: inset 0 0 0 2px rgba(17, 63, 45, 0.2);
+}
+
+.word-panel {
+  background: #f6fbff;
+  border-radius: 18px;
+  padding: 14px;
+  text-align: left;
+}
+
+.word-list-title {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+.word-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.word-item {
+  background: #fff;
+  border-radius: 999px;
+  border: 1px solid #dcecff;
+  padding: 8px 12px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.word-item.completed {
+  background: #dff8e9;
+  border-color: rgba(93, 170, 125, 0.5);
+  text-decoration: line-through;
+}
+
+.victory-panel {
+  margin-top: 20px;
+  background: linear-gradient(180deg, #fffaf0 0%, #fff0c4 100%);
+  border: 2px solid rgba(255, 209, 102, 0.7);
+  border-radius: 18px;
+  padding: 16px 14px;
+}
+
+.victory-panel h3 {
+  font-size: clamp(1.8rem, 6vw, 2.5rem);
+  margin-bottom: 8px;
+}
+
+.victory-panel p {
+  margin: 0 0 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.victory-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
 @media (min-width: 600px) {
   .panel {
+    width: min(100%, 540px);
     padding: 36px 28px 26px;
   }
 
   .tagline,
-  .selected-age {
+  .selected-age,
+  .category-message {
     font-size: 1.25rem;
+  }
+
+  .game-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .word-grid {
+    flex: 1 1 auto;
+    min-width: 220px;
+  }
+
+  .word-panel {
+    flex: 0 0 180px;
+  }
+
+  .victory-actions {
+    flex-direction: row;
+    justify-content: center;
   }
 }

@@ -21,7 +21,7 @@
           MULA
         </button>
 
-        <p class="version" aria-label="Versi permainan">v0.3.0</p>
+        <p class="version" aria-label="Versi permainan">v0.4.0</p>
       </section>
 
       <section id="age-screen" class="panel" aria-labelledby="age-title" aria-hidden="true">
@@ -44,6 +44,7 @@
         <p class="eyebrow">Permainan Kata</p>
         <h2 id="category-title">PILIH KATEGORI</h2>
         <p id="selected-age-label" class="selected-age">Umur: --</p>
+        <p id="category-message" class="category-message" aria-live="polite"></p>
 
         <div class="category-list" aria-label="Pilihan kategori">
           <button class="category-button" data-category="Haiwan" type="button">🐾 Haiwan</button>
@@ -57,6 +58,30 @@
         <button id="category-back-button" class="secondary-button" type="button">
           KEMBALI
         </button>
+      </section>
+
+      <section id="game-screen" class="panel" aria-labelledby="game-heading" aria-hidden="true">
+        <p class="eyebrow">Permainan Kata</p>
+        <h2 id="game-heading">CARI KATA</h2>
+        <p id="game-session-label" class="selected-age">Umur: --</p>
+
+        <div class="game-layout">
+          <div id="word-grid" class="word-grid" aria-label="Papan permainan"></div>
+
+          <div class="word-panel">
+            <h3 class="word-list-title">Senarai Kata</h3>
+            <ul id="word-list" class="word-list" aria-label="Senarai kata"></ul>
+          </div>
+        </div>
+
+        <div id="victory-panel" class="victory-panel hidden" aria-live="polite">
+          <h3>TAHNIAH!</h3>
+          <p>Semua kata ditemui.</p>
+          <div class="victory-actions">
+            <button id="play-again-button" class="primary-button" type="button">MAIN LAGI</button>
+            <button id="menu-button" class="secondary-button" type="button">MENU</button>
+          </div>
+        </div>
       </section>
     </main>
 
