@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuButton = document.getElementById('menu-button');
 
   const GRID_SIZE = 6;
-  const TARGET_WORDS = ['AYAM', 'IKAN', 'KUDA', 'API'];
+  const TARGET_WORDS = ['AYAM', 'IKAN', 'KUDA', 'ULAR'];
 
   let selectedAge = 'Belum dipilih';
   let selectedCategory = 'Belum dipilih';
@@ -350,14 +350,21 @@ document.addEventListener('DOMContentLoaded', () => {
         clearSelection();
         updateSelection({ row, col });
       });
+    });
 
-      cell.addEventListener('pointerenter', () => {
-        if (isDragging && dragStartCell) {
-          const row = Number(cell.dataset.row);
-          const col = Number(cell.dataset.col);
-          updateSelection({ row, col });
-        }
-      });
+    document.addEventListener('pointermove', (event) => {
+      if (!isDragging || !dragStartCell) {
+        return;
+      }
+
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      if (!element || !element.classList.contains('cell')) {
+        return;
+      }
+
+      const row = Number(element.dataset.row);
+      const col = Number(element.dataset.col);
+      updateSelection({ row, col });
     });
   }
 
