@@ -12,7 +12,7 @@
   </head>
   <body>
     <main class="screen">
-      <section class="title-card" aria-labelledby="game-title">
+      <section id="title-screen" class="panel active" aria-labelledby="game-title" aria-hidden="false">
         <p class="eyebrow">Permainan Kata</p>
         <h1 id="game-title">Mata Helang: Cari Kata</h1>
         <p class="tagline">Seberapa Tajam Mata Kamu?</p>
@@ -21,7 +21,23 @@
           MULA
         </button>
 
-        <p class="version" aria-label="Versi permainan">v0.1.0</p>
+        <p class="version" aria-label="Versi permainan">v0.2.0</p>
+      </section>
+
+      <section id="age-screen" class="panel" aria-labelledby="age-title" aria-hidden="true">
+        <p class="eyebrow">Permainan Kata</p>
+        <h2 id="age-title">PILIH UMUR</h2>
+
+        <div class="age-list" aria-label="Pilihan umur">
+          <button class="age-button" data-age="5-7 Tahun" type="button">🐣 5–7 Tahun</button>
+          <button class="age-button" data-age="8-10 Tahun" type="button">🧒 8–10 Tahun</button>
+          <button class="age-button" data-age="11-12 Tahun" type="button">🎒 11–12 Tahun</button>
+          <button class="age-button" data-age="13-15 Tahun" type="button">🧠 13–15 Tahun</button>
+        </div>
+
+        <button id="back-button" class="secondary-button" type="button">
+          KEMBALI
+        </button>
       </section>
     </main>
 
