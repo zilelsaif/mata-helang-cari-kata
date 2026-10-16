@@ -20,17 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuButton = document.getElementById('menu-button');
 
   const GRID_SIZE = 6;
+  const WORDS_PER_PUZZLE = 4;
+
+  // Word banks are kept together so more age groups can be added later.
   const WORDS_BY_CATEGORY = {
-    Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR'],
-    'Buah-buahan': ['EPAL', 'NANAS', 'MANGGA', 'DURIAN'],
-    Makanan: ['NASI', 'ROTI', 'MEE', 'SUP'],
-    Sekolah: ['BUKU', 'PENA', 'MEJA', 'GURU'],
-    Kenderaan: ['BAS', 'TEKSI', 'BOT', 'VAN'],
-    Alam: ['AWAN', 'HUJAN', 'SUNGAI', 'BUKIT']
+    Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'SAPI', 'KAMBING'],
+    'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
+    Makanan: ['NASI', 'ROTI', 'MEE', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATAY'],
+    Sekolah: ['BUKU', 'PENA', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
+    Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
+    Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
   };
 
   let selectedAge = 'Belum dipilih';
   let selectedCategory = 'Belum dipilih';
+  let currentTargetWords = [];
   let puzzle = null;
   let foundWords = new Set();
   let isDragging = false;
@@ -40,7 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let feedbackTimerId = null;
 
   function getTargetWords() {
-    return WORDS_BY_CATEGORY[selectedCategory] || [];
+    return currentTargetWords;
+  }
+
+  function chooseTargetWords(category) {
+    const categoryWords = WORDS_BY_CATEGORY[category] || [];
+    const validWords = [...new Set(categoryWords)].filter((word) => (
+      word.length <= GRID_SIZE && /^[A-Z]+$/.test(word)
+    ));
+
+    // Shuffle valid words, then take four unique targets for this puzzle.
+    for (let index = validWords.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [validWords[index], validWords[randomIndex]] = [validWords[randomIndex], validWords[index]];
+    }
+
+    return validWords.slice(0, WORDS_PER_PUZZLE);
   }
 
   function showScreen(show) {
@@ -75,10 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return letters[Math.floor(Math.random() * letters.length)];
   }
 
-  function buildBoard() {
+  function tryBuildBoard(targetWords) {
     const board = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''));
-
-    const targetWords = getTargetWords();
     const cellsByWord = {};
 
     for (let i = 0; i < targetWords.length; i += 1) {
@@ -136,6 +153,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    return { board, cellsByWord };
+  }
+
+  function buildBoard(targetWords) {
+    let generatedPuzzle = null;
+
+    // Restart with an empty grid if random placements block a later word.
+    for (let boardAttempt = 0; boardAttempt < 100 && !generatedPuzzle; boardAttempt += 1) {
+      generatedPuzzle = tryBuildBoard(targetWords);
+    }
+
+    if (!generatedPuzzle) {
+      return null;
+    }
+
+    const { board } = generatedPuzzle;
     for (let row = 0; row < GRID_SIZE; row += 1) {
       for (let col = 0; col < GRID_SIZE; col += 1) {
         if (board[row][col] === '') {
@@ -144,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    return { board, cellsByWord };
+    return generatedPuzzle;
   }
 
   function renderWordList() {
@@ -337,10 +370,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupBoard() {
-    const generatedPuzzle = buildBoard();
+    currentTargetWords = chooseTargetWords(selectedCategory);
+    const generatedPuzzle = buildBoard(currentTargetWords);
 
-    if (!generatedPuzzle) {
-      return;
+    if (!generatedPuzzle || currentTargetWords.length !== WORDS_PER_PUZZLE) {
+      showCategoryMessage('Papan tidak dapat dibina. Cuba lagi.');
+      showScreen(categoryScreen);
+      return false;
     }
 
     const { board, cellsByWord } = generatedPuzzle;
@@ -393,13 +429,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    return true;
   }
 
   function startGame() {
+    if (selectedAge !== '5–7 Tahun') {
+      showCategoryMessage('Akan datang');
+      showScreen(categoryScreen);
+      return;
+    }
+
     gameSessionLabel.textContent = `Umur: ${selectedAge} | Kategori: ${selectedCategory}`;
     showCategoryMessage('');
-    setupBoard();
-    showScreen(gameScreen);
+    if (setupBoard()) {
+      showScreen(gameScreen);
+    }
   }
 
   if (startButton) {
@@ -422,15 +466,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (playAgainButton) {
     playAgainButton.addEventListener('click', () => {
-      setupBoard();
-      showScreen(gameScreen);
+      if (setupBoard()) {
+        showScreen(gameScreen);
+      }
     });
   }
 
   ageButtons.forEach((button) => {
     button.addEventListener('click', () => {
       selectedAge = button.dataset.age;
-      console.log('Umur dipilih:', selectedAge);
+      showCategoryMessage('');
       showCategoryScreen();
     });
   });
@@ -438,8 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
   categoryButtons.forEach((button) => {
     button.addEventListener('click', () => {
       selectedCategory = button.dataset.category;
-      console.log('Umur dipilih:', selectedAge);
-      console.log('Kategori dipilih:', selectedCategory);
       startGame();
     });
   });
