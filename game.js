@@ -13,20 +13,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const wordGrid = document.getElementById('word-grid');
   const wordList = document.getElementById('word-list');
   const gameSessionLabel = document.getElementById('game-session-label');
+  const gameFeedback = document.getElementById('game-feedback');
   const victoryPanel = document.getElementById('victory-panel');
+  const victorySummary = document.getElementById('victory-summary');
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
 
   const GRID_SIZE = 6;
-  const TARGET_WORDS = ['AYAM', 'IKAN', 'KUDA', 'ULAR'];
+  const WORDS_BY_CATEGORY = {
+    Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR'],
+    'Buah-buahan': ['EPAL', 'NANAS', 'MANGGA', 'DURIAN'],
+    Makanan: ['NASI', 'ROTI', 'MEE', 'SUP'],
+    Sekolah: ['BUKU', 'PENA', 'MEJA', 'GURU'],
+    Kenderaan: ['BAS', 'TEKSI', 'BOT', 'VAN'],
+    Alam: ['AWAN', 'HUJAN', 'SUNGAI', 'BUKIT']
+  };
 
   let selectedAge = 'Belum dipilih';
   let selectedCategory = 'Belum dipilih';
   let puzzle = null;
   let foundWords = new Set();
   let isDragging = false;
+  let activePointerId = null;
   let dragStartCell = null;
   let currentSelection = [];
+  let feedbackTimerId = null;
+
+  function getTargetWords() {
+    return WORDS_BY_CATEGORY[selectedCategory] || [];
+  }
 
   function showScreen(show) {
     const screens = [titleScreen, ageScreen, categoryScreen, gameScreen];
@@ -63,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function buildBoard() {
     const board = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''));
 
-    for (let i = 0; i < TARGET_WORDS.length; i += 1) {
+    const targetWords = getTargetWords();
+    const cellsByWord = {};
+
+    for (let i = 0; i < targetWords.length; i += 1) {
       let placed = false;
       let tries = 0;
 
@@ -73,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const direction = Math.random() < 0.5 ? 'H' : 'V';
         const row = Math.floor(Math.random() * GRID_SIZE);
         const col = Math.floor(Math.random() * GRID_SIZE);
-        const word = TARGET_WORDS[i];
+        const word = targetWords[i];
 
         const endRow = direction === 'H' ? row : row + word.length - 1;
         const endCol = direction === 'H' ? col + word.length - 1 : col;
@@ -105,6 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
           board[cell.row][cell.col] = cell.letter;
         });
 
+        cellsByWord[word] = cells.map(({ row: cellRow, col: cellCol }) => ({
+          row: cellRow,
+          col: cellCol
+        }));
+
         placed = true;
       }
 
@@ -121,19 +144,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    return board;
+    return { board, cellsByWord };
   }
 
   function renderWordList() {
     wordList.innerHTML = '';
 
-    TARGET_WORDS.forEach((word) => {
+    getTargetWords().forEach((word) => {
       const item = document.createElement('li');
       item.className = 'word-item';
       item.textContent = word;
 
       if (foundWords.has(word)) {
         item.classList.add('completed');
+        item.setAttribute('aria-label', `${word} ditemui`);
       }
 
       wordList.appendChild(item);
@@ -147,9 +171,46 @@ document.addEventListener('DOMContentLoaded', () => {
     currentSelection = [];
   }
 
+  function clearFeedback() {
+    window.clearTimeout(feedbackTimerId);
+    gameFeedback.textContent = '';
+    gameFeedback.className = 'game-feedback';
+    wordGrid.classList.remove('wrong-selection');
+  }
+
+  function showFeedback(message, type) {
+    clearFeedback();
+    gameFeedback.textContent = message;
+    gameFeedback.classList.add(type);
+
+    if (type === 'retry') {
+      // Restart the shake animation for each incorrect attempt.
+      void wordGrid.offsetWidth;
+      wordGrid.classList.add('wrong-selection');
+    }
+
+    feedbackTimerId = window.setTimeout(clearFeedback, 900);
+  }
+
+  function selectionsMatch(selectedCells, wordCells) {
+    if (!wordCells || selectedCells.length !== wordCells.length) {
+      return false;
+    }
+
+    const isSameOrder = selectedCells.every((cell, index) => (
+      cell.row === wordCells[index].row && cell.col === wordCells[index].col
+    ));
+    const isReverseOrder = selectedCells.every((cell, index) => {
+      const reverseCell = wordCells[wordCells.length - 1 - index];
+      return cell.row === reverseCell.row && cell.col === reverseCell.col;
+    });
+
+    return isSameOrder || isReverseOrder;
+  }
+
   function markWordAsFound(word) {
     if (foundWords.has(word)) {
-      return;
+      return false;
     }
 
     foundWords.add(word);
@@ -166,38 +227,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderWordList();
 
-    if (foundWords.size === TARGET_WORDS.length) {
+    victorySummary.textContent = `${foundWords.size}/${getTargetWords().length} kata ditemui`;
+
+    if (foundWords.size === getTargetWords().length) {
       victoryPanel.classList.remove('hidden');
     }
+
+    return true;
   }
 
-  function finishSelection() {
+  function finishSelection(event) {
     if (!isDragging) {
       return;
     }
 
-    const selectedWord = currentSelection.map((cell) => cell.letter).join('');
-    const matchedWord = TARGET_WORDS.find((word) => word === selectedWord);
+    if (event && activePointerId !== null && event.pointerId !== activePointerId) {
+      return;
+    }
+
+    const matchedWord = getTargetWords().find((word) => (
+      selectionsMatch(currentSelection, puzzle.cellsByWord[word])
+    ));
+
+    clearSelection();
 
     if (matchedWord) {
-      markWordAsFound(matchedWord);
+      if (markWordAsFound(matchedWord)) {
+        showFeedback('Betul!', 'success');
+      } else {
+        showFeedback('Kata ini sudah ditemui.', 'neutral');
+      }
     } else {
-      clearSelection();
+      showFeedback('Cuba lagi', 'retry');
+    }
+
+    if (activePointerId !== null && wordGrid.hasPointerCapture(activePointerId)) {
+      wordGrid.releasePointerCapture(activePointerId);
     }
 
     isDragging = false;
+    activePointerId = null;
     dragStartCell = null;
-    currentSelection = [];
   }
 
   function getLineBetweenCells(startCell, endCell) {
     const cells = [];
-    const rowStep = Math.sign(endCell.row - startCell.row);
-    const colStep = Math.sign(endCell.col - startCell.col);
+    const rowDistance = Math.abs(endCell.row - startCell.row);
+    const colDistance = Math.abs(endCell.col - startCell.col);
 
-    if (startCell.row === endCell.row) {
-      const startCol = Math.min(startCell.col, endCell.col);
-      const endCol = Math.max(startCell.col, endCell.col);
+    // Snap a slightly diagonal drag to its strongest straight axis.
+    const snappedEndCell = { ...endCell };
+    if (rowDistance > 0 && colDistance > 0) {
+      if (rowDistance > colDistance) {
+        snappedEndCell.col = startCell.col;
+      } else {
+        snappedEndCell.row = startCell.row;
+      }
+    }
+
+    if (startCell.row === snappedEndCell.row) {
+      const startCol = Math.min(startCell.col, snappedEndCell.col);
+      const endCol = Math.max(startCell.col, snappedEndCell.col);
 
       for (let col = startCol; col <= endCol; col += 1) {
         cells.push({ row: startCell.row, col, letter: puzzle.board[startCell.row][col] });
@@ -206,19 +296,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return cells;
     }
 
-    if (startCell.col === endCell.col) {
-      const startRow = Math.min(startCell.row, endCell.row);
-      const endRow = Math.max(startCell.row, endCell.row);
+    if (startCell.col === snappedEndCell.col) {
+      const startRow = Math.min(startCell.row, snappedEndCell.row);
+      const endRow = Math.max(startCell.row, snappedEndCell.row);
 
       for (let row = startRow; row <= endRow; row += 1) {
         cells.push({ row, col: startCell.col, letter: puzzle.board[row][startCell.col] });
       }
 
       return cells;
-    }
-
-    if (rowStep !== 0 && colStep !== 0) {
-      return [];
     }
 
     return cells;
@@ -251,80 +337,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupBoard() {
-    const board = buildBoard();
+    const generatedPuzzle = buildBoard();
 
-    if (!board) {
+    if (!generatedPuzzle) {
       return;
     }
 
-    const cellsByWord = {};
-    const wordEntries = TARGET_WORDS.map((word) => {
-      let placedCells = [];
-
-      for (let row = 0; row < GRID_SIZE; row += 1) {
-        for (let col = 0; col < GRID_SIZE; col += 1) {
-          if (board[row][col] === word[0]) {
-            let found = false;
-            const directions = [
-              { row: 0, col: 1 },
-              { row: 1, col: 0 }
-            ];
-
-            directions.forEach((direction) => {
-              if (found) {
-                return;
-              }
-
-              const line = [];
-              let valid = true;
-
-              for (let index = 0; index < word.length; index += 1) {
-                const r = row + direction.row * index;
-                const c = col + direction.col * index;
-
-                if (r >= GRID_SIZE || c >= GRID_SIZE) {
-                  valid = false;
-                  break;
-                }
-
-                if (board[r][c] !== word[index]) {
-                  valid = false;
-                  break;
-                }
-
-                line.push({ row: r, col: c });
-              }
-
-              if (valid) {
-                placedCells = line;
-                found = true;
-              }
-            });
-          }
-
-          if (placedCells.length > 0) {
-            break;
-          }
-        }
-
-        if (placedCells.length > 0) {
-          break;
-        }
-      }
-
-      cellsByWord[word] = placedCells;
-      return { word, cells: placedCells };
-    });
+    const { board, cellsByWord } = generatedPuzzle;
 
     puzzle = {
       board,
-      words: TARGET_WORDS,
+      words: getTargetWords(),
       cellsByWord
     };
 
     wordGrid.innerHTML = '';
     foundWords = new Set();
+    clearSelection();
+    clearFeedback();
+    isDragging = false;
+    activePointerId = null;
+    dragStartCell = null;
     victoryPanel.classList.add('hidden');
+    victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
 
     for (let row = 0; row < GRID_SIZE; row += 1) {
       for (let col = 0; col < GRID_SIZE; col += 1) {
@@ -342,39 +377,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wordGrid.querySelectorAll('.cell').forEach((cell) => {
       cell.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) {
+          return;
+        }
+
         event.preventDefault();
         const row = Number(cell.dataset.row);
         const col = Number(cell.dataset.col);
         isDragging = true;
+        activePointerId = event.pointerId;
         dragStartCell = { row, col };
+        wordGrid.setPointerCapture(event.pointerId);
         clearSelection();
         updateSelection({ row, col });
       });
     });
 
-    document.addEventListener('pointermove', (event) => {
-      if (!isDragging || !dragStartCell) {
-        return;
-      }
-
-      const element = document.elementFromPoint(event.clientX, event.clientY);
-      if (!element || !element.classList.contains('cell')) {
-        return;
-      }
-
-      const row = Number(element.dataset.row);
-      const col = Number(element.dataset.col);
-      updateSelection({ row, col });
-    });
   }
 
   function startGame() {
-    if (selectedAge !== '5–7 Tahun' || selectedCategory !== 'Haiwan') {
-      showCategoryMessage('Akan datang');
-      showScreen(categoryScreen);
-      return;
-    }
-
     gameSessionLabel.textContent = `Umur: ${selectedAge} | Kategori: ${selectedCategory}`;
     showCategoryMessage('');
     setupBoard();
@@ -423,13 +444,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.addEventListener('pointerup', () => {
-    finishSelection();
+  document.addEventListener('pointerup', (event) => {
+    finishSelection(event);
   });
 
-  document.addEventListener('pointercancel', () => {
+  document.addEventListener('pointermove', (event) => {
+    if (!isDragging || !dragStartCell || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    const element = document.elementFromPoint(event.clientX, event.clientY);
+    if (!element || !element.classList.contains('cell')) {
+      return;
+    }
+
+    const row = Number(element.dataset.row);
+    const col = Number(element.dataset.col);
+    updateSelection({ row, col });
+  });
+
+  document.addEventListener('pointercancel', (event) => {
+    if (activePointerId !== null && event.pointerId !== activePointerId) {
+      return;
+    }
+
     clearSelection();
     isDragging = false;
+    activePointerId = null;
     dragStartCell = null;
   });
 });

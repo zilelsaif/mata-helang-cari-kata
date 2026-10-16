@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="ms">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,7 +21,7 @@
           MULA
         </button>
 
-        <p class="version" aria-label="Versi permainan">v0.4.0</p>
+        <p class="version" aria-label="Versi permainan">v0.5.0</p>
       </section>
 
       <section id="age-screen" class="panel" aria-labelledby="age-title" aria-hidden="true">
@@ -64,6 +64,7 @@
         <p class="eyebrow">Permainan Kata</p>
         <h2 id="game-heading">CARI KATA</h2>
         <p id="game-session-label" class="selected-age">Umur: --</p>
+        <p id="game-feedback" class="game-feedback" aria-live="polite"></p>
 
         <div class="game-layout">
           <div id="word-grid" class="word-grid" aria-label="Papan permainan"></div>
@@ -77,6 +78,7 @@
         <div id="victory-panel" class="victory-panel hidden" aria-live="polite">
           <h3>TAHNIAH!</h3>
           <p>Semua kata ditemui.</p>
+          <p id="victory-summary" class="victory-summary">4/4 kata ditemui</p>
           <div class="victory-actions">
             <button id="play-again-button" class="primary-button" type="button">MAIN LAGI</button>
             <button id="menu-button" class="secondary-button" type="button">MENU</button>
