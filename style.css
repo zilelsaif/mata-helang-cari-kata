@@ -215,12 +215,22 @@ h2 {
 
 .word-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--grid-size, 6), minmax(0, 1fr));
   gap: 6px;
   background: var(--board-bg);
   border-radius: 18px;
   padding: 12px;
   border: 2px solid rgba(29, 111, 214, 0.12);
+}
+
+.word-grid--large {
+  gap: 4px;
+  padding: 8px;
+}
+
+.word-grid--large .cell {
+  border-radius: 9px;
+  font-size: clamp(0.9rem, 2.4vw, 1.25rem);
 }
 
 .cell {
@@ -353,9 +363,13 @@ h2 {
     padding: 24px 12px 18px;
   }
 
+  #game-screen {
+    padding-inline: 6px;
+  }
+
   .word-grid {
-    gap: 4px;
-    padding: 8px;
+    gap: 3px;
+    padding: 6px;
   }
 
   .cell {

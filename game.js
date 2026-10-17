@@ -19,17 +19,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
 
-  const GRID_SIZE = 6;
-  const WORDS_PER_PUZZLE = 4;
+  const DIRECTIONS = {
+    horizontal: { row: 0, col: 1 },
+    vertical: { row: 1, col: 0 },
+    diagonalDownRight: { row: 1, col: 1 },
+    diagonalDownLeft: { row: 1, col: -1 }
+  };
 
-  // Word banks are kept together so more age groups can be added later.
-  const WORDS_BY_CATEGORY = {
-    Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'SAPI', 'KAMBING'],
-    'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
-    Makanan: ['NASI', 'ROTI', 'MEE', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATAY'],
-    Sekolah: ['BUKU', 'PENA', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
-    Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
-    Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
+  // Each age group owns its board rules, making future levels easy to add.
+  const AGE_CONFIGS = {
+    '5–7 Tahun': {
+      gridSize: 6,
+      wordCount: 4,
+      directions: ['horizontal', 'vertical']
+    },
+    '8–10 Tahun': {
+      gridSize: 8,
+      wordCount: 6,
+      directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft']
+    }
+  };
+
+  // Word banks are separate by age and category so content can grow independently.
+  const WORDS_BY_AGE_AND_CATEGORY = {
+    '5–7 Tahun': {
+      Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'SAPI', 'KAMBING'],
+      'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
+      Makanan: ['NASI', 'ROTI', 'MEE', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATAY'],
+      Sekolah: ['BUKU', 'PENA', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
+      Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
+      Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
+    },
+    '8–10 Tahun': {
+      Haiwan: ['HARIMAU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'ZIRAFAH', 'BURUNG', 'KELINCI'],
+      'Buah-buahan': ['PISANG', 'MANGGA', 'TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'CIKU', 'LIMAU', 'PAPAYA'],
+      Makanan: ['NASIGORENG', 'SANDWIC', 'LAKSA', 'MEEGORENG', 'BISKUT', 'AYAM', 'SATE', 'DONAT'],
+      Sekolah: ['PENSEL', 'PEMADAM', 'PEMBARIS', 'GUNTING', 'KELAS', 'PAPAN', 'SEKOLAH', 'BEG'],
+      Kenderaan: ['KERETA', 'BASIKAL', 'MOTOSIKAL', 'KERETAPI', 'TEKSI', 'LORI', 'BOT', 'VAN'],
+      Alam: ['GUNUNG', 'SUNGAI', 'PANTAI', 'HUTAN', 'HUJAN', 'PELANGI', 'BUKIT', 'AWAN']
+    }
   };
 
   let selectedAge = 'Belum dipilih';
@@ -47,19 +75,24 @@ document.addEventListener('DOMContentLoaded', () => {
     return currentTargetWords;
   }
 
-  function chooseTargetWords(category) {
-    const categoryWords = WORDS_BY_CATEGORY[category] || [];
-    const validWords = [...new Set(categoryWords)].filter((word) => (
-      word.length <= GRID_SIZE && /^[A-Z]+$/.test(word)
+  function getAgeConfig() {
+    return AGE_CONFIGS[selectedAge];
+  }
+
+  function chooseTargetWords(category, config) {
+    const categoryWords = WORDS_BY_AGE_AND_CATEGORY[selectedAge]?.[category] || [];
+    const normalizedWords = categoryWords.map((word) => word.toUpperCase());
+    const validWords = [...new Set(normalizedWords)].filter((word) => (
+      word.length <= config.gridSize && /^[A-Z]+$/.test(word)
     ));
 
-    // Shuffle valid words, then take four unique targets for this puzzle.
+    // Shuffle valid words, then take the required number of unique targets.
     for (let index = validWords.length - 1; index > 0; index -= 1) {
       const randomIndex = Math.floor(Math.random() * (index + 1));
       [validWords[index], validWords[randomIndex]] = [validWords[randomIndex], validWords[index]];
     }
 
-    return validWords.slice(0, WORDS_PER_PUZZLE);
+    return validWords.slice(0, config.wordCount);
   }
 
   function showScreen(show) {
@@ -94,8 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return letters[Math.floor(Math.random() * letters.length)];
   }
 
-  function tryBuildBoard(targetWords) {
-    const board = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''));
+  function tryBuildBoard(targetWords, config) {
+    const board = Array.from(
+      { length: config.gridSize },
+      () => Array(config.gridSize).fill('')
+    );
     const cellsByWord = {};
 
     for (let i = 0; i < targetWords.length; i += 1) {
@@ -105,15 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
       while (!placed && tries < 400) {
         tries += 1;
 
-        const direction = Math.random() < 0.5 ? 'H' : 'V';
-        const row = Math.floor(Math.random() * GRID_SIZE);
-        const col = Math.floor(Math.random() * GRID_SIZE);
+        const directionName = config.directions[
+          Math.floor(Math.random() * config.directions.length)
+        ];
+        const direction = DIRECTIONS[directionName];
+        const row = Math.floor(Math.random() * config.gridSize);
+        const col = Math.floor(Math.random() * config.gridSize);
         const word = targetWords[i];
 
-        const endRow = direction === 'H' ? row : row + word.length - 1;
-        const endCol = direction === 'H' ? col + word.length - 1 : col;
+        const endRow = row + direction.row * (word.length - 1);
+        const endCol = col + direction.col * (word.length - 1);
 
-        if (endRow >= GRID_SIZE || endCol >= GRID_SIZE) {
+        if (
+          endRow < 0 || endRow >= config.gridSize ||
+          endCol < 0 || endCol >= config.gridSize
+        ) {
           continue;
         }
 
@@ -121,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let canPlace = true;
 
         for (let letterIndex = 0; letterIndex < word.length; letterIndex += 1) {
-          const nextRow = direction === 'H' ? row : row + letterIndex;
-          const nextCol = direction === 'H' ? col + letterIndex : col;
+          const nextRow = row + direction.row * letterIndex;
+          const nextCol = col + direction.col * letterIndex;
 
           if (board[nextRow][nextCol] !== '' && board[nextRow][nextCol] !== word[letterIndex]) {
             canPlace = false;
@@ -156,12 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return { board, cellsByWord };
   }
 
-  function buildBoard(targetWords) {
+  function buildBoard(targetWords, config) {
     let generatedPuzzle = null;
 
     // Restart with an empty grid if random placements block a later word.
     for (let boardAttempt = 0; boardAttempt < 100 && !generatedPuzzle; boardAttempt += 1) {
-      generatedPuzzle = tryBuildBoard(targetWords);
+      generatedPuzzle = tryBuildBoard(targetWords, config);
     }
 
     if (!generatedPuzzle) {
@@ -169,8 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const { board } = generatedPuzzle;
-    for (let row = 0; row < GRID_SIZE; row += 1) {
-      for (let col = 0; col < GRID_SIZE; col += 1) {
+    for (let row = 0; row < config.gridSize; row += 1) {
+      for (let col = 0; col < config.gridSize; col += 1) {
         if (board[row][col] === '') {
           board[row][col] = getRandomLetter();
         }
@@ -305,39 +347,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getLineBetweenCells(startCell, endCell) {
     const cells = [];
-    const rowDistance = Math.abs(endCell.row - startCell.row);
-    const colDistance = Math.abs(endCell.col - startCell.col);
-
-    // Snap a slightly diagonal drag to its strongest straight axis.
+    const config = getAgeConfig();
+    const rowDifference = endCell.row - startCell.row;
+    const colDifference = endCell.col - startCell.col;
+    const rowDistance = Math.abs(rowDifference);
+    const colDistance = Math.abs(colDifference);
     const snappedEndCell = { ...endCell };
-    if (rowDistance > 0 && colDistance > 0) {
-      if (rowDistance > colDistance) {
-        snappedEndCell.col = startCell.col;
-      } else {
-        snappedEndCell.row = startCell.row;
-      }
+
+    let rowStep = Math.sign(rowDifference);
+    let colStep = Math.sign(colDifference);
+    let directionName = '';
+
+    if (rowDistance === 0) {
+      directionName = 'horizontal';
+      rowStep = 0;
+    } else if (colDistance === 0) {
+      directionName = 'vertical';
+      colStep = 0;
+    } else if (rowDistance === colDistance) {
+      directionName = colStep > 0 ? 'diagonalDownRight' : 'diagonalDownLeft';
+    } else if (colDistance >= rowDistance * 2) {
+      // A mostly horizontal drag snaps back onto its row.
+      directionName = 'horizontal';
+      rowStep = 0;
+      snappedEndCell.row = startCell.row;
+    } else if (rowDistance >= colDistance * 2) {
+      // A mostly vertical drag snaps back onto its column.
+      directionName = 'vertical';
+      colStep = 0;
+      snappedEndCell.col = startCell.col;
     }
 
-    if (startCell.row === snappedEndCell.row) {
-      const startCol = Math.min(startCell.col, snappedEndCell.col);
-      const endCol = Math.max(startCell.col, snappedEndCell.col);
-
-      for (let col = startCol; col <= endCol; col += 1) {
-        cells.push({ row: startCell.row, col, letter: puzzle.board[startCell.row][col] });
-      }
-
+    if (!config || !config.directions.includes(directionName)) {
       return cells;
     }
 
-    if (startCell.col === snappedEndCell.col) {
-      const startRow = Math.min(startCell.row, snappedEndCell.row);
-      const endRow = Math.max(startCell.row, snappedEndCell.row);
+    const stepCount = Math.max(
+      Math.abs(snappedEndCell.row - startCell.row),
+      Math.abs(snappedEndCell.col - startCell.col)
+    );
 
-      for (let row = startRow; row <= endRow; row += 1) {
-        cells.push({ row, col: startCell.col, letter: puzzle.board[row][startCell.col] });
-      }
-
-      return cells;
+    for (let index = 0; index <= stepCount; index += 1) {
+      const row = startCell.row + rowStep * index;
+      const col = startCell.col + colStep * index;
+      cells.push({ row, col, letter: puzzle.board[row][col] });
     }
 
     return cells;
@@ -370,10 +423,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupBoard() {
-    currentTargetWords = chooseTargetWords(selectedCategory);
-    const generatedPuzzle = buildBoard(currentTargetWords);
+    const config = getAgeConfig();
+    if (!config) {
+      return false;
+    }
 
-    if (!generatedPuzzle || currentTargetWords.length !== WORDS_PER_PUZZLE) {
+    currentTargetWords = chooseTargetWords(selectedCategory, config);
+    const generatedPuzzle = buildBoard(currentTargetWords, config);
+
+    if (!generatedPuzzle || currentTargetWords.length !== config.wordCount) {
       showCategoryMessage('Papan tidak dapat dibina. Cuba lagi.');
       showScreen(categoryScreen);
       return false;
@@ -396,9 +454,11 @@ document.addEventListener('DOMContentLoaded', () => {
     dragStartCell = null;
     victoryPanel.classList.add('hidden');
     victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
+    wordGrid.style.setProperty('--grid-size', String(config.gridSize));
+    wordGrid.classList.toggle('word-grid--large', config.gridSize > 6);
 
-    for (let row = 0; row < GRID_SIZE; row += 1) {
-      for (let col = 0; col < GRID_SIZE; col += 1) {
+    for (let row = 0; row < config.gridSize; row += 1) {
+      for (let col = 0; col < config.gridSize; col += 1) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.row = String(row);
@@ -433,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startGame() {
-    if (selectedAge !== '5–7 Tahun') {
+    if (!getAgeConfig()) {
       showCategoryMessage('Akan datang');
       showScreen(categoryScreen);
       return;
