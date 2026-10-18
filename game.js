@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     '5–7 Tahun': {
       Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'LEMBU', 'KAMBING'],
       'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
-      Makanan: ['NASI', 'ROTI', 'MIHUN', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATE'],
+      Makanan: ['NASI', 'ROTI', 'MI', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATE'],
       Sekolah: ['BUKU', 'PEN', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
       Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
       Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
