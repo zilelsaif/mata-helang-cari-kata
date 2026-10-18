@@ -31,12 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
     '5–7 Tahun': {
       gridSize: 6,
       wordCount: 4,
-      directions: ['horizontal', 'vertical']
+      directions: ['horizontal', 'vertical'],
+      reverse: false
     },
     '8–10 Tahun': {
       gridSize: 8,
       wordCount: 6,
-      directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft']
+      directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
+      reverse: false
+    },
+    '11–12 Tahun': {
+      gridSize: 10,
+      wordCount: 8,
+      directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
+      reverse: true
     }
   };
 
@@ -57,6 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
       Sekolah: ['PENSEL', 'PEMADAM', 'PEMBARIS', 'GUNTING', 'KELAS', 'PAPAN', 'SEKOLAH', 'BEG'],
       Kenderaan: ['KERETA', 'BASIKAL', 'MOTOSIKAL', 'KERETAPI', 'TEKSI', 'LORI', 'BOT', 'VAN'],
       Alam: ['GUNUNG', 'SUNGAI', 'PANTAI', 'HUTAN', 'HUJAN', 'PELANGI', 'BUKIT', 'AWAN']
+    },
+    '11–12 Tahun': {
+      Haiwan: ['HARIMAU', 'GAJAH', 'KELINCI', 'MONYET', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'ZIRAFAH', 'KUCING'],
+      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'MANGGIS', 'CEMPEDAK', 'PISANG', 'MANGGA', 'BETIK', 'JAMBU', 'LIMAU', 'NANAS', 'CIKU'],
+      Makanan: ['NASILEMAK', 'LAKSA', 'SATAY', 'RENDANG', 'BISKUT', 'SANDWIC', 'MIHUN', 'LEMPENG', 'KETUPAT', 'KARIPAP', 'DONAT', 'BUBUR'],
+      Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PERPUSTAKAAN', 'PENSIL', 'BUKULATIHAN', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN'],
+      Kenderaan: ['KERETAPI', 'MOTOSIKAL', 'BASIKAL', 'KERETA', 'AMBULANS', 'TRAKTOR', 'LORI', 'TEKSI', 'VAN', 'BOT', 'FERI', 'BAS'],
+      Alam: ['GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'AIRTERJUN', 'BUKIT', 'AWAN', 'HUJAN', 'PASIR', 'PULAU']
     }
   };
 
@@ -133,10 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
       () => Array(config.gridSize).fill('')
     );
     const cellsByWord = {};
+    const reversedWords = new Set();
+    const requiredReverseIndex = config.reverse
+      ? Math.floor(Math.random() * targetWords.length)
+      : -1;
 
     for (let i = 0; i < targetWords.length; i += 1) {
       let placed = false;
       let tries = 0;
+      const shouldReverse = config.reverse && (
+        i === requiredReverseIndex || Math.random() < 0.5
+      );
+      const targetWord = targetWords[i];
+      const placedWord = shouldReverse
+        ? targetWord.split('').reverse().join('')
+        : targetWord;
 
       while (!placed && tries < 400) {
         tries += 1;
@@ -147,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const direction = DIRECTIONS[directionName];
         const row = Math.floor(Math.random() * config.gridSize);
         const col = Math.floor(Math.random() * config.gridSize);
-        const word = targetWords[i];
+        const word = placedWord;
 
         const endRow = row + direction.row * (word.length - 1);
         const endCol = col + direction.col * (word.length - 1);
@@ -182,10 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
           board[cell.row][cell.col] = cell.letter;
         });
 
-        cellsByWord[word] = cells.map(({ row: cellRow, col: cellCol }) => ({
+        cellsByWord[targetWord] = cells.map(({ row: cellRow, col: cellCol }) => ({
           row: cellRow,
           col: cellCol
         }));
+
+        if (shouldReverse) {
+          reversedWords.add(targetWord);
+        }
 
         placed = true;
       }
@@ -195,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    return { board, cellsByWord };
+    return { board, cellsByWord, reversedWords };
   }
 
   function buildBoard(targetWords, config) {
@@ -437,12 +468,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    const { board, cellsByWord } = generatedPuzzle;
+    const { board, cellsByWord, reversedWords } = generatedPuzzle;
 
     puzzle = {
       board,
       words: getTargetWords(),
-      cellsByWord
+      cellsByWord,
+      reversedWords
     };
 
     wordGrid.innerHTML = '';
@@ -456,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
     wordGrid.style.setProperty('--grid-size', String(config.gridSize));
     wordGrid.classList.toggle('word-grid--large', config.gridSize > 6);
+    wordGrid.classList.toggle('word-grid--compact', config.gridSize > 8);
 
     for (let row = 0; row < config.gridSize; row += 1) {
       for (let col = 0; col < config.gridSize; col += 1) {
