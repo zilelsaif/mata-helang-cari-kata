@@ -51,26 +51,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // Word banks are separate by age and category so content can grow independently.
   const WORDS_BY_AGE_AND_CATEGORY = {
     '5–7 Tahun': {
-      Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'SAPI', 'KAMBING'],
+      Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'LEMBU', 'KAMBING'],
       'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
-      Makanan: ['NASI', 'ROTI', 'MEE', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATAY'],
-      Sekolah: ['BUKU', 'PENA', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
+      Makanan: ['NASI', 'ROTI', 'MIHUN', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATE'],
+      Sekolah: ['BUKU', 'PEN', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
       Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
       Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
     },
     '8–10 Tahun': {
-      Haiwan: ['HARIMAU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'ZIRAFAH', 'BURUNG', 'KELINCI'],
-      'Buah-buahan': ['PISANG', 'MANGGA', 'TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'CIKU', 'LIMAU', 'PAPAYA'],
-      Makanan: ['NASIGORENG', 'SANDWIC', 'LAKSA', 'MEEGORENG', 'BISKUT', 'AYAM', 'SATE', 'DONAT'],
+      Haiwan: ['HARIMAU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'ZIRAFAH', 'BURUNG'],
+      'Buah-buahan': ['PISANG', 'MANGGA', 'TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'CIKU', 'LIMAU', 'BETIK'],
+      Makanan: ['NASIGORENG', 'SANDWIC', 'LAKSA', 'MIGORENG', 'BISKUT', 'AYAM', 'SATE', 'DONAT'],
       Sekolah: ['PENSEL', 'PEMADAM', 'PEMBARIS', 'GUNTING', 'KELAS', 'PAPAN', 'SEKOLAH', 'BEG'],
       Kenderaan: ['KERETA', 'BASIKAL', 'MOTOSIKAL', 'KERETAPI', 'TEKSI', 'LORI', 'BOT', 'VAN'],
       Alam: ['GUNUNG', 'SUNGAI', 'PANTAI', 'HUTAN', 'HUJAN', 'PELANGI', 'BUKIT', 'AWAN']
     },
     '11–12 Tahun': {
-      Haiwan: ['HARIMAU', 'GAJAH', 'KELINCI', 'MONYET', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'ZIRAFAH', 'KUCING'],
+      Haiwan: ['HARIMAU', 'GAJAH', 'ARNAB', 'MONYET', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'ZIRAFAH', 'KUCING'],
       'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'MANGGIS', 'CEMPEDAK', 'PISANG', 'MANGGA', 'BETIK', 'JAMBU', 'LIMAU', 'NANAS', 'CIKU'],
-      Makanan: ['NASILEMAK', 'LAKSA', 'SATAY', 'RENDANG', 'BISKUT', 'SANDWIC', 'MIHUN', 'LEMPENG', 'KETUPAT', 'KARIPAP', 'DONAT', 'BUBUR'],
-      Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PERPUSTAKAAN', 'PENSIL', 'BUKULATIHAN', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN'],
+      Makanan: ['NASILEMAK', 'LAKSA', 'SATE', 'RENDANG', 'BISKUT', 'SANDWIC', 'MIHUN', 'LEMPENG', 'KETUPAT', 'KARIPAP', 'DONAT', 'BUBUR'],
+      Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PERPUSTAKAAN', 'PENSEL', 'BUKULATIHAN', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN'],
       Kenderaan: ['KERETAPI', 'MOTOSIKAL', 'BASIKAL', 'KERETA', 'AMBULANS', 'TRAKTOR', 'LORI', 'TEKSI', 'VAN', 'BOT', 'FERI', 'BAS'],
       Alam: ['GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'AIRTERJUN', 'BUKIT', 'AWAN', 'HUJAN', 'PASIR', 'PULAU']
     }
