@@ -71,36 +71,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // Word banks are separate by age and category so content can grow independently.
   const WORDS_BY_AGE_AND_CATEGORY = {
     '5–7 Tahun': {
-      Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'LEMBU', 'KAMBING'],
-      'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG'],
-      Makanan: ['NASI', 'ROTI', 'MI', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATE'],
-      Sekolah: ['BUKU', 'PEN', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN'],
-      Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'MOTOSIKAL', 'KERETA', 'BASIKAL'],
-      Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT']
+      Haiwan: ['AYAM', 'IKAN', 'KUDA', 'ULAR', 'ITIK', 'RUSA', 'LEMBU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'BUAYA', 'BURUNG', 'TAPIR', 'KERBAU', 'SEMUT', 'LEBAH', 'SIPUT', 'CACING', 'KATAK', 'TIKUS'],
+      'Buah-buahan': ['EPAL', 'MANGGA', 'NANAS', 'BETIK', 'DUKU', 'LIMAU', 'KIWI', 'PISANG', 'CIKU', 'JAMBU', 'DURIAN', 'ANGGUR', 'KURMA', 'SALAK', 'SUKUN', 'CERMA', 'BACANG', 'MELON', 'LAICI', 'PIR'],
+      Makanan: ['NASI', 'ROTI', 'MI', 'SUP', 'TELUR', 'KEK', 'BUBUR', 'SATE', 'LAKSA', 'AYAM', 'DONAT', 'BISKUT', 'LEMANG', 'KUIH', 'WAJIK', 'DODOL', 'KARI', 'CUCUR', 'SOSEJ', 'BURGER'],
+      Sekolah: ['BUKU', 'PEN', 'MEJA', 'KERUSI', 'BEG', 'PINTU', 'KELAS', 'PAPAN', 'PENSEL', 'GURU', 'MURID', 'KAPUR', 'GAM', 'KERTAS', 'FAIL', 'KANTIN', 'TANDAS', 'DEWAN', 'PADANG', 'LOKAR', 'KRAYON'],
+      Kenderaan: ['BAS', 'VAN', 'BOT', 'TEKSI', 'LORI', 'KERETA', 'FERI', 'JIP', 'TREM', 'RAKIT', 'SAMPAN', 'KAPAL', 'BECA', 'ROKET', 'SKUTER', 'KANU', 'MOTO', 'LRT', 'MRT', 'ETS'],
+      Alam: ['AWAN', 'HUJAN', 'POKOK', 'SUNGAI', 'BATU', 'PASIR', 'BUKIT', 'LAUT', 'GUNUNG', 'HUTAN', 'PANTAI', 'PULAU', 'TANAH', 'BUNGA', 'RUMPUT', 'OMBAK', 'ANGIN', 'TASIK', 'PAYA', 'EMBUN', 'KABUS', 'RIBUT']
     },
     '8–10 Tahun': {
-      Haiwan: ['HARIMAU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'ZIRAFAH', 'BURUNG'],
-      'Buah-buahan': ['PISANG', 'MANGGA', 'TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'CIKU', 'LIMAU', 'BETIK'],
-      Makanan: ['NASIGORENG', 'SANDWIC', 'LAKSA', 'MIGORENG', 'BISKUT', 'AYAM', 'SATE', 'DONAT'],
-      Sekolah: ['PENSEL', 'PEMADAM', 'PEMBARIS', 'GUNTING', 'KELAS', 'PAPAN', 'SEKOLAH', 'BEG'],
-      Kenderaan: ['KERETA', 'BASIKAL', 'MOTOSIKAL', 'KERETAPI', 'TEKSI', 'LORI', 'BOT', 'VAN'],
-      Alam: ['GUNUNG', 'SUNGAI', 'PANTAI', 'HUTAN', 'HUJAN', 'PELANGI', 'BUKIT', 'AWAN']
+      Haiwan: ['HARIMAU', 'KUCING', 'ARNAB', 'GAJAH', 'MONYET', 'ZIRAFAH', 'BURUNG', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'LEMBU', 'KAMBING', 'PANDA', 'SINGA', 'ZEBRA', 'BADAK', 'LANDAK', 'PENYU', 'BELALANG'],
+      'Buah-buahan': ['PISANG', 'MANGGA', 'TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'CIKU', 'LIMAU', 'BETIK', 'JAMBU', 'NANAS', 'ANGGUR', 'KURMA', 'MANGGIS', 'CEMPEDAK', 'DUKU', 'EPAL', 'LAICI', 'SALAK', 'SUKUN', 'BACANG', 'CERMA', 'MELON'],
+      Makanan: ['SANDWIC', 'LAKSA', 'MIGORENG', 'BISKUT', 'AYAM', 'SATE', 'DONAT', 'NASI', 'ROTI', 'MIHUN', 'RENDANG', 'KETUPAT', 'KARIPAP', 'LEMPENG', 'BUBUR', 'LEMANG', 'CUCUR', 'WAJIK', 'DODOL', 'SAMBAL', 'BURGER', 'SOSEJ', 'KARI'],
+      Sekolah: ['PENSEL', 'PEMADAM', 'PEMBARIS', 'GUNTING', 'KELAS', 'PAPAN', 'SEKOLAH', 'BEG', 'BUKU', 'GURU', 'MURID', 'KANTIN', 'MAKMAL', 'DEWAN', 'PADANG', 'KERTAS', 'FAIL', 'KRAYON', 'KAPUR', 'KAMUS', 'LATIHAN', 'TUGAS', 'LOKAR'],
+      Kenderaan: ['KERETA', 'BASIKAL', 'KERETAPI', 'TEKSI', 'LORI', 'BOT', 'VAN', 'AMBULANS', 'TRAKTOR', 'FERI', 'BAS', 'LRT', 'MRT', 'ETS', 'KOMUTER', 'MONOREL', 'SKUTER', 'SAMPAN', 'KAPAL', 'RAKIT', 'ROKET', 'JIP'],
+      Alam: ['GUNUNG', 'SUNGAI', 'PANTAI', 'HUTAN', 'HUJAN', 'PELANGI', 'BUKIT', 'AWAN', 'LAUTAN', 'PULAU', 'PASIR', 'ANGIN', 'OMBAK', 'TASIK', 'TANAH', 'RUMPUT', 'KABUS', 'RIBUT', 'EMBUN', 'PAYA', 'BUNGA']
     },
     '11–12 Tahun': {
-      Haiwan: ['HARIMAU', 'GAJAH', 'ARNAB', 'MONYET', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'ZIRAFAH', 'KUCING'],
-      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'MANGGIS', 'CEMPEDAK', 'PISANG', 'MANGGA', 'BETIK', 'JAMBU', 'LIMAU', 'NANAS', 'CIKU'],
-      Makanan: ['NASILEMAK', 'LAKSA', 'SATE', 'RENDANG', 'BISKUT', 'SANDWIC', 'MIHUN', 'LEMPENG', 'KETUPAT', 'KARIPAP', 'DONAT', 'BUBUR'],
-      Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PERPUSTAKAAN', 'PENSEL', 'BUKULATIHAN', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN'],
-      Kenderaan: ['KERETAPI', 'MOTOSIKAL', 'BASIKAL', 'KERETA', 'AMBULANS', 'TRAKTOR', 'LORI', 'TEKSI', 'VAN', 'BOT', 'FERI', 'BAS'],
-      Alam: ['GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'AIRTERJUN', 'BUKIT', 'AWAN', 'HUJAN', 'PASIR', 'PULAU']
+      Haiwan: ['HARIMAU', 'GAJAH', 'ARNAB', 'MONYET', 'KERBAU', 'BERUANG', 'HELANG', 'BUAYA', 'TAPIR', 'RUSA', 'ZIRAFAH', 'KUCING', 'ORANGUTAN', 'KAMBING', 'LEMBU', 'SINGA', 'ZEBRA', 'BADAK', 'LANDAK', 'PENYU', 'PANDA', 'BELALANG', 'LELABAH', 'KURAKURA'],
+      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'DURIAN', 'MANGGIS', 'CEMPEDAK', 'PISANG', 'MANGGA', 'BETIK', 'JAMBU', 'LIMAU', 'NANAS', 'CIKU', 'BELIMBING', 'ANGGUR', 'KURMA', 'LAICI', 'SALAK', 'SUKUN', 'BACANG', 'CERMA', 'MELON', 'EPAL', 'DUKU', 'BUAHNAGA'],
+      Makanan: ['NASILEMAK', 'LAKSA', 'SATE', 'RENDANG', 'BISKUT', 'SANDWIC', 'MIHUN', 'LEMPENG', 'KETUPAT', 'KARIPAP', 'DONAT', 'BUBUR', 'MIGORENG', 'NASIGORENG', 'NASI', 'ROTI', 'AYAM', 'LEMANG', 'CUCUR', 'WAJIK', 'DODOL', 'SAMBAL', 'BURGER', 'SOSEJ', 'KARI', 'KUIH'],
+      Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PENSEL', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN', 'MAKMAL', 'MURID', 'DEWAN', 'PADANG', 'KERTAS', 'KRAYON', 'KAPUR', 'KAMUS', 'LATIHAN', 'TUGAS', 'LOKAR', 'GEOGRAFI', 'SEJARAH', 'SAINS', 'MATEMATIK', 'BAHASA', 'UJIAN', 'CIKGU'],
+      Kenderaan: ['KERETAPI', 'MOTOSIKAL', 'BASIKAL', 'KERETA', 'AMBULANS', 'TRAKTOR', 'LORI', 'TEKSI', 'VAN', 'BOT', 'FERI', 'BAS', 'KOMUTER', 'MONOREL', 'SKUTER', 'SAMPAN', 'KAPAL', 'RAKIT', 'ROKET', 'JIP', 'TREM', 'LRT', 'MRT', 'ETS', 'BULDOZER', 'BOTLAJU'],
+      Alam: ['GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'AIRTERJUN', 'BUKIT', 'AWAN', 'HUJAN', 'PASIR', 'PULAU', 'ANGIN', 'OMBAK', 'TASIK', 'TANAH', 'RUMPUT', 'KABUS', 'RIBUT', 'EMBUN', 'PAYA', 'BUNGA', 'LEMBAH', 'GAUNG', 'TELUK', 'DELTA']
     },
     '13–15 Tahun': {
-      Haiwan: ['ORANGUTAN', 'HARIMAU', 'BERUANG', 'BUAYA', 'ZIRAFAH', 'KERBAU', 'HELANG', 'TAPIR', 'RUSA', 'KUCING', 'ARNAB', 'MONYET'],
-      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'CEMPEDAK', 'MANGGIS', 'DURIAN', 'BELIMBING', 'MANGGA', 'PISANG', 'JAMBU', 'BETIK', 'LIMAU', 'NANAS'],
-      Makanan: ['NASILEMAK', 'RENDANG', 'KETUPAT', 'KARIPAP', 'LAKSA', 'LEMPENG', 'MIGORENG', 'MIHUN', 'BISKUT', 'SATE', 'BUBUR', 'DONAT'],
-      Sekolah: ['PERPUSTAKAAN', 'KOMPUTER', 'PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'KANTIN', 'PENSEL', 'BUKULATIHAN', 'MAKMAL', 'KELAS', 'PAPAN'],
-      Kenderaan: ['MOTOSIKAL', 'KERETAPI', 'AMBULANS', 'BASIKAL', 'TRAKTOR', 'KERETA', 'FERI', 'TEKSI', 'LORI', 'BOT', 'VAN', 'BAS'],
-      Alam: ['AIRTERJUN', 'GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'BUKIT', 'PULAU', 'HUJAN', 'PASIR', 'AWAN']
+      Haiwan: ['ORANGUTAN', 'HARIMAU', 'BERUANG', 'BUAYA', 'ZIRAFAH', 'KERBAU', 'HELANG', 'TAPIR', 'RUSA', 'KUCING', 'ARNAB', 'MONYET', 'GAJAH', 'KELAWAR', 'KAMBING', 'SINGA', 'ZEBRA', 'BADAK', 'LANDAK', 'PENYU', 'PANDA', 'BELALANG', 'LELABAH', 'KURAKURA', 'RAMARAMA', 'CENGKERIK', 'KALAJENGKING', 'MEMERANG', 'MUSANG'],
+      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'CEMPEDAK', 'MANGGIS', 'DURIAN', 'BELIMBING', 'MANGGA', 'PISANG', 'JAMBU', 'BETIK', 'LIMAU', 'NANAS', 'ANGGUR', 'KURMA', 'LAICI', 'SALAK', 'SUKUN', 'BACANG', 'CERMA', 'MELON', 'EPAL', 'DUKU', 'BUAHNAGA', 'DOKONG', 'LONGAN', 'PULASAN', 'KUINI'],
+      Makanan: ['NASILEMAK', 'RENDANG', 'KETUPAT', 'KARIPAP', 'LAKSA', 'LEMPENG', 'MIGORENG', 'MIHUN', 'BISKUT', 'SATE', 'BUBUR', 'DONAT', 'NASIGORENG', 'ROTICANAI', 'MURTABAK', 'LONTONG', 'LEMANG', 'DODOL', 'WAJIK', 'CUCUR', 'SAMBAL', 'BURGER', 'SOSEJ', 'KARI', 'KUIH', 'AYAM', 'NASI', 'ROTI'],
+      Sekolah: ['PERPUSTAKAAN', 'KOMPUTER', 'PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'KANTIN', 'PENSEL', 'BUKULATIHAN', 'MAKMAL', 'KELAS', 'PAPAN', 'MURID', 'GURU', 'DEWAN', 'PADANG', 'KERTAS', 'KRAYON', 'KAPUR', 'KAMUS', 'LATIHAN', 'TUGAS', 'LOKAR', 'GEOGRAFI', 'SEJARAH', 'SAINS', 'MATEMATIK', 'BAHASA', 'PEPERIKSAAN', 'TINGKATAN', 'AKADEMIK'],
+      Kenderaan: ['MOTOSIKAL', 'KERETAPI', 'AMBULANS', 'BASIKAL', 'TRAKTOR', 'KERETA', 'FERI', 'TEKSI', 'LORI', 'BOT', 'VAN', 'BAS', 'KOMUTER', 'MONOREL', 'SKUTER', 'SAMPAN', 'KAPAL', 'RAKIT', 'ROKET', 'JIP', 'TREM', 'LRT', 'MRT', 'ETS', 'BULDOZER', 'BOTLAJU', 'KAPALTERBANG', 'HELIKOPTER', 'PERAHU'],
+      Alam: ['AIRTERJUN', 'GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'BUKIT', 'PULAU', 'HUJAN', 'PASIR', 'AWAN', 'ANGIN', 'OMBAK', 'TASIK', 'TANAH', 'RUMPUT', 'KABUS', 'RIBUT', 'EMBUN', 'PAYA', 'BUNGA', 'LEMBAH', 'GAUNG', 'TELUK', 'DELTA', 'TANJUNG', 'DATARAN', 'GUA', 'CERUN', 'LURAH']
     }
   };
 
@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let dragStartCell = null;
   let currentSelection = [];
   let feedbackTimerId = null;
+  const previousPuzzleWordsByMode = new Map();
 
   function getTargetWords() {
     return currentTargetWords;
@@ -125,20 +126,74 @@ document.addEventListener('DOMContentLoaded', () => {
     return AGE_CONFIGS[selectedAge];
   }
 
+  function shuffleWords(words) {
+    const shuffledWords = [...words];
+
+    for (let index = shuffledWords.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [shuffledWords[index], shuffledWords[randomIndex]] = [
+        shuffledWords[randomIndex],
+        shuffledWords[index]
+      ];
+    }
+
+    return shuffledWords;
+  }
+
+  function getPuzzleModeKey(category) {
+    return `${selectedAge}|${category}`;
+  }
+
   function chooseTargetWords(category, config) {
     const categoryWords = WORDS_BY_AGE_AND_CATEGORY[selectedAge]?.[category] || [];
     const normalizedWords = categoryWords.map((word) => word.toUpperCase());
     const validWords = [...new Set(normalizedWords)].filter((word) => (
       word.length <= config.gridSize && /^[A-Z]+$/.test(word)
     ));
+    const previousWords = previousPuzzleWordsByMode.get(getPuzzleModeKey(category));
 
-    // Shuffle valid words, then take the required number of unique targets.
-    for (let index = validWords.length - 1; index > 0; index -= 1) {
-      const randomIndex = Math.floor(Math.random() * (index + 1));
-      [validWords[index], validWords[randomIndex]] = [validWords[randomIndex], validWords[index]];
+    if (!previousWords) {
+      return shuffleWords(validWords).slice(0, config.wordCount);
     }
 
-    return validWords.slice(0, config.wordCount);
+    const previousWordSet = new Set(previousWords);
+    const differentWords = validWords.filter((word) => !previousWordSet.has(word));
+    const preferredDifferentCount = Math.min(
+      Math.ceil(config.wordCount / 2),
+      differentWords.length
+    );
+    let bestSelection = [];
+    let bestDifferentCount = -1;
+
+    // A short retry window keeps selection random without risking an endless loop.
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const candidate = shuffleWords(validWords).slice(0, config.wordCount);
+      const differentCount = candidate.filter((word) => !previousWordSet.has(word)).length;
+
+      if (differentCount > bestDifferentCount) {
+        bestSelection = candidate;
+        bestDifferentCount = differentCount;
+      }
+
+      if (differentCount >= preferredDifferentCount) {
+        return candidate;
+      }
+    }
+
+    // Graceful fallback guarantees variety when enough alternatives are available.
+    const requiredDifferentWords = shuffleWords(differentWords)
+      .slice(0, preferredDifferentCount);
+    const fallbackPool = shuffleWords(validWords.filter((word) => (
+      !requiredDifferentWords.includes(word)
+    )));
+    const guaranteedSelection = shuffleWords([
+      ...requiredDifferentWords,
+      ...fallbackPool.slice(0, config.wordCount - requiredDifferentWords.length)
+    ]);
+
+    return guaranteedSelection.length === config.wordCount
+      ? guaranteedSelection
+      : bestSelection;
   }
 
   function showScreen(show) {
@@ -568,6 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
       cellsByWord,
       reversedWords
     };
+    previousPuzzleWordsByMode.set(
+      getPuzzleModeKey(selectedCategory),
+      [...currentTargetWords]
+    );
 
     wordGrid.innerHTML = '';
     foundWords = new Set();
