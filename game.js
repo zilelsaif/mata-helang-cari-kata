@@ -26,6 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
     diagonalDownLeft: { row: 1, col: -1 }
   };
 
+  // Soft colours keep found words distinct while preserving dark, readable text.
+  const FOUND_WORD_COLORS = [
+    { background: '#F6C7C7', border: '#C77474' },
+    { background: '#F8D7A8', border: '#C8893D' },
+    { background: '#F7E59B', border: '#B69A2E' },
+    { background: '#CDE8B6', border: '#72A64A' },
+    { background: '#B9E3D7', border: '#4F9B88' },
+    { background: '#B8DCEC', border: '#4F91B0' },
+    { background: '#C9D0F5', border: '#6B78BE' },
+    { background: '#D9C5EF', border: '#8C68B5' },
+    { background: '#E8C2DA', border: '#AD6894' },
+    { background: '#D8D3C4', border: '#8B826A' }
+  ];
+
   // Each age group owns its board rules, making future levels easy to add.
   const AGE_CONFIGS = {
     '5–7 Tahun': {
@@ -95,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTargetWords = [];
   let puzzle = null;
   let foundWords = new Set();
+  let wordColors = new Map();
+  let foundCellDetails = new Map();
   let isDragging = false;
   let activePointerId = null;
   let dragStartCell = null;
@@ -276,12 +292,73 @@ document.addEventListener('DOMContentLoaded', () => {
       item.textContent = word;
 
       if (foundWords.has(word)) {
+        const color = wordColors.get(word);
         item.classList.add('completed');
         item.setAttribute('aria-label', `${word} ditemui`);
+        if (color) {
+          item.style.setProperty('--word-color', color.background);
+          item.style.setProperty('--word-border', color.border);
+        }
       }
 
       wordList.appendChild(item);
     });
+  }
+
+  function assignWordColors() {
+    const availableColors = [...FOUND_WORD_COLORS];
+
+    for (let index = availableColors.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [availableColors[index], availableColors[randomIndex]] = [
+        availableColors[randomIndex],
+        availableColors[index]
+      ];
+    }
+
+    wordColors = new Map();
+    getTargetWords().forEach((word, index) => {
+      wordColors.set(word, availableColors[index]);
+    });
+  }
+
+  function getFoundCellBackground(details) {
+    if (details.length === 1) {
+      return details[0].color.background;
+    }
+
+    const sectionSize = 100 / details.length;
+    const sections = details.flatMap((detail, index) => {
+      const start = (index * sectionSize).toFixed(2);
+      const end = ((index + 1) * sectionSize).toFixed(2);
+      return [
+        `${detail.color.background} ${start}%`,
+        `${detail.color.background} ${end}%`
+      ];
+    });
+
+    return `linear-gradient(135deg, ${sections.join(', ')})`;
+  }
+
+  function applyFoundCellColor(cell, word, color) {
+    const cellKey = `${cell.dataset.row},${cell.dataset.col}`;
+    const details = foundCellDetails.get(cellKey) || [];
+
+    if (!details.some((detail) => detail.word === word)) {
+      details.push({ word, color });
+      foundCellDetails.set(cellKey, details);
+    }
+
+    cell.classList.add('found');
+    cell.style.setProperty('--found-background', getFoundCellBackground(details));
+    cell.style.setProperty(
+      '--found-border',
+      details.length === 1 ? color.border : '#516274'
+    );
+    cell.setAttribute(
+      'aria-label',
+      `${cell.dataset.letter}, ditemui dalam ${details.map((detail) => detail.word).join(' dan ')}`
+    );
   }
 
   function clearSelection() {
@@ -336,11 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
     foundWords.add(word);
 
     const wordCells = puzzle.cellsByWord[word];
+    const color = wordColors.get(word);
     if (wordCells) {
       wordCells.forEach(({ row, col }) => {
         const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-        if (cell) {
-          cell.classList.add('found');
+        if (cell && color) {
+          applyFoundCellColor(cell, word, color);
         }
       });
     }
@@ -493,6 +571,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wordGrid.innerHTML = '';
     foundWords = new Set();
+    foundCellDetails = new Map();
+    assignWordColors();
     clearSelection();
     clearFeedback();
     isDragging = false;
