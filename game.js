@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
       wordCount: 8,
       directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
       reverse: true
+    },
+    '13–15 Tahun': {
+      gridSize: 12,
+      wordCount: 10,
+      directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
+      reverse: true
     }
   };
 
@@ -73,6 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
       Sekolah: ['PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'PERPUSTAKAAN', 'PENSEL', 'BUKULATIHAN', 'KOMPUTER', 'KANTIN', 'GURU', 'KELAS', 'PAPAN'],
       Kenderaan: ['KERETAPI', 'MOTOSIKAL', 'BASIKAL', 'KERETA', 'AMBULANS', 'TRAKTOR', 'LORI', 'TEKSI', 'VAN', 'BOT', 'FERI', 'BAS'],
       Alam: ['GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'AIRTERJUN', 'BUKIT', 'AWAN', 'HUJAN', 'PASIR', 'PULAU']
+    },
+    '13–15 Tahun': {
+      Haiwan: ['ORANGUTAN', 'HARIMAU', 'BERUANG', 'BUAYA', 'ZIRAFAH', 'KERBAU', 'HELANG', 'TAPIR', 'RUSA', 'KUCING', 'ARNAB', 'MONYET'],
+      'Buah-buahan': ['TEMBIKAI', 'RAMBUTAN', 'CEMPEDAK', 'MANGGIS', 'DURIAN', 'BELIMBING', 'MANGGA', 'PISANG', 'JAMBU', 'BETIK', 'LIMAU', 'NANAS'],
+      Makanan: ['NASILEMAK', 'RENDANG', 'KETUPAT', 'KARIPAP', 'LAKSA', 'LEMPENG', 'MIGORENG', 'MIHUN', 'BISKUT', 'SATE', 'BUBUR', 'DONAT'],
+      Sekolah: ['PERPUSTAKAAN', 'KOMPUTER', 'PEMBARIS', 'PEMADAM', 'GUNTING', 'SEKOLAH', 'KANTIN', 'PENSEL', 'BUKULATIHAN', 'MAKMAL', 'KELAS', 'PAPAN'],
+      Kenderaan: ['MOTOSIKAL', 'KERETAPI', 'AMBULANS', 'BASIKAL', 'TRAKTOR', 'KERETA', 'FERI', 'TEKSI', 'LORI', 'BOT', 'VAN', 'BAS'],
+      Alam: ['AIRTERJUN', 'GUNUNG', 'SUNGAI', 'PELANGI', 'HUTAN', 'PANTAI', 'LAUTAN', 'BUKIT', 'PULAU', 'HUJAN', 'PASIR', 'AWAN']
     }
   };
 
@@ -489,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wordGrid.style.setProperty('--grid-size', String(config.gridSize));
     wordGrid.classList.toggle('word-grid--large', config.gridSize > 6);
     wordGrid.classList.toggle('word-grid--compact', config.gridSize > 8);
+    wordGrid.classList.toggle('word-grid--dense', config.gridSize > 10);
 
     for (let row = 0; row < config.gridSize; row += 1) {
       for (let col = 0; col < config.gridSize; col += 1) {

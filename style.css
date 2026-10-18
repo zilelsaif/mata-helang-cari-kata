@@ -243,6 +243,16 @@ h2 {
   font-size: clamp(0.75rem, 2.1vw, 1.05rem);
 }
 
+.word-grid--dense {
+  gap: 2px;
+  padding: 4px;
+}
+
+.word-grid--dense .cell {
+  border-radius: 6px;
+  font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+}
+
 .cell {
   aspect-ratio: 1 / 1;
   background: #fff;
@@ -385,6 +395,16 @@ h2 {
   .word-grid--compact {
     gap: 2px;
     padding: 4px;
+  }
+
+  .word-grid--dense {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .word-grid--dense .cell {
+    border-radius: 5px;
+    font-size: 0.9rem;
   }
 
   .cell {
