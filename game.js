@@ -104,6 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Grid tokens stay A-Z only; labels preserve natural Malay spelling for players.
+  const WORD_LABELS = {
+    AIRTERJUN: 'AIR TERJUN',
+    BOTLAJU: 'BOT LAJU',
+    BUAHNAGA: 'BUAH NAGA',
+    BUKULATIHAN: 'BUKU LATIHAN',
+    KAPALTERBANG: 'KAPAL TERBANG',
+    KURAKURA: 'KURA-KURA',
+    MIGORENG: 'MI GORENG',
+    NASIGORENG: 'NASI GORENG',
+    NASILEMAK: 'NASI LEMAK',
+    RAMARAMA: 'RAMA-RAMA',
+    ROTICANAI: 'ROTI CANAI'
+  };
+
   let selectedAge = 'Belum dipilih';
   let selectedCategory = 'Belum dipilih';
   let currentTargetWords = [];
@@ -120,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getTargetWords() {
     return currentTargetWords;
+  }
+
+  function getWordLabel(word) {
+    return WORD_LABELS[word] || word;
   }
 
   function getAgeConfig() {
@@ -343,13 +362,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getTargetWords().forEach((word) => {
       const item = document.createElement('li');
+      const wordLabel = getWordLabel(word);
       item.className = 'word-item';
-      item.textContent = word;
+      item.textContent = wordLabel;
 
       if (foundWords.has(word)) {
         const color = wordColors.get(word);
         item.classList.add('completed');
-        item.setAttribute('aria-label', `${word} ditemui`);
+        item.setAttribute('aria-label', `${wordLabel} ditemui`);
         if (color) {
           item.style.setProperty('--word-color', color.background);
           item.style.setProperty('--word-border', color.border);
