@@ -12,10 +12,39 @@
   </head>
   <body>
     <main class="screen">
-      <section id="title-screen" class="panel active" aria-labelledby="game-title" aria-hidden="false">
-        <p class="eyebrow">Permainan Kata</p>
-        <h1 id="game-title">Mata Helang: Cari Kata</h1>
-        <p class="tagline">Seberapa Tajam Mata Kamu?</p>
+      <section id="title-screen" class="panel title-panel active" aria-labelledby="game-title" aria-hidden="false">
+        <div class="title-motif" aria-hidden="true">
+          <span>C</span><span>A</span><span>R</span><span>I</span>
+          <span>K</span><span>A</span><span>T</span><span>A</span>
+          <span>M</span><span>A</span><span>T</span><span>A</span>
+        </div>
+
+        <div class="title-copy">
+          <p class="brand-kicker">ZilTeroka mempersembahkan</p>
+          <h1 id="game-title" class="title-logo">
+            <span class="title-logo-top">MATA HELANG</span>
+            <span class="title-logo-bottom">CARI KATA</span>
+          </h1>
+          <p class="title-tagline">Seberapa Tajam Mata Kamu?</p>
+          <p class="title-feature">4 Tahap Umur <span aria-hidden="true">•</span> 6 Kategori</p>
+        </div>
+
+        <div class="raka-hero">
+          <img
+            class="raka-image"
+            src="assets/raka/raka-hero.webp"
+            alt="Raka, maskot helang Mata Helang: Cari Kata"
+            onerror="this.hidden = true; this.nextElementSibling.hidden = false;"
+          />
+          <p
+            class="raka-fallback"
+            role="img"
+            aria-label="Raka, maskot helang Mata Helang: Cari Kata"
+            hidden
+          >
+            Ilustrasi Raka tidak dapat dimuatkan.
+          </p>
+        </div>
 
         <button id="start-button" type="button" aria-label="Mula permainan">
           MULA
@@ -86,7 +115,7 @@
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.11.0 by Zil-el-Saif
+      v0.13.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

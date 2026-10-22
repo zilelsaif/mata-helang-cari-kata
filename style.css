@@ -9,6 +9,11 @@
   --shadow: rgba(15, 67, 130, 0.18);
   --success: #7bcf9c;
   --board-bg: #eaf5ff;
+  --raka-gold: #eda53b;
+  --raka-brown: #74411f;
+  --raka-cream: #fff2dc;
+  --raka-blue: #075abb;
+  --raka-cyan: #2bb8e8;
 }
 
 * {
@@ -61,6 +66,135 @@ body {
   transform: translateY(0);
 }
 
+.title-panel {
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(680px, calc(100vh - 100px));
+  background:
+    radial-gradient(circle at 85% 20%, rgba(43, 184, 232, 0.2), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(233, 246, 255, 0.96));
+  border-color: rgba(7, 90, 187, 0.2);
+}
+
+.title-copy,
+.raka-hero,
+.title-panel > #start-button {
+  position: relative;
+  z-index: 2;
+}
+
+.brand-kicker {
+  margin: 0 0 16px;
+  color: var(--raka-blue);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 0.9;
+  text-wrap: balance;
+}
+
+.title-logo-top {
+  color: var(--raka-blue);
+  font-size: clamp(2.15rem, 11vw, 4.9rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  text-shadow: 0 4px 0 rgba(255, 255, 255, 0.9);
+}
+
+.title-logo-bottom {
+  margin-top: 4px;
+  color: #fff;
+  background: linear-gradient(180deg, #1477dd 0%, #064799 100%);
+  border: 3px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 8px 0 rgba(5, 64, 139, 0.15), 0 14px 28px rgba(7, 90, 187, 0.24);
+  padding: 9px 22px 10px;
+  font-size: clamp(1.45rem, 7vw, 3rem);
+  letter-spacing: 0.06em;
+}
+
+.title-tagline {
+  margin: 24px 0 8px;
+  color: var(--text);
+  font-size: clamp(1.08rem, 3vw, 1.45rem);
+  font-weight: 800;
+}
+
+.title-feature {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.title-feature span {
+  padding: 0 7px;
+  color: var(--raka-gold);
+}
+
+.raka-hero {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 240px;
+  margin: 14px auto 10px;
+}
+
+.raka-image {
+  display: block;
+  width: min(62vw, 240px);
+  height: 250px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 18px 18px rgba(13, 78, 163, 0.18));
+}
+
+.raka-fallback {
+  width: min(72vw, 260px);
+  margin: 0;
+  padding: 28px 20px;
+  border: 2px dashed rgba(7, 90, 187, 0.28);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.title-motif {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 42px);
+  grid-auto-rows: 42px;
+  justify-content: end;
+  align-content: start;
+  gap: 7px;
+  padding: 22px;
+  opacity: 0.075;
+  transform: rotate(8deg) translate(18px, -18px);
+  pointer-events: none;
+}
+
+.title-motif span {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--raka-blue);
+  border-radius: 9px;
+  color: var(--raka-blue);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
 .eyebrow {
   margin: 0 0 10px;
   font-size: 0.75rem;
@@ -107,6 +241,7 @@ h2 {
 #start-button {
   width: 100%;
   max-width: 220px;
+  margin-inline: auto;
   background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   font-size: clamp(1.5rem, 4vw, 2.1rem);
@@ -375,6 +510,15 @@ h2 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
   .word-grid.wrong-selection {
     animation: none;
   }
@@ -388,6 +532,10 @@ h2 {
 
   .panel {
     padding: 24px 12px 18px;
+  }
+
+  .title-panel {
+    padding: 28px 16px 22px;
   }
 
   #game-screen {
@@ -429,6 +577,68 @@ h2 {
   .panel {
     width: min(100%, 540px);
     padding: 36px 28px 26px;
+  }
+
+  .title-panel {
+    width: min(100%, 1040px);
+    min-height: 590px;
+    display: none;
+    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+    align-items: center;
+    gap: 36px;
+    padding: 48px 54px;
+    text-align: left;
+  }
+
+  .title-panel.active {
+    display: grid;
+  }
+
+  .title-logo {
+    align-items: flex-start;
+  }
+
+  .title-logo-top {
+    font-size: clamp(3.6rem, 7vw, 5.4rem);
+  }
+
+  .title-logo-bottom {
+    font-size: clamp(2rem, 4vw, 3.1rem);
+  }
+
+  .title-tagline {
+    margin-top: 30px;
+  }
+
+  .raka-hero {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    min-height: 470px;
+    margin: 0;
+  }
+
+  .raka-image {
+    width: min(34vw, 380px);
+    height: 500px;
+  }
+
+  .title-copy {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .title-panel > #start-button {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    justify-self: start;
+    margin-inline: 0;
+  }
+
+  .title-motif {
+    grid-template-columns: repeat(5, 48px);
+    grid-auto-rows: 48px;
   }
 
   #game-screen {
