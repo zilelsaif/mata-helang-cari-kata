@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const playerScreen = document.getElementById('player-screen');
   const profileScreen = document.getElementById('profile-screen');
   const ageScreen = document.getElementById('age-screen');
+  const progressScreen = document.getElementById('progress-screen');
   const categoryScreen = document.getElementById('category-screen');
   const gameScreen = document.getElementById('game-screen');
   const startButton = document.getElementById('start-button');
@@ -26,6 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmDeleteButton = document.getElementById('confirm-delete-button');
   const cancelDeleteButton = document.getElementById('cancel-delete-button');
   const activePlayerLabel = document.getElementById('active-player-label');
+  const activeProgressSummary = document.getElementById('active-progress-summary');
+  const progressButton = document.getElementById('progress-button');
+  const progressBackButton = document.getElementById('progress-back-button');
+  const progressAvatar = document.getElementById('progress-avatar');
+  const progressPlayerName = document.getElementById('progress-player-name');
+  const progressStorageStatus = document.getElementById('progress-storage-status');
+  const progressTotalJejak = document.getElementById('progress-total-jejak');
+  const progressRankName = document.getElementById('progress-rank-name');
+  const progressLevel = document.getElementById('progress-level');
+  const rankProgressTrack = document.querySelector('.rank-progress-track');
+  const rankProgressFill = document.getElementById('rank-progress-fill');
+  const rankProgressText = document.getElementById('rank-progress-text');
+  const completedPuzzleCount = document.getElementById('completed-puzzle-count');
+  const totalWordsFound = document.getElementById('total-words-found');
+  const badgeList = document.getElementById('badge-list');
   const ageBackButton = document.getElementById('age-back-button');
   const categoryBackButton = document.getElementById('category-back-button');
   const ageButtons = document.querySelectorAll('.age-button');
@@ -38,12 +54,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameFeedback = document.getElementById('game-feedback');
   const victoryPanel = document.getElementById('victory-panel');
   const victorySummary = document.getElementById('victory-summary');
+  const victoryProgress = document.getElementById('victory-progress');
+  const victoryJejakEarned = document.getElementById('victory-jejak-earned');
+  const victoryBonusList = document.getElementById('victory-bonus-list');
+  const victoryTotalJejak = document.getElementById('victory-total-jejak');
+  const victoryPromotion = document.getElementById('victory-promotion');
+  const victoryBadges = document.getElementById('victory-badges');
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
 
   const PROFILE_STORAGE_KEY = 'mataHelangProfiles_v1';
   const PROFILE_DATA_VERSION = 1;
   const MAX_PROFILES = 5;
+  const PROGRESSION_STORAGE_KEY = 'mataHelangProgression_v1';
+  const PROGRESSION_DATA_VERSION = 1;
+
+  const RANKS = [
+    { threshold: 0, level: 1, name: 'Pemerhati Baru' },
+    { threshold: 80, level: 2, name: 'Pencari Kata' },
+    { threshold: 200, level: 3, name: 'Penjejak Kata' },
+    { threshold: 360, level: 4, name: 'Peninjau Cekap' },
+    { threshold: 560, level: 5, name: 'Mata Tajam' },
+    { threshold: 800, level: 6, name: 'Helang Unggul' },
+    { threshold: 1100, level: 7, name: 'Legenda Helang' }
+  ];
+
+  const ACHIEVEMENTS = [
+    { id: 'first-puzzle', name: 'Jejak Pertama', description: 'Selesaikan teka kata pertama.' },
+    { id: 'category-explorer', name: 'Peneroka Kategori', description: 'Selesaikan keenam-enam kategori dalam satu tahap umur.' },
+    { id: 'hundred-words', name: 'Pemburu 100 Kata', description: 'Temui 100 kata dalam teka kata yang diselesaikan.' },
+    { id: 'four-ages', name: 'Penjelajah Empat Tahap', description: 'Selesaikan teka kata dalam setiap tahap umur.' }
+  ];
+
+  const ALL_CATEGORIES = ['Haiwan', 'Buah-buahan', 'Makanan', 'Sekolah', 'Kenderaan', 'Alam'];
 
   // These original inline SVG avatars need no external assets or third-party art.
   const AVATARS = [
@@ -174,6 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedAvatarId = AVATARS[0].id;
   let pendingDeleteProfileId = null;
   let isSavingProfile = false;
+  let progressionData = createEmptyProgressionData();
+  let progressionStorageIsAvailable = true;
+  let guestProgress = createEmptyPlayerProgress();
+  let currentPuzzleId = null;
+  let currentPuzzleRewarded = false;
 
   function getTargetWords() {
     return currentTargetWords;
@@ -263,6 +311,375 @@ document.addEventListener('DOMContentLoaded', () => {
       activeProfileId: null,
       profiles: []
     };
+  }
+
+  function createEmptyProgressionData() {
+    return {
+      version: PROGRESSION_DATA_VERSION,
+      byProfileId: {}
+    };
+  }
+
+  function createEmptyPlayerProgress() {
+    return {
+      totalJejak: 0,
+      completedPuzzleCount: 0,
+      totalWordsFound: 0,
+      completedModes: {},
+      firstModeBonusClaims: [],
+      ageCompletionBonusClaims: [],
+      unlockedAchievements: [],
+      recentPuzzleIds: []
+    };
+  }
+
+  function getValidModeKeys() {
+    const keys = [];
+    Object.keys(AGE_CONFIGS).forEach((age) => {
+      ALL_CATEGORIES.forEach((category) => keys.push(`${age}|${category}`));
+    });
+    return new Set(keys);
+  }
+
+  function normalizePlayerProgress(value) {
+    const emptyProgress = createEmptyPlayerProgress();
+    if (!value || typeof value !== 'object') {
+      return emptyProgress;
+    }
+
+    const validModeKeys = getValidModeKeys();
+    const completedModes = {};
+    if (value.completedModes && typeof value.completedModes === 'object') {
+      Object.entries(value.completedModes).forEach(([key, count]) => {
+        if (validModeKeys.has(key) && Number.isInteger(count) && count > 0) {
+          completedModes[key] = count;
+        }
+      });
+    }
+
+    const uniqueStrings = (items, allowedValues = null, limit = 30) => {
+      if (!Array.isArray(items)) {
+        return [];
+      }
+      return [...new Set(items.filter((item) => (
+        typeof item === 'string' && (!allowedValues || allowedValues.has(item))
+      )))].slice(-limit);
+    };
+
+    return {
+      totalJejak: Number.isInteger(value.totalJejak) && value.totalJejak >= 0
+        ? value.totalJejak
+        : 0,
+      completedPuzzleCount: Number.isInteger(value.completedPuzzleCount) && value.completedPuzzleCount >= 0
+        ? value.completedPuzzleCount
+        : 0,
+      totalWordsFound: Number.isInteger(value.totalWordsFound) && value.totalWordsFound >= 0
+        ? value.totalWordsFound
+        : 0,
+      completedModes,
+      firstModeBonusClaims: uniqueStrings(value.firstModeBonusClaims, validModeKeys, 24),
+      ageCompletionBonusClaims: uniqueStrings(
+        value.ageCompletionBonusClaims,
+        new Set(Object.keys(AGE_CONFIGS)),
+        4
+      ),
+      unlockedAchievements: uniqueStrings(
+        value.unlockedAchievements,
+        new Set(ACHIEVEMENTS.map((achievement) => achievement.id)),
+        ACHIEVEMENTS.length
+      ),
+      recentPuzzleIds: uniqueStrings(value.recentPuzzleIds, null, 30)
+    };
+  }
+
+  function loadProgression() {
+    try {
+      const storedValue = localStorage.getItem(PROGRESSION_STORAGE_KEY);
+      if (!storedValue) {
+        progressionData = createEmptyProgressionData();
+        return;
+      }
+
+      const parsedData = JSON.parse(storedValue);
+      if (
+        !parsedData
+        || parsedData.version !== PROGRESSION_DATA_VERSION
+        || !parsedData.byProfileId
+        || typeof parsedData.byProfileId !== 'object'
+        || Array.isArray(parsedData.byProfileId)
+      ) {
+        throw new Error('Format kemajuan tidak sah.');
+      }
+
+      const validProfileIds = new Set(profileData.profiles.map((profile) => profile.id));
+      const byProfileId = {};
+      Object.entries(parsedData.byProfileId).forEach(([profileId, progress]) => {
+        if (validProfileIds.has(profileId)) {
+          byProfileId[profileId] = normalizePlayerProgress(progress);
+        }
+      });
+
+      progressionData = {
+        version: PROGRESSION_DATA_VERSION,
+        byProfileId
+      };
+    } catch (error) {
+      progressionData = createEmptyProgressionData();
+      const isStorageError = error?.name === 'SecurityError'
+        || error?.name === 'QuotaExceededError';
+      progressionStorageIsAvailable = !isStorageError;
+      profileStorageMessage.textContent = isStorageError
+        ? 'Kemajuan tidak dapat disimpan. Permainan masih boleh diteruskan.'
+        : 'Data Jejak Helang rosak dan telah dimulakan semula dengan selamat.';
+    }
+  }
+
+  function saveProgression() {
+    if (!progressionStorageIsAvailable) {
+      return false;
+    }
+
+    try {
+      localStorage.setItem(PROGRESSION_STORAGE_KEY, JSON.stringify(progressionData));
+      return true;
+    } catch (error) {
+      progressionStorageIsAvailable = false;
+      profileStorageMessage.textContent = 'Kemajuan tidak dapat disimpan. Permainan masih boleh diteruskan.';
+      return false;
+    }
+  }
+
+  function getProgressForProfile(profileId) {
+    if (!profileId) {
+      return guestProgress;
+    }
+
+    if (!progressionData.byProfileId[profileId]) {
+      progressionData.byProfileId[profileId] = createEmptyPlayerProgress();
+    }
+    return progressionData.byProfileId[profileId];
+  }
+
+  function getActiveProgress() {
+    return getProgressForProfile(profileData.activeProfileId);
+  }
+
+  function getRankForJejak(totalJejak) {
+    let currentRank = RANKS[0];
+    RANKS.forEach((rank) => {
+      if (totalJejak >= rank.threshold) {
+        currentRank = rank;
+      }
+    });
+    return currentRank;
+  }
+
+  function getNextRank(rank) {
+    return RANKS.find((item) => item.level === rank.level + 1) || null;
+  }
+
+  function getCompletedAges(progress) {
+    return Object.keys(AGE_CONFIGS).filter((age) => (
+      ALL_CATEGORIES.some((category) => progress.completedModes[`${age}|${category}`] > 0)
+    ));
+  }
+
+  function hasCompletedAllCategories(progress) {
+    return Object.keys(AGE_CONFIGS).some((age) => (
+      ALL_CATEGORIES.every((category) => progress.completedModes[`${age}|${category}`] > 0)
+    ));
+  }
+
+  function unlockEligibleAchievements(progress) {
+    const eligibleIds = [];
+    if (progress.completedPuzzleCount >= 1) {
+      eligibleIds.push('first-puzzle');
+    }
+    if (hasCompletedAllCategories(progress)) {
+      eligibleIds.push('category-explorer');
+    }
+    if (progress.totalWordsFound >= 100) {
+      eligibleIds.push('hundred-words');
+    }
+    if (getCompletedAges(progress).length === 4) {
+      eligibleIds.push('four-ages');
+    }
+
+    const newlyUnlocked = eligibleIds.filter((achievementId) => (
+      !progress.unlockedAchievements.includes(achievementId)
+    ));
+    progress.unlockedAchievements.push(...newlyUnlocked);
+    return newlyUnlocked;
+  }
+
+  function generatePuzzleId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return `puzzle-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function awardPuzzleCompletion() {
+    const progress = getActiveProgress();
+    if (
+      currentPuzzleRewarded
+      || !currentPuzzleId
+      || progress.recentPuzzleIds.includes(currentPuzzleId)
+    ) {
+      return null;
+    }
+
+    currentPuzzleRewarded = true;
+    const previousRank = getRankForJejak(progress.totalJejak);
+    const modeKey = `${selectedAge}|${selectedCategory}`;
+    const modeWasCompleted = progress.completedModes[modeKey] > 0;
+    const ageWasComplete = ALL_CATEGORIES.every((category) => (
+      progress.completedModes[`${selectedAge}|${category}`] > 0
+    ));
+    let earnedJejak = 20;
+    const bonuses = [{ label: 'Teka kata selesai', amount: 20 }];
+
+    progress.completedPuzzleCount += 1;
+    progress.totalWordsFound += getTargetWords().length;
+    progress.completedModes[modeKey] = (progress.completedModes[modeKey] || 0) + 1;
+
+    if (!modeWasCompleted && !progress.firstModeBonusClaims.includes(modeKey)) {
+      progress.firstModeBonusClaims.push(modeKey);
+      earnedJejak += 5;
+      bonuses.push({ label: 'Kombinasi umur dan kategori baharu', amount: 5 });
+    }
+
+    const completedAge = ALL_CATEGORIES.every((category) => (
+      progress.completedModes[`${selectedAge}|${category}`] > 0
+    ));
+    if (
+      completedAge
+      && !ageWasComplete
+      && !progress.ageCompletionBonusClaims.includes(selectedAge)
+    ) {
+      progress.ageCompletionBonusClaims.push(selectedAge);
+      earnedJejak += 20;
+      bonuses.push({ label: `Semua kategori ${selectedAge}`, amount: 20 });
+    }
+
+    progress.totalJejak += earnedJejak;
+    progress.recentPuzzleIds.push(currentPuzzleId);
+    progress.recentPuzzleIds = progress.recentPuzzleIds.slice(-30);
+
+    const newlyUnlockedIds = unlockEligibleAchievements(progress);
+    const newRank = getRankForJejak(progress.totalJejak);
+    if (profileData.activeProfileId) {
+      saveProgression();
+    }
+
+    return {
+      earnedJejak,
+      bonuses,
+      totalJejak: progress.totalJejak,
+      previousRank,
+      newRank,
+      newlyUnlockedIds,
+      isGuest: !profileData.activeProfileId
+    };
+  }
+
+  function renderBadges(progress) {
+    badgeList.innerHTML = '';
+    ACHIEVEMENTS.forEach((achievement) => {
+      const unlocked = progress.unlockedAchievements.includes(achievement.id);
+      const item = document.createElement('article');
+      item.className = `badge-card ${unlocked ? 'badge-card--unlocked' : 'badge-card--locked'}`;
+      const icon = document.createElement('span');
+      icon.className = 'badge-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = unlocked ? '★' : '◇';
+      const copy = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = achievement.name;
+      const description = document.createElement('span');
+      description.textContent = unlocked ? achievement.description : 'Belum dibuka';
+      copy.append(name, description);
+      item.append(icon, copy);
+      item.setAttribute('aria-label', `${achievement.name}, ${unlocked ? 'dibuka' : 'terkunci'}`);
+      badgeList.appendChild(item);
+    });
+  }
+
+  function renderProgressionScreen() {
+    const activeProfile = profileData.profiles.find((profile) => (
+      profile.id === profileData.activeProfileId
+    ));
+    const progress = getActiveProgress();
+    const rank = getRankForJejak(progress.totalJejak);
+    const nextRank = getNextRank(rank);
+
+    setAvatarArt(progressAvatar, activeProfile?.avatarId || AVATARS[0].id);
+    progressPlayerName.textContent = activeProfile?.nickname || 'Tetamu';
+    progressStorageStatus.textContent = activeProfile
+      ? (progressionStorageIsAvailable ? 'Kemajuan disimpan pada peranti ini' : 'Kemajuan sesi sahaja')
+      : 'Kemajuan tetamu untuk sesi ini sahaja';
+    progressTotalJejak.textContent = `${progress.totalJejak} Jejak`;
+    progressRankName.textContent = rank.name;
+    progressLevel.textContent = `Tahap Ketajaman ${rank.level}`;
+    completedPuzzleCount.textContent = String(progress.completedPuzzleCount);
+    totalWordsFound.textContent = String(progress.totalWordsFound);
+
+    if (nextRank) {
+      const range = nextRank.threshold - rank.threshold;
+      const withinRank = progress.totalJejak - rank.threshold;
+      const percentage = Math.min(100, Math.max(0, (withinRank / range) * 100));
+      rankProgressFill.style.width = `${percentage}%`;
+      rankProgressTrack.setAttribute('aria-valuemin', String(rank.threshold));
+      rankProgressTrack.setAttribute('aria-valuemax', String(nextRank.threshold));
+      rankProgressTrack.setAttribute('aria-valuenow', String(progress.totalJejak));
+      rankProgressText.textContent = `${nextRank.threshold - progress.totalJejak} Jejak lagi ke Tahap ${nextRank.level}`;
+    } else {
+      rankProgressFill.style.width = '100%';
+      rankProgressTrack.setAttribute('aria-valuemin', '1100');
+      rankProgressTrack.setAttribute('aria-valuemax', '1100');
+      rankProgressTrack.setAttribute('aria-valuenow', '1100');
+      rankProgressText.textContent = 'Tahap tertinggi dicapai • Jejak terus dikumpul';
+    }
+
+    renderBadges(progress);
+  }
+
+  function showProgressScreen() {
+    renderProgressionScreen();
+    showScreen(progressScreen);
+  }
+
+  function renderVictoryProgress(reward) {
+    victoryBonusList.innerHTML = '';
+    victoryBadges.innerHTML = '';
+    victoryPromotion.textContent = '';
+
+    if (!reward) {
+      return;
+    }
+
+    victoryJejakEarned.textContent = `+${reward.earnedJejak} Jejak`;
+    reward.bonuses.forEach((bonus) => {
+      const item = document.createElement('li');
+      item.textContent = `${bonus.label}: +${bonus.amount}`;
+      victoryBonusList.appendChild(item);
+    });
+    victoryTotalJejak.textContent = reward.isGuest
+      ? `Jumlah sesi tetamu: ${reward.totalJejak} Jejak`
+      : `Jumlah terkini: ${reward.totalJejak} Jejak`;
+
+    if (reward.newRank.level > reward.previousRank.level) {
+      victoryPromotion.textContent = `Naik pangkat! Tahap ${reward.newRank.level} • ${reward.newRank.name}`;
+    }
+
+    reward.newlyUnlockedIds.forEach((achievementId) => {
+      const achievement = ACHIEVEMENTS.find((item) => item.id === achievementId);
+      if (achievement) {
+        const badge = document.createElement('p');
+        badge.textContent = `Lencana baharu: ${achievement.name}`;
+        victoryBadges.appendChild(badge);
+      }
+    });
   }
 
   function isKnownAvatar(avatarId) {
@@ -411,6 +828,9 @@ document.addEventListener('DOMContentLoaded', () => {
     activePlayerLabel.textContent = activeProfile
       ? `Pemain: ${activeProfile.nickname}`
       : 'Pemain: Tetamu';
+    const progress = getActiveProgress();
+    const rank = getRankForJejak(progress.totalJejak);
+    activeProgressSummary.textContent = `${progress.totalJejak} Jejak • Tahap ${rank.level} • ${rank.name}`;
   }
 
   function closeDeleteConfirmation() {
@@ -443,9 +863,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = document.createElement('strong');
       name.textContent = profile.nickname;
       const status = document.createElement('span');
-      status.textContent = profile.id === profileData.activeProfileId
-        ? 'Profil aktif'
-        : getAvatar(profile.avatarId).name;
+      const progress = getProgressForProfile(profile.id);
+      const rank = getRankForJejak(progress.totalJejak);
+      status.textContent = `${progress.totalJejak} Jejak • Tahap ${rank.level} • ${rank.name}`;
       details.append(name, status);
 
       const controls = document.createElement('div');
@@ -555,7 +975,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     pendingDeleteProfileId = profile.id;
-    deleteConfirmationText.textContent = `Profil “${profile.nickname}” akan dipadam. Tindakan ini tidak boleh dibatalkan.`;
+    deleteConfirmationText.textContent = `Profil “${profile.nickname}” dan semua kemajuan Jejak Helang akan dipadam. Tindakan ini tidak boleh dibatalkan.`;
     deleteConfirmation.hidden = false;
     confirmDeleteButton.focus();
   }
@@ -565,13 +985,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const deletedProfileId = pendingDeleteProfileId;
     profileData.profiles = profileData.profiles.filter((profile) => (
       profile.id !== pendingDeleteProfileId
     ));
     if (profileData.activeProfileId === pendingDeleteProfileId) {
       profileData.activeProfileId = null;
     }
+    delete progressionData.byProfileId[deletedProfileId];
     saveProfiles();
+    saveProgression();
     updateActivePlayerLabel();
     closeDeleteConfirmation();
     renderProfileList();
@@ -641,6 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
       playerScreen,
       profileScreen,
       ageScreen,
+      progressScreen,
       categoryScreen,
       gameScreen
     ];
@@ -931,6 +1355,8 @@ document.addEventListener('DOMContentLoaded', () => {
     victorySummary.textContent = `${foundWords.size}/${getTargetWords().length} kata ditemui`;
 
     if (foundWords.size === getTargetWords().length) {
+      const reward = awardPuzzleCompletion();
+      renderVictoryProgress(reward);
       victoryPanel.classList.remove('hidden');
     }
 
@@ -1087,6 +1513,14 @@ document.addEventListener('DOMContentLoaded', () => {
     dragStartCell = null;
     victoryPanel.classList.add('hidden');
     victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
+    victoryProgress.classList.remove('hidden');
+    victoryJejakEarned.textContent = '';
+    victoryBonusList.innerHTML = '';
+    victoryTotalJejak.textContent = '';
+    victoryPromotion.textContent = '';
+    victoryBadges.innerHTML = '';
+    currentPuzzleId = generatePuzzleId();
+    currentPuzzleRewarded = false;
     wordGrid.style.setProperty('--grid-size', String(config.gridSize));
     wordGrid.classList.toggle('word-grid--large', config.gridSize > 6);
     wordGrid.classList.toggle('word-grid--compact', config.gridSize > 8);
@@ -1181,6 +1615,14 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmDeleteButton.addEventListener('click', deletePendingProfile);
   }
 
+  if (progressButton) {
+    progressButton.addEventListener('click', showProgressScreen);
+  }
+
+  if (progressBackButton) {
+    progressBackButton.addEventListener('click', showAgeScreen);
+  }
+
   if (ageBackButton) {
     ageBackButton.addEventListener('click', showPlayerScreen);
   }
@@ -1226,6 +1668,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
 
   loadProfiles();
+  loadProgression();
   updateActivePlayerLabel();
 
   document.addEventListener('pointerup', (event) => {

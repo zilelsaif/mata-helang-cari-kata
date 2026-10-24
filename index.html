@@ -117,6 +117,8 @@
         <p class="eyebrow">Permainan Kata</p>
         <h2 id="age-title">PILIH UMUR</h2>
         <p id="active-player-label" class="active-player-label">Pemain: Tetamu</p>
+        <p id="active-progress-summary" class="active-progress-summary">0 Jejak • Tahap 1</p>
+        <button id="progress-button" class="progress-button" type="button">JEJAK HELANG</button>
 
         <div class="age-list" aria-label="Pilihan umur">
           <button class="age-button" data-age="5–7 Tahun" type="button">🐣 5–7 Tahun</button>
@@ -128,6 +130,41 @@
         <button id="age-back-button" class="secondary-button" type="button">
           KEMBALI
         </button>
+      </section>
+
+      <section id="progress-screen" class="panel progression-panel" aria-labelledby="progress-title" aria-hidden="true">
+        <p class="eyebrow">Kemajuan Pemain</p>
+        <h2 id="progress-title">JEJAK HELANG</h2>
+
+        <div class="progress-identity">
+          <div id="progress-avatar" class="avatar avatar--large" aria-hidden="true"></div>
+          <div>
+            <strong id="progress-player-name">Tetamu</strong>
+            <span id="progress-storage-status">Kemajuan sesi sahaja</span>
+          </div>
+        </div>
+
+        <div class="rank-card">
+          <p id="progress-total-jejak" class="jejak-total">0 Jejak</p>
+          <h3 id="progress-rank-name">Pemerhati Baru</h3>
+          <p id="progress-level">Tahap Ketajaman 1</p>
+          <div class="rank-progress-track" role="progressbar" aria-label="Kemajuan ke pangkat seterusnya" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0">
+            <span id="rank-progress-fill"></span>
+          </div>
+          <p id="rank-progress-text">80 Jejak lagi ke Tahap 2</p>
+        </div>
+
+        <div class="progress-stats" aria-label="Statistik pemain">
+          <div><strong id="completed-puzzle-count">0</strong><span>Teka kata selesai</span></div>
+          <div><strong id="total-words-found">0</strong><span>Jumlah kata ditemui</span></div>
+        </div>
+
+        <section class="badge-section" aria-labelledby="badge-title">
+          <h3 id="badge-title">Lencana Pencapaian</h3>
+          <div id="badge-list" class="badge-list"></div>
+        </section>
+
+        <button id="progress-back-button" class="secondary-button" type="button">KEMBALI</button>
       </section>
 
       <section id="category-screen" class="panel" aria-labelledby="category-title" aria-hidden="true">
@@ -169,6 +206,13 @@
           <h3>TAHNIAH!</h3>
           <p>Semua kata ditemui.</p>
           <p id="victory-summary" class="victory-summary">0/0 kata ditemui</p>
+          <div id="victory-progress" class="victory-progress">
+            <p id="victory-jejak-earned" class="victory-jejak-earned"></p>
+            <ul id="victory-bonus-list" class="victory-bonus-list"></ul>
+            <p id="victory-total-jejak"></p>
+            <p id="victory-promotion" class="victory-promotion"></p>
+            <div id="victory-badges" class="victory-badges"></div>
+          </div>
           <div class="victory-actions">
             <button id="play-again-button" class="primary-button" type="button">MAIN LAGI</button>
             <button id="menu-button" class="secondary-button" type="button">MENU</button>
@@ -178,7 +222,7 @@
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.14.0 by Zil-el-Saif
+      v0.15.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>
