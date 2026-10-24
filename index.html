@@ -189,7 +189,10 @@
 
       <section id="game-screen" class="panel" aria-labelledby="game-heading" aria-hidden="true">
         <p class="eyebrow">Permainan Kata</p>
-        <h2 id="game-heading">CARI KATA</h2>
+        <div class="game-heading-row">
+          <h2 id="game-heading">CARI KATA</h2>
+          <button id="game-menu-button" class="game-menu-button" type="button">MENU</button>
+        </div>
         <p id="game-session-label" class="selected-age">Umur: --</p>
         <p id="game-feedback" class="game-feedback" aria-live="polite"></p>
 
@@ -218,11 +221,29 @@
             <button id="menu-button" class="secondary-button" type="button">MENU</button>
           </div>
         </div>
+
+        <div
+          id="exit-confirmation"
+          class="exit-confirmation hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="exit-confirmation-title"
+          aria-describedby="exit-confirmation-message"
+        >
+          <div class="exit-confirmation-card">
+            <h3 id="exit-confirmation-title">Keluar Permainan?</h3>
+            <p id="exit-confirmation-message">Permainan belum selesai. Kemajuan papan ini akan hilang jika kamu keluar.</p>
+            <div class="confirmation-actions">
+              <button id="continue-game-button" class="secondary-button" type="button">TERUSKAN</button>
+              <button id="exit-game-button" class="danger-button" type="button">KELUAR</button>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.15.0 by Zil-el-Saif
+      v0.15.1 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

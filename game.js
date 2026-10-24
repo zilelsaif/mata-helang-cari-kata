@@ -62,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const victoryBadges = document.getElementById('victory-badges');
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
+  const gameMenuButton = document.getElementById('game-menu-button');
+  const exitConfirmation = document.getElementById('exit-confirmation');
+  const continueGameButton = document.getElementById('continue-game-button');
+  const exitGameButton = document.getElementById('exit-game-button');
 
   const PROFILE_STORAGE_KEY = 'mataHelangProfiles_v1';
   const PROFILE_DATA_VERSION = 1;
@@ -1094,6 +1098,34 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryMessage.textContent = message;
   }
 
+  function closeExitConfirmation() {
+    exitConfirmation.classList.add('hidden');
+    gameMenuButton.focus();
+  }
+
+  function discardUnfinishedPuzzle() {
+    // An abandoned board must never reach the completion reward path.
+    currentPuzzleRewarded = true;
+    currentPuzzleId = null;
+    clearSelection();
+    clearFeedback();
+    isDragging = false;
+    activePointerId = null;
+    dragStartCell = null;
+    exitConfirmation.classList.add('hidden');
+    showCategoryScreen();
+  }
+
+  function requestGameplayExit() {
+    if (foundWords.size === getTargetWords().length) {
+      showCategoryScreen();
+      return;
+    }
+
+    exitConfirmation.classList.remove('hidden');
+    continueGameButton.focus();
+  }
+
   function getRandomLetter() {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return letters[Math.floor(Math.random() * letters.length)];
@@ -1358,6 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reward = awardPuzzleCompletion();
       renderVictoryProgress(reward);
       victoryPanel.classList.remove('hidden');
+      gameMenuButton.classList.add('hidden');
     }
 
     return true;
@@ -1519,6 +1552,8 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryTotalJejak.textContent = '';
     victoryPromotion.textContent = '';
     victoryBadges.innerHTML = '';
+    exitConfirmation.classList.add('hidden');
+    gameMenuButton.classList.remove('hidden');
     currentPuzzleId = generatePuzzleId();
     currentPuzzleRewarded = false;
     wordGrid.style.setProperty('--grid-size', String(config.gridSize));
@@ -1635,6 +1670,18 @@ document.addEventListener('DOMContentLoaded', () => {
     menuButton.addEventListener('click', () => {
       showCategoryScreen();
     });
+  }
+
+  if (gameMenuButton) {
+    gameMenuButton.addEventListener('click', requestGameplayExit);
+  }
+
+  if (continueGameButton) {
+    continueGameButton.addEventListener('click', closeExitConfirmation);
+  }
+
+  if (exitGameButton) {
+    exitGameButton.addEventListener('click', discardUnfinishedPuzzle);
   }
 
   if (playAgainButton) {
