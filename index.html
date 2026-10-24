@@ -51,9 +51,72 @@
         </button>
       </section>
 
+      <section id="player-screen" class="panel profile-panel" aria-labelledby="player-title" aria-hidden="true">
+        <p class="eyebrow">Ruang Pemain</p>
+        <h2 id="player-title">PILIH PEMAIN</h2>
+        <p id="profile-storage-message" class="profile-message" aria-live="polite"></p>
+
+        <div id="profile-list" class="profile-list" aria-label="Senarai profil pemain"></div>
+        <p id="empty-profile-message" class="empty-profile-message">
+          Belum ada profil. Kamu boleh tambah profil atau terus bermain sebagai tetamu.
+        </p>
+
+        <div class="profile-actions">
+          <button id="add-profile-button" class="primary-button" type="button">TAMBAH PROFIL</button>
+          <button id="guest-button" class="guest-button" type="button">MAIN TANPA PROFIL</button>
+          <button id="player-back-button" class="secondary-button" type="button">KEMBALI</button>
+        </div>
+
+        <div id="delete-confirmation" class="delete-confirmation" hidden>
+          <h3>Padam profil?</h3>
+          <p id="delete-confirmation-text"></p>
+          <div class="confirmation-actions">
+            <button id="cancel-delete-button" class="secondary-button" type="button">BATAL</button>
+            <button id="confirm-delete-button" class="danger-button" type="button">PADAM</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="profile-screen" class="panel profile-editor-panel" aria-labelledby="profile-form-title" aria-hidden="true">
+        <p class="eyebrow">Ruang Pemain</p>
+        <h2 id="profile-form-title">TAMBAH PROFIL</h2>
+
+        <form id="profile-form" novalidate>
+          <div class="profile-preview" aria-live="polite">
+            <div id="profile-preview-avatar" class="avatar avatar--large" aria-hidden="true"></div>
+            <strong id="profile-preview-name">Pemain Baharu</strong>
+          </div>
+
+          <label class="nickname-label" for="nickname-input">Nama panggilan</label>
+          <input
+            id="nickname-input"
+            class="nickname-input"
+            name="nickname"
+            type="text"
+            maxlength="16"
+            autocomplete="off"
+            placeholder="Contoh: Aiman"
+            aria-describedby="nickname-help profile-form-message"
+          />
+          <p id="nickname-help" class="field-help">Maksimum 16 aksara. Nama sebenar tidak diperlukan.</p>
+
+          <fieldset class="avatar-fieldset">
+            <legend>Pilih avatar</legend>
+            <div id="avatar-options" class="avatar-options"></div>
+          </fieldset>
+
+          <p id="profile-form-message" class="profile-message" aria-live="polite"></p>
+          <div class="profile-form-actions">
+            <button id="save-profile-button" class="primary-button" type="submit">SIMPAN PROFIL</button>
+            <button id="cancel-profile-button" class="secondary-button" type="button">BATAL</button>
+          </div>
+        </form>
+      </section>
+
       <section id="age-screen" class="panel" aria-labelledby="age-title" aria-hidden="true">
         <p class="eyebrow">Permainan Kata</p>
         <h2 id="age-title">PILIH UMUR</h2>
+        <p id="active-player-label" class="active-player-label">Pemain: Tetamu</p>
 
         <div class="age-list" aria-label="Pilihan umur">
           <button class="age-button" data-age="5–7 Tahun" type="button">🐣 5–7 Tahun</button>
@@ -115,7 +178,7 @@
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.13.0 by Zil-el-Saif
+      v0.14.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

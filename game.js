@@ -1,9 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
   const titleScreen = document.getElementById('title-screen');
+  const playerScreen = document.getElementById('player-screen');
+  const profileScreen = document.getElementById('profile-screen');
   const ageScreen = document.getElementById('age-screen');
   const categoryScreen = document.getElementById('category-screen');
   const gameScreen = document.getElementById('game-screen');
   const startButton = document.getElementById('start-button');
+  const profileList = document.getElementById('profile-list');
+  const emptyProfileMessage = document.getElementById('empty-profile-message');
+  const profileStorageMessage = document.getElementById('profile-storage-message');
+  const addProfileButton = document.getElementById('add-profile-button');
+  const guestButton = document.getElementById('guest-button');
+  const playerBackButton = document.getElementById('player-back-button');
+  const profileForm = document.getElementById('profile-form');
+  const profileFormTitle = document.getElementById('profile-form-title');
+  const nicknameInput = document.getElementById('nickname-input');
+  const avatarOptions = document.getElementById('avatar-options');
+  const profilePreviewAvatar = document.getElementById('profile-preview-avatar');
+  const profilePreviewName = document.getElementById('profile-preview-name');
+  const profileFormMessage = document.getElementById('profile-form-message');
+  const saveProfileButton = document.getElementById('save-profile-button');
+  const cancelProfileButton = document.getElementById('cancel-profile-button');
+  const deleteConfirmation = document.getElementById('delete-confirmation');
+  const deleteConfirmationText = document.getElementById('delete-confirmation-text');
+  const confirmDeleteButton = document.getElementById('confirm-delete-button');
+  const cancelDeleteButton = document.getElementById('cancel-delete-button');
+  const activePlayerLabel = document.getElementById('active-player-label');
   const ageBackButton = document.getElementById('age-back-button');
   const categoryBackButton = document.getElementById('category-back-button');
   const ageButtons = document.querySelectorAll('.age-button');
@@ -18,6 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const victorySummary = document.getElementById('victory-summary');
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
+
+  const PROFILE_STORAGE_KEY = 'mataHelangProfiles_v1';
+  const PROFILE_DATA_VERSION = 1;
+  const MAX_PROFILES = 5;
+
+  // These original inline SVG avatars need no external assets or third-party art.
+  const AVATARS = [
+    { id: 'helang-biru', name: 'Helang Biru', color: '#1D6FD6', accent: '#FFD166', symbol: 'wing' },
+    { id: 'kompas-cyan', name: 'Kompas Sian', color: '#2BB8E8', accent: '#FFF2DC', symbol: 'compass' },
+    { id: 'bintang-ambar', name: 'Bintang Ambar', color: '#EDA53B', accent: '#075ABB', symbol: 'star' },
+    { id: 'awan-krim', name: 'Awan Krim', color: '#FFF2DC', accent: '#1D6FD6', symbol: 'cloud' },
+    { id: 'daun-hijau', name: 'Daun Hijau', color: '#7BCF9C', accent: '#0D4EA3', symbol: 'leaf' },
+    { id: 'bulan-ungu', name: 'Bulan Ungu', color: '#D9C5EF', accent: '#74411F', symbol: 'moon' }
+  ];
 
   const DIRECTIONS = {
     horizontal: { row: 0, col: 1 },
@@ -132,6 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentSelection = [];
   let feedbackTimerId = null;
   const previousPuzzleWordsByMode = new Map();
+  let profileData = createEmptyProfileData();
+  let storageIsAvailable = true;
+  let editingProfileId = null;
+  let selectedAvatarId = AVATARS[0].id;
+  let pendingDeleteProfileId = null;
+  let isSavingProfile = false;
 
   function getTargetWords() {
     return currentTargetWords;
@@ -215,8 +257,393 @@ document.addEventListener('DOMContentLoaded', () => {
       : bestSelection;
   }
 
+  function createEmptyProfileData() {
+    return {
+      version: PROFILE_DATA_VERSION,
+      activeProfileId: null,
+      profiles: []
+    };
+  }
+
+  function isKnownAvatar(avatarId) {
+    return AVATARS.some((avatar) => avatar.id === avatarId);
+  }
+
+  function normalizeStoredProfile(profile) {
+    if (!profile || typeof profile !== 'object') {
+      return null;
+    }
+
+    const nickname = typeof profile.nickname === 'string'
+      ? profile.nickname.trim()
+      : '';
+
+    if (
+      typeof profile.id !== 'string'
+      || !profile.id
+      || !nickname
+      || nickname.length > 16
+      || !isKnownAvatar(profile.avatarId)
+      || typeof profile.createdAt !== 'string'
+    ) {
+      return null;
+    }
+
+    return {
+      id: profile.id,
+      nickname,
+      avatarId: profile.avatarId,
+      createdAt: profile.createdAt
+    };
+  }
+
+  function loadProfiles() {
+    try {
+      const storedValue = localStorage.getItem(PROFILE_STORAGE_KEY);
+      if (!storedValue) {
+        profileData = createEmptyProfileData();
+        return;
+      }
+
+      const parsedData = JSON.parse(storedValue);
+      if (
+        !parsedData
+        || parsedData.version !== PROFILE_DATA_VERSION
+        || !Array.isArray(parsedData.profiles)
+      ) {
+        throw new Error('Format data profil tidak sah.');
+      }
+
+      const seenIds = new Set();
+      const validProfiles = parsedData.profiles
+        .map(normalizeStoredProfile)
+        .filter((profile) => {
+          if (!profile || seenIds.has(profile.id) || seenIds.size >= MAX_PROFILES) {
+            return false;
+          }
+
+          seenIds.add(profile.id);
+          return true;
+        });
+
+      const activeProfileId = validProfiles.some((profile) => (
+        profile.id === parsedData.activeProfileId
+      ))
+        ? parsedData.activeProfileId
+        : null;
+
+      profileData = {
+        version: PROFILE_DATA_VERSION,
+        activeProfileId,
+        profiles: validProfiles
+      };
+    } catch (error) {
+      profileData = createEmptyProfileData();
+      const isStorageError = error?.name === 'SecurityError'
+        || error?.name === 'QuotaExceededError';
+      storageIsAvailable = !isStorageError;
+      profileStorageMessage.textContent = isStorageError
+        ? 'Simpanan tempatan tidak tersedia. Profil hanya aktif untuk sesi ini.'
+        : 'Data profil lama rosak. Profil baharu masih boleh dibuat.';
+    }
+  }
+
+  function saveProfiles() {
+    if (!storageIsAvailable) {
+      return false;
+    }
+
+    try {
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData));
+      return true;
+    } catch (error) {
+      storageIsAvailable = false;
+      profileStorageMessage.textContent = 'Simpanan tempatan tidak tersedia. Profil hanya aktif untuk sesi ini.';
+      return false;
+    }
+  }
+
+  function generateProfileId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+
+    return `player-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function getAvatar(avatarId) {
+    return AVATARS.find((avatar) => avatar.id === avatarId) || AVATARS[0];
+  }
+
+  function getAvatarSymbol(symbol, accent) {
+    const symbols = {
+      wing: `<path d="M31 49c13-20 30-24 42-17-12 3-20 10-24 20 9-7 19-9 29-5-13 18-29 24-47 18z" fill="${accent}"/>`,
+      compass: `<path d="M50 22l8 20 20 8-20 8-8 20-8-20-20-8 20-8z" fill="${accent}"/><circle cx="50" cy="50" r="8" fill="#fff"/>`,
+      star: `<path d="M50 20l9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3z" fill="${accent}"/>`,
+      cloud: `<path d="M29 63h43a13 13 0 000-26 22 22 0 00-41-5 16 16 0 00-2 31z" fill="${accent}"/>`,
+      leaf: `<path d="M75 25C48 25 28 38 27 65c17 4 36-3 48-40z" fill="${accent}"/><path d="M30 72c10-17 22-26 38-36" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`,
+      moon: `<path d="M68 25a28 28 0 11-34 42 31 31 0 0034-42z" fill="${accent}"/>`
+    };
+
+    return symbols[symbol] || symbols.star;
+  }
+
+  function getAvatarSvg(avatarId) {
+    const avatar = getAvatar(avatarId);
+    return `
+      <svg viewBox="0 0 100 100" focusable="false" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="${avatar.color}" />
+        <circle cx="50" cy="50" r="39" fill="none" stroke="rgba(255,255,255,0.72)" stroke-width="4" />
+        ${getAvatarSymbol(avatar.symbol, avatar.accent)}
+      </svg>
+    `;
+  }
+
+  function setAvatarArt(element, avatarId) {
+    element.innerHTML = getAvatarSvg(avatarId);
+    element.dataset.avatarId = avatarId;
+  }
+
+  function updateActivePlayerLabel() {
+    const activeProfile = profileData.profiles.find((profile) => (
+      profile.id === profileData.activeProfileId
+    ));
+    activePlayerLabel.textContent = activeProfile
+      ? `Pemain: ${activeProfile.nickname}`
+      : 'Pemain: Tetamu';
+  }
+
+  function closeDeleteConfirmation() {
+    pendingDeleteProfileId = null;
+    deleteConfirmation.hidden = true;
+  }
+
+  function renderProfileList() {
+    profileList.innerHTML = '';
+    emptyProfileMessage.hidden = profileData.profiles.length > 0;
+    addProfileButton.disabled = profileData.profiles.length >= MAX_PROFILES;
+    addProfileButton.textContent = addProfileButton.disabled
+      ? 'HAD 5 PROFIL DICAPAI'
+      : 'TAMBAH PROFIL';
+
+    profileData.profiles.forEach((profile) => {
+      const card = document.createElement('article');
+      card.className = 'profile-card';
+      if (profile.id === profileData.activeProfileId) {
+        card.classList.add('profile-card--active');
+      }
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      setAvatarArt(avatar, profile.avatarId);
+
+      const details = document.createElement('div');
+      details.className = 'profile-card-details';
+      const name = document.createElement('strong');
+      name.textContent = profile.nickname;
+      const status = document.createElement('span');
+      status.textContent = profile.id === profileData.activeProfileId
+        ? 'Profil aktif'
+        : getAvatar(profile.avatarId).name;
+      details.append(name, status);
+
+      const controls = document.createElement('div');
+      controls.className = 'profile-card-controls';
+
+      const playButton = document.createElement('button');
+      playButton.className = 'profile-play-button';
+      playButton.type = 'button';
+      playButton.textContent = 'MAIN';
+      playButton.setAttribute('aria-label', `Main sebagai ${profile.nickname}`);
+      playButton.addEventListener('click', () => selectProfile(profile.id));
+
+      const editButton = document.createElement('button');
+      editButton.className = 'profile-icon-button';
+      editButton.type = 'button';
+      editButton.textContent = 'UBAH';
+      editButton.setAttribute('aria-label', `Ubah profil ${profile.nickname}`);
+      editButton.addEventListener('click', () => openProfileEditor(profile.id));
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'profile-icon-button profile-delete-button';
+      deleteButton.type = 'button';
+      deleteButton.textContent = 'PADAM';
+      deleteButton.setAttribute('aria-label', `Padam profil ${profile.nickname}`);
+      deleteButton.addEventListener('click', () => requestProfileDeletion(profile.id));
+
+      controls.append(playButton, editButton, deleteButton);
+      card.append(avatar, details, controls);
+      profileList.appendChild(card);
+    });
+  }
+
+  function renderAvatarOptions() {
+    avatarOptions.innerHTML = '';
+
+    AVATARS.forEach((avatar) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'avatar-option';
+      button.dataset.avatarId = avatar.id;
+      button.setAttribute('aria-label', `Pilih avatar ${avatar.name}`);
+      button.setAttribute('aria-pressed', String(avatar.id === selectedAvatarId));
+      button.classList.toggle('selected', avatar.id === selectedAvatarId);
+
+      const art = document.createElement('span');
+      art.className = 'avatar';
+      art.setAttribute('aria-hidden', 'true');
+      setAvatarArt(art, avatar.id);
+      const label = document.createElement('span');
+      label.textContent = avatar.name;
+      button.append(art, label);
+      button.addEventListener('click', () => {
+        selectedAvatarId = avatar.id;
+        renderAvatarOptions();
+        updateProfilePreview();
+      });
+      avatarOptions.appendChild(button);
+    });
+  }
+
+  function updateProfilePreview() {
+    setAvatarArt(profilePreviewAvatar, selectedAvatarId);
+    profilePreviewName.textContent = nicknameInput.value.trim() || 'Pemain Baharu';
+  }
+
+  function showPlayerScreen() {
+    closeDeleteConfirmation();
+    renderProfileList();
+    showScreen(playerScreen);
+  }
+
+  function openProfileEditor(profileId = null) {
+    if (!profileId && profileData.profiles.length >= MAX_PROFILES) {
+      profileStorageMessage.textContent = 'Maksimum lima profil dibenarkan.';
+      return;
+    }
+
+    const profile = profileData.profiles.find((item) => item.id === profileId);
+    editingProfileId = profile ? profile.id : null;
+    selectedAvatarId = profile ? profile.avatarId : AVATARS[0].id;
+    nicknameInput.value = profile ? profile.nickname : '';
+    profileFormTitle.textContent = profile ? 'UBAH PROFIL' : 'TAMBAH PROFIL';
+    saveProfileButton.textContent = profile ? 'SIMPAN PERUBAHAN' : 'SIMPAN PROFIL';
+    profileFormMessage.textContent = '';
+    isSavingProfile = false;
+    renderAvatarOptions();
+    updateProfilePreview();
+    showScreen(profileScreen);
+    nicknameInput.focus();
+  }
+
+  function selectProfile(profileId) {
+    if (!profileData.profiles.some((profile) => profile.id === profileId)) {
+      return;
+    }
+
+    profileData.activeProfileId = profileId;
+    saveProfiles();
+    updateActivePlayerLabel();
+    showAgeScreen();
+  }
+
+  function requestProfileDeletion(profileId) {
+    const profile = profileData.profiles.find((item) => item.id === profileId);
+    if (!profile) {
+      return;
+    }
+
+    pendingDeleteProfileId = profile.id;
+    deleteConfirmationText.textContent = `Profil “${profile.nickname}” akan dipadam. Tindakan ini tidak boleh dibatalkan.`;
+    deleteConfirmation.hidden = false;
+    confirmDeleteButton.focus();
+  }
+
+  function deletePendingProfile() {
+    if (!pendingDeleteProfileId) {
+      return;
+    }
+
+    profileData.profiles = profileData.profiles.filter((profile) => (
+      profile.id !== pendingDeleteProfileId
+    ));
+    if (profileData.activeProfileId === pendingDeleteProfileId) {
+      profileData.activeProfileId = null;
+    }
+    saveProfiles();
+    updateActivePlayerLabel();
+    closeDeleteConfirmation();
+    renderProfileList();
+    profileStorageMessage.textContent = 'Profil telah dipadam.';
+  }
+
+  function saveProfileFromForm(event) {
+    event.preventDefault();
+    if (isSavingProfile) {
+      return;
+    }
+
+    const nickname = nicknameInput.value.trim();
+    if (!nickname) {
+      profileFormMessage.textContent = 'Masukkan nama panggilan.';
+      nicknameInput.focus();
+      return;
+    }
+    if (nickname.length > 16) {
+      profileFormMessage.textContent = 'Nama panggilan mestilah 16 aksara atau kurang.';
+      nicknameInput.focus();
+      return;
+    }
+
+    const existingProfile = profileData.profiles.find((profile) => (
+      profile.id === editingProfileId
+    ));
+    if (!existingProfile && profileData.profiles.length >= MAX_PROFILES) {
+      profileFormMessage.textContent = 'Maksimum lima profil dibenarkan.';
+      return;
+    }
+
+    isSavingProfile = true;
+    if (existingProfile) {
+      existingProfile.nickname = nickname;
+      existingProfile.avatarId = selectedAvatarId;
+    } else {
+      profileData.profiles.push({
+        id: generateProfileId(),
+        nickname,
+        avatarId: selectedAvatarId,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    const savedPermanently = saveProfiles();
+    if (savedPermanently) {
+      profileStorageMessage.textContent = existingProfile
+        ? 'Perubahan profil telah disimpan.'
+        : 'Profil baharu telah disimpan.';
+    }
+    saveProfileButton.disabled = true;
+    // Keep the disabled Save button in place until a possible second tap ends.
+    window.setTimeout(() => {
+      document.body.classList.add('profile-input-locked');
+      showPlayerScreen();
+      saveProfileButton.disabled = false;
+      window.setTimeout(() => {
+        document.body.classList.remove('profile-input-locked');
+      }, 1000);
+    }, 300);
+  }
+
   function showScreen(show) {
-    const screens = [titleScreen, ageScreen, categoryScreen, gameScreen];
+    const screens = [
+      titleScreen,
+      playerScreen,
+      profileScreen,
+      ageScreen,
+      categoryScreen,
+      gameScreen
+    ];
 
     screens.forEach((screen) => {
       const isActive = screen === show;
@@ -230,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showAgeScreen() {
+    updateActivePlayerLabel();
     showScreen(ageScreen);
   }
 
@@ -714,11 +1142,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (startButton) {
-    startButton.addEventListener('click', showAgeScreen);
+    startButton.addEventListener('click', showPlayerScreen);
+  }
+
+  if (addProfileButton) {
+    addProfileButton.addEventListener('click', () => openProfileEditor());
+  }
+
+  if (guestButton) {
+    guestButton.addEventListener('click', () => {
+      profileData.activeProfileId = null;
+      saveProfiles();
+      showAgeScreen();
+    });
+  }
+
+  if (playerBackButton) {
+    playerBackButton.addEventListener('click', showTitleScreen);
+  }
+
+  if (profileForm) {
+    profileForm.addEventListener('submit', saveProfileFromForm);
+  }
+
+  if (nicknameInput) {
+    nicknameInput.addEventListener('input', updateProfilePreview);
+  }
+
+  if (cancelProfileButton) {
+    cancelProfileButton.addEventListener('click', showPlayerScreen);
+  }
+
+  if (cancelDeleteButton) {
+    cancelDeleteButton.addEventListener('click', closeDeleteConfirmation);
+  }
+
+  if (confirmDeleteButton) {
+    confirmDeleteButton.addEventListener('click', deletePendingProfile);
   }
 
   if (ageBackButton) {
-    ageBackButton.addEventListener('click', showTitleScreen);
+    ageBackButton.addEventListener('click', showPlayerScreen);
   }
 
   if (categoryBackButton) {
@@ -753,6 +1217,16 @@ document.addEventListener('DOMContentLoaded', () => {
       startGame();
     });
   });
+
+  document.addEventListener('click', (event) => {
+    if (document.body.classList.contains('profile-input-locked')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  loadProfiles();
+  updateActivePlayerLabel();
 
   document.addEventListener('pointerup', (event) => {
     finishSelection(event);
