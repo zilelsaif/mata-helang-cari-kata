@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressScreen = document.getElementById('progress-screen');
   const galleryScreen = document.getElementById('gallery-screen');
   const categoryScreen = document.getElementById('category-screen');
+  const modeScreen = document.getElementById('mode-screen');
   const gameScreen = document.getElementById('game-screen');
   const startButton = document.getElementById('start-button');
   const profileList = document.getElementById('profile-list');
@@ -72,13 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveRevealedCardLink = document.getElementById('save-revealed-card-link');
   const ageBackButton = document.getElementById('age-back-button');
   const categoryBackButton = document.getElementById('category-back-button');
+  const modeBackButton = document.getElementById('mode-back-button');
+  const modeButtons = document.querySelectorAll('.mode-button');
+  const modeSelectionLabel = document.getElementById('mode-selection-label');
   const ageButtons = document.querySelectorAll('.age-button');
   const categoryButtons = document.querySelectorAll('.category-button');
   const selectedAgeLabel = document.getElementById('selected-age-label');
   const categoryMessage = document.getElementById('category-message');
   const wordGrid = document.getElementById('word-grid');
   const wordList = document.getElementById('word-list');
+  const wordPanel = document.getElementById('word-panel');
+  const wordListTitle = document.getElementById('word-list-title');
+  const secretProgress = document.getElementById('secret-progress');
+  const gameHeading = document.getElementById('game-heading');
   const gameSessionLabel = document.getElementById('game-session-label');
+  const gameModeLabel = document.getElementById('game-mode-label');
   const gameFeedback = document.getElementById('game-feedback');
   const victoryPanel = document.getElementById('victory-panel');
   const victorySummary = document.getElementById('victory-summary');
@@ -113,6 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const KATA_RAKA_STORAGE_KEY = 'mataHelangKataRaka_v1';
   const KATA_RAKA_DATA_VERSION = 1;
   const BRAND_INTRO_SESSION_KEY = 'mataHelangZilTerokaIntro_v1';
+
+  const GAME_MODES = {
+    classic: { label: 'MOD KLASIK' },
+    secret: { label: 'PENCARIAN RAHSIA' }
+  };
 
   let brandIntroTimer = null;
   let brandIntroDismissed = false;
@@ -324,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let selectedAge = 'Belum dipilih';
   let selectedCategory = 'Belum dipilih';
+  let selectedGameMode = 'classic';
   let currentTargetWords = [];
   let puzzle = null;
   let foundWords = new Set();
@@ -385,15 +400,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getPuzzleModeKey(category) {
-    return `${selectedAge}|${category}`;
+    return `${selectedAge}|${category}|${selectedGameMode}`;
   }
 
-  function chooseTargetWords(category, config) {
+  function getEligibleWords(category, config) {
     const categoryWords = WORDS_BY_AGE_AND_CATEGORY[selectedAge]?.[category] || [];
     const normalizedWords = categoryWords.map((word) => word.toUpperCase());
-    const validWords = [...new Set(normalizedWords)].filter((word) => (
+    return [...new Set(normalizedWords)].filter((word) => (
       word.length <= config.gridSize && /^[A-Z]+$/.test(word)
     ));
+  }
+
+  function chooseTargetWords(category, config, wordPool = null) {
+    const validWords = wordPool || getEligibleWords(category, config);
     const previousWords = previousPuzzleWordsByMode.get(getPuzzleModeKey(category));
 
     if (!previousWords) {
@@ -1697,6 +1716,7 @@ document.addEventListener('DOMContentLoaded', () => {
       progressScreen,
       galleryScreen,
       categoryScreen,
+      modeScreen,
       gameScreen
     ];
 
@@ -1721,6 +1741,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function showCategoryScreen() {
     selectedAgeLabel.textContent = `Umur: ${selectedAge}`;
     showScreen(categoryScreen);
+  }
+
+  function showModeScreen() {
+    modeSelectionLabel.textContent = `Umur: ${selectedAge} | Kategori: ${selectedCategory}`;
+    modeButtons.forEach((button) => {
+      const isSelected = button.dataset.mode === selectedGameMode;
+      button.classList.toggle('selected', isSelected);
+      button.setAttribute('aria-pressed', String(isSelected));
+    });
+    showScreen(modeScreen);
   }
 
   function showCategoryMessage(message) {
@@ -1846,11 +1876,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return { board, cellsByWord, reversedWords };
   }
 
-  function buildBoard(targetWords, config) {
+  function buildBoard(targetWords, config, maximumAttempts = 100) {
     let generatedPuzzle = null;
 
     // Restart with an empty grid if random placements block a later word.
-    for (let boardAttempt = 0; boardAttempt < 100 && !generatedPuzzle; boardAttempt += 1) {
+    for (let boardAttempt = 0; boardAttempt < maximumAttempts && !generatedPuzzle; boardAttempt += 1) {
       generatedPuzzle = tryBuildBoard(targetWords, config);
     }
 
@@ -1870,13 +1900,121 @@ document.addEventListener('DOMContentLoaded', () => {
     return generatedPuzzle;
   }
 
+  function getSearchDirections(config) {
+    const directions = [];
+    config.directions.forEach((directionName) => {
+      const direction = DIRECTIONS[directionName];
+      directions.push(direction, { row: -direction.row, col: -direction.col });
+    });
+    return directions;
+  }
+
+  function getWordOccurrences(board, word, config) {
+    const occurrences = new Set();
+    const directions = getSearchDirections(config);
+
+    for (let row = 0; row < config.gridSize; row += 1) {
+      for (let col = 0; col < config.gridSize; col += 1) {
+        directions.forEach((direction) => {
+          const cells = [];
+          for (let index = 0; index < word.length; index += 1) {
+            const nextRow = row + direction.row * index;
+            const nextCol = col + direction.col * index;
+            if (
+              nextRow < 0 || nextRow >= config.gridSize
+              || nextCol < 0 || nextCol >= config.gridSize
+              || board[nextRow][nextCol] !== word[index]
+            ) {
+              return;
+            }
+            cells.push(`${nextRow},${nextCol}`);
+          }
+
+          // Reading the same path from its other end is one occurrence.
+          occurrences.add([...cells].sort().join('|'));
+        });
+      }
+    }
+
+    return occurrences;
+  }
+
+  function secretPuzzleIsFair(generatedPuzzle, targetWords, config) {
+    const targetSet = new Set(targetWords);
+    const eligibleWords = getEligibleWords(selectedCategory, config);
+
+    return eligibleWords.every((word) => {
+      const occurrenceCount = getWordOccurrences(
+        generatedPuzzle.board,
+        word,
+        config
+      ).size;
+      return targetSet.has(word) ? occurrenceCount === 1 : occurrenceCount === 0;
+    });
+  }
+
+  function buildSecretPuzzle(config) {
+    const eligibleWords = getEligibleWords(selectedCategory, config);
+    const secretCandidateWords = eligibleWords.filter((word) => (
+      !eligibleWords.some((otherWord) => (
+        otherWord !== word && word.includes(otherWord)
+      ))
+    ));
+
+    if (secretCandidateWords.length < config.wordCount) {
+      return null;
+    }
+
+    // Bounded retries prevent accidental bank words without risking a frozen UI.
+    for (let setAttempt = 0; setAttempt < 16; setAttempt += 1) {
+      const targetWords = chooseTargetWords(
+        selectedCategory,
+        config,
+        secretCandidateWords
+      );
+      if (targetWords.length !== config.wordCount) {
+        continue;
+      }
+
+      for (let boardAttempt = 0; boardAttempt < 6; boardAttempt += 1) {
+        const generatedPuzzle = buildBoard(targetWords, config, 12);
+        if (generatedPuzzle && secretPuzzleIsFair(generatedPuzzle, targetWords, config)) {
+          return { targetWords, generatedPuzzle };
+        }
+      }
+    }
+
+    return null;
+  }
+
   function renderWordList() {
     wordList.innerHTML = '';
+
+    const isSecretMode = selectedGameMode === 'secret';
+    wordPanel.classList.toggle('word-panel--secret', isSecretMode);
+    wordListTitle.textContent = isSecretMode ? 'PENCARIAN RAHSIA' : 'Senarai Kata';
+    secretProgress.classList.toggle('hidden', !isSecretMode);
+    secretProgress.textContent = isSecretMode
+      ? `Kata Ditemui: ${foundWords.size} / ${getTargetWords().length}`
+      : '';
+    wordList.setAttribute(
+      'aria-label',
+      isSecretMode ? 'Kata rahsia yang telah ditemui' : 'Senarai kata'
+    );
 
     getTargetWords().forEach((word) => {
       const item = document.createElement('li');
       const wordLabel = getWordLabel(word);
       item.className = 'word-item';
+
+      if (isSecretMode && !foundWords.has(word)) {
+        item.classList.add('mystery-slot');
+        item.textContent = '?';
+        item.setAttribute('aria-label', 'Kata rahsia belum ditemui');
+        wordList.appendChild(item);
+        return;
+      }
+
       item.textContent = wordLabel;
 
       if (foundWords.has(word)) {
@@ -1945,7 +2083,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     cell.setAttribute(
       'aria-label',
-      `${cell.dataset.letter}, ditemui dalam ${details.map((detail) => detail.word).join(' dan ')}`
+      `${cell.dataset.letter}, ditemui dalam ${details.map((detail) => getWordLabel(detail.word)).join(' dan ')}`
     );
   }
 
@@ -2048,12 +2186,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (matchedWord) {
       if (markWordAsFound(matchedWord)) {
-        showFeedback('Betul!', 'success');
+        showFeedback(
+          selectedGameMode === 'secret'
+            ? `Hebat! ${getWordLabel(matchedWord)} ditemui!`
+            : 'Betul!',
+          'success'
+        );
       } else {
         showFeedback('Kata ini sudah ditemui.', 'neutral');
       }
     } else {
-      showFeedback('Cuba lagi', 'retry');
+      showFeedback(
+        selectedGameMode === 'secret' ? 'Belum tepat. Cuba laluan lain.' : 'Cuba lagi',
+        selectedGameMode === 'secret' ? 'neutral' : 'retry'
+      );
     }
 
     if (activePointerId !== null && wordGrid.hasPointerCapture(activePointerId)) {
@@ -2148,12 +2294,23 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    currentTargetWords = chooseTargetWords(selectedCategory, config);
-    const generatedPuzzle = buildBoard(currentTargetWords, config);
+    let generatedPuzzle = null;
+    if (selectedGameMode === 'secret') {
+      const secretResult = buildSecretPuzzle(config);
+      currentTargetWords = secretResult?.targetWords || [];
+      generatedPuzzle = secretResult?.generatedPuzzle || null;
+    } else {
+      currentTargetWords = chooseTargetWords(selectedCategory, config);
+      generatedPuzzle = buildBoard(currentTargetWords, config);
+    }
 
     if (!generatedPuzzle || currentTargetWords.length !== config.wordCount) {
-      showCategoryMessage('Papan tidak dapat dibina. Cuba lagi.');
-      showScreen(categoryScreen);
+      showCategoryMessage(
+        selectedGameMode === 'secret'
+          ? 'Papan rahsia yang adil tidak dapat dibina. Sila pilih mod semula.'
+          : 'Papan tidak dapat dibina. Cuba lagi.'
+      );
+      showCategoryScreen();
       return false;
     }
 
@@ -2381,7 +2538,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    gameHeading.textContent = selectedGameMode === 'secret'
+      ? 'PENCARIAN RAHSIA'
+      : 'CARI KATA';
     gameSessionLabel.textContent = `Umur: ${selectedAge} | Kategori: ${selectedCategory}`;
+    gameModeLabel.textContent = GAME_MODES[selectedGameMode].label;
     showCategoryMessage('');
     if (setupBoard()) {
       showScreen(gameScreen);
@@ -2504,6 +2665,10 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryBackButton.addEventListener('click', showAgeScreen);
   }
 
+  if (modeBackButton) {
+    modeBackButton.addEventListener('click', showCategoryScreen);
+  }
+
   if (menuButton) {
     menuButton.addEventListener('click', () => {
       showCategoryScreen();
@@ -2541,6 +2706,13 @@ document.addEventListener('DOMContentLoaded', () => {
   categoryButtons.forEach((button) => {
     button.addEventListener('click', () => {
       selectedCategory = button.dataset.category;
+      showModeScreen();
+    });
+  });
+
+  modeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedGameMode = button.dataset.mode;
       startGame();
     });
   });

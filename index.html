@@ -238,6 +238,25 @@
         </button>
       </section>
 
+      <section id="mode-screen" class="panel mode-panel" aria-labelledby="mode-title" aria-hidden="true">
+        <p class="eyebrow">Cara Bermain</p>
+        <h2 id="mode-title">PILIH MOD PERMAINAN</h2>
+        <p id="mode-selection-label" class="selected-age">Umur: -- | Kategori: --</p>
+
+        <div class="mode-list" aria-label="Pilihan mod permainan">
+          <button class="mode-button" data-mode="classic" type="button">
+            <strong>KLASIK</strong>
+            <span>Cari perkataan berdasarkan senarai kata.</span>
+          </button>
+          <button class="mode-button mode-button--secret" data-mode="secret" type="button">
+            <strong>PENCARIAN RAHSIA</strong>
+            <span>Cari semua perkataan tanpa senarai kata!</span>
+          </button>
+        </div>
+
+        <button id="mode-back-button" class="secondary-button" type="button">KEMBALI</button>
+      </section>
+
       <section id="game-screen" class="panel" aria-labelledby="game-heading" aria-hidden="true">
         <p class="eyebrow">Permainan Kata</p>
         <div class="game-heading-row">
@@ -245,13 +264,15 @@
           <button id="game-menu-button" class="game-menu-button" type="button">MENU</button>
         </div>
         <p id="game-session-label" class="selected-age">Umur: --</p>
+        <p id="game-mode-label" class="game-mode-label">MOD KLASIK</p>
         <p id="game-feedback" class="game-feedback" aria-live="polite"></p>
 
         <div class="game-layout">
           <div id="word-grid" class="word-grid" aria-label="Papan permainan"></div>
 
-          <div class="word-panel">
-            <h3 class="word-list-title">Senarai Kata</h3>
+          <div id="word-panel" class="word-panel">
+            <h3 id="word-list-title" class="word-list-title">Senarai Kata</h3>
+            <p id="secret-progress" class="secret-progress hidden" aria-live="polite"></p>
             <ul id="word-list" class="word-list" aria-label="Senarai kata"></ul>
           </div>
         </div>
@@ -389,7 +410,7 @@
     </div>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.18.0 by Zil-el-Saif
+      v0.19.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>
