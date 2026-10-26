@@ -123,6 +123,11 @@
           <button id="age-gallery-button" class="collection-button" type="button">KOLEKSI KATA RAKA</button>
         </div>
 
+        <div id="retroactive-card-summary" class="retroactive-card-summary hidden" aria-live="polite">
+          <strong id="retroactive-card-message"></strong>
+          <button id="retroactive-gallery-button" class="collection-button" type="button">LIHAT KOLEKSI</button>
+        </div>
+
         <div class="age-list" aria-label="Pilihan umur">
           <button class="age-button" data-age="5–7 Tahun" type="button">🐣 5–7 Tahun</button>
           <button class="age-button" data-age="8–10 Tahun" type="button">🧒 8–10 Tahun</button>
@@ -285,7 +290,10 @@
           <h2 id="card-reveal-title">Kad Raka</h2>
           <p id="card-reveal-details" class="card-reveal-details"></p>
           <p id="card-reveal-count" class="card-reveal-count" aria-live="polite"></p>
-          <button id="continue-card-reveal-button" class="primary-button" type="button">TERUSKAN</button>
+          <div class="card-reveal-actions">
+            <a id="save-revealed-card-link" class="secondary-button hidden" href="#" download target="_blank" rel="noopener">SIMPAN KAD</a>
+            <button id="continue-card-reveal-button" class="primary-button" type="button">TERUSKAN</button>
+          </div>
         </div>
       </div>
 
@@ -304,7 +312,7 @@
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.16.0 by Zil-el-Saif
+      v0.17.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

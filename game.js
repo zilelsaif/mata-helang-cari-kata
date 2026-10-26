@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeProgressSummary = document.getElementById('active-progress-summary');
   const progressButton = document.getElementById('progress-button');
   const ageGalleryButton = document.getElementById('age-gallery-button');
+  const retroactiveCardSummary = document.getElementById('retroactive-card-summary');
+  const retroactiveCardMessage = document.getElementById('retroactive-card-message');
+  const retroactiveGalleryButton = document.getElementById('retroactive-gallery-button');
   const progressGalleryButton = document.getElementById('progress-gallery-button');
   const progressBackButton = document.getElementById('progress-back-button');
   const progressAvatar = document.getElementById('progress-avatar');
@@ -60,11 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeCardViewerButton = document.getElementById('close-card-viewer-button');
   const cardReveal = document.getElementById('card-reveal');
   const cardRevealCard = document.getElementById('card-reveal-card');
+  const cardRevealHeading = document.getElementById('card-reveal-heading');
   const cardRevealImage = document.getElementById('card-reveal-image');
   const cardRevealTitle = document.getElementById('card-reveal-title');
   const cardRevealDetails = document.getElementById('card-reveal-details');
   const cardRevealCount = document.getElementById('card-reveal-count');
   const continueCardRevealButton = document.getElementById('continue-card-reveal-button');
+  const saveRevealedCardLink = document.getElementById('save-revealed-card-link');
   const ageBackButton = document.getElementById('age-back-button');
   const categoryBackButton = document.getElementById('category-back-button');
   const ageButtons = document.querySelectorAll('.age-button');
@@ -154,10 +159,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const KATA_RAKA_UNLOCKS = {
     'KR-I01': { type: 'puzzles', value: 1, label: 'Selesaikan teka kata pertama' },
-    'KR-P07': { type: 'puzzles', value: 3, label: 'Selesaikan 3 teka kata' },
+    'KR-I02': { type: 'puzzles', value: 2, label: 'Selesaikan 2 teka kata' },
+    'KR-I03': { type: 'puzzles', value: 5, label: 'Selesaikan 5 teka kata' },
+    'KR-I04': { type: 'categoriesInOneAge', value: 2, label: 'Lengkapkan 2 kategori dalam satu tahap umur' },
+    'KR-I05': { type: 'puzzles', value: 10, label: 'Selesaikan 10 teka kata' },
+    'KR-I06': { type: 'categoriesInOneAge', value: 3, label: 'Lengkapkan 3 kategori dalam satu tahap umur' },
+    'KR-I07': { type: 'puzzles', value: 15, label: 'Selesaikan 15 teka kata' },
+    'KR-I08': { type: 'categoriesInOneAge', value: 4, label: 'Lengkapkan 4 kategori dalam satu tahap umur' },
+    'KR-I09': { type: 'puzzles', value: 20, label: 'Selesaikan 20 teka kata' },
+    'KR-I10': { type: 'categoriesInOneAge', value: 5, label: 'Lengkapkan 5 kategori dalam satu tahap umur' },
+    'KR-P01': { type: 'puzzles', value: 6, label: 'Selesaikan 6 teka kata' },
+    'KR-P02': { type: 'jejak', value: 150, label: 'Kumpul 150 Jejak' },
+    'KR-P03': { type: 'combinations', value: 4, label: 'Terokai 4 kombinasi umur dan kategori' },
+    'KR-P04': { type: 'puzzles', value: 12, label: 'Selesaikan 12 teka kata' },
     'KR-P05': { type: 'jejak', value: 80, label: 'Capai Tahap 2 • 80 Jejak' },
+    'KR-P06': { type: 'jejak', value: 250, label: 'Kumpul 250 Jejak' },
+    'KR-P07': { type: 'puzzles', value: 3, label: 'Selesaikan 3 teka kata' },
+    'KR-P08': { type: 'combinations', value: 5, label: 'Terokai 5 kombinasi umur dan kategori' },
+    'KR-P09': { type: 'categoriesInOneAge', value: 6, label: 'Lengkapkan semua 6 kategori dalam satu tahap umur' },
+    'KR-P10': { type: 'jejak', value: 650, label: 'Kumpul 650 Jejak' },
     'KR-L01': { type: 'jejak', value: 360, label: 'Capai Tahap 4 • 360 Jejak' },
-    'KR-L06': { type: 'jejak', value: 1100, label: 'Capai Tahap 7 • 1,100 Jejak' }
+    'KR-L02': { type: 'jejak', value: 450, label: 'Kumpul 450 Jejak' },
+    'KR-L03': { type: 'jejak', value: 550, label: 'Kumpul 550 Jejak' },
+    'KR-L04': { type: 'jejak', value: 700, label: 'Kumpul 700 Jejak' },
+    'KR-L05': { type: 'jejak', value: 900, label: 'Kumpul 900 Jejak' },
+    'KR-L06': { type: 'jejak', value: 1100, label: 'Capai Tahap 7 • 1,100 Jejak' },
+    'KR-L07': { type: 'jejak', value: 1300, label: 'Kumpul 1,300 Jejak' },
+    'KR-L08': { type: 'jejak', value: 1550, label: 'Kumpul 1,550 Jejak' },
+    'KR-L09': { type: 'jejak', value: 1800, label: 'Kumpul 1,800 Jejak' },
+    'KR-L10': { type: 'jejak', value: 2100, label: 'Kumpul 2,100 Jejak' }
   };
 
   const KATA_RAKA_EDITION_LABELS = {
@@ -311,6 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let cardViewerReturnElement = null;
   let cardRevealQueue = [];
   let cardRevealIndex = 0;
+  let cardRevealMode = 'unlock';
+  const kataRakaSessionByPlayer = new Map();
 
   function getTargetWords() {
     return currentTargetWords;
@@ -520,14 +552,41 @@ document.addEventListener('DOMContentLoaded', () => {
     return kataRakaData.byProfileId[profileId];
   }
 
+  function getCompletedModeKeys(progress) {
+    return Object.keys(progress.completedModes).filter((key) => progress.completedModes[key] > 0);
+  }
+
+  function getMaximumCategoryCoverage(progress) {
+    return Object.keys(AGE_CONFIGS).reduce((highestCount, age) => {
+      const categoryCount = ALL_CATEGORIES.filter((category) => (
+        progress.completedModes[`${age}|${category}`] > 0
+      )).length;
+      return Math.max(highestCount, categoryCount);
+    }, 0);
+  }
+
+  function getCardConditionValue(condition, progress) {
+    if (condition.type === 'puzzles') {
+      return progress.completedPuzzleCount;
+    }
+    if (condition.type === 'jejak') {
+      return progress.totalJejak;
+    }
+    if (condition.type === 'combinations') {
+      return getCompletedModeKeys(progress).length;
+    }
+    if (condition.type === 'categoriesInOneAge') {
+      return getMaximumCategoryCoverage(progress);
+    }
+    return 0;
+  }
+
   function cardConditionIsMet(cardId, progress) {
     const condition = KATA_RAKA_UNLOCKS[cardId];
     if (!condition) {
       return false;
     }
-    return condition.type === 'puzzles'
-      ? progress.completedPuzzleCount >= condition.value
-      : progress.totalJejak >= condition.value;
+    return getCardConditionValue(condition, progress) >= condition.value;
   }
 
   function unlockEligibleKataRaka(progress, profileId = profileData.activeProfileId) {
@@ -548,6 +607,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function syncActiveKataRakaUnlocks() {
     return unlockEligibleKataRaka(getActiveProgress());
+  }
+
+  function getKataRakaSession() {
+    const playerKey = profileData.activeProfileId || 'guest';
+    if (!kataRakaSessionByPlayer.has(playerKey)) {
+      kataRakaSessionByPlayer.set(playerKey, {
+        completedPuzzles: 0,
+        randomPosterShown: false,
+        lastRandomCardId: null
+      });
+    }
+    return kataRakaSessionByPlayer.get(playerKey);
+  }
+
+  function getRandomPosterRoll() {
+    const params = new URLSearchParams(window.location.search);
+    const testRoll = Number(params.get('randomPosterRoll'));
+    const isLocalTest = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    return isLocalTest && Number.isFinite(testRoll) && testRoll >= 0 && testRoll <= 1
+      ? testRoll
+      : Math.random();
+  }
+
+  function selectRandomPosterCard(collection, session) {
+    const ownedIds = Object.keys(collection.ownedCards).filter((cardId) => Boolean(getCardById(cardId)));
+    const viewedIds = ownedIds.filter((cardId) => collection.viewedCards.includes(cardId));
+    let candidates = viewedIds.length ? viewedIds : ownedIds;
+    if (candidates.length > 1 && session.lastRandomCardId) {
+      candidates = candidates.filter((cardId) => cardId !== session.lastRandomCardId);
+    }
+    if (!candidates.length) {
+      return null;
+    }
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  function getRandomPosterForVictory(hasNewCards) {
+    const session = getKataRakaSession();
+    session.completedPuzzles += 1;
+    if (
+      hasNewCards
+      || session.completedPuzzles < 3
+      || session.randomPosterShown
+      || getRandomPosterRoll() >= 0.2
+    ) {
+      return null;
+    }
+
+    const cardId = selectRandomPosterCard(getKataRakaCollection(), session);
+    if (!cardId) {
+      return null;
+    }
+    session.randomPosterShown = true;
+    session.lastRandomCardId = cardId;
+    return cardId;
   }
 
   function getValidModeKeys() {
@@ -790,6 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Card checks run after Jejak, rank and badge calculations.
     const newlyUnlockedCardIds = unlockEligibleKataRaka(progress);
+    const randomPosterCardId = getRandomPosterForVictory(newlyUnlockedCardIds.length > 0);
 
     return {
       earnedJejak,
@@ -799,6 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newRank,
       newlyUnlockedIds,
       newlyUnlockedCardIds,
+      randomPosterCardId,
       isGuest: !profileData.activeProfileId
     };
   }
@@ -834,10 +950,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!condition) {
       return '';
     }
-    const currentValue = condition.type === 'puzzles'
-      ? progress.completedPuzzleCount
-      : progress.totalJejak;
-    const unit = condition.type === 'puzzles' ? 'teka kata' : 'Jejak';
+    const currentValue = getCardConditionValue(condition, progress);
+    const units = {
+      puzzles: 'teka kata',
+      jejak: 'Jejak',
+      combinations: 'kombinasi diteroka',
+      categoriesInOneAge: 'kategori lengkap'
+    };
+    const unit = units[condition.type] || '';
     return `${Math.min(currentValue, condition.value)}/${condition.value} ${unit}`;
   }
 
@@ -896,7 +1016,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    markCardAsViewed(card.id, profileData.activeProfileId);
+    if (cardRevealMode === 'unlock') {
+      markCardAsViewed(card.id, profileData.activeProfileId);
+    }
     cardRevealCard.className = `card-reveal-card card-reveal-card--${card.edition}`;
     window.requestAnimationFrame(() => {
       if (!cardReveal.classList.contains('hidden')) {
@@ -905,17 +1027,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     cardRevealImage.src = card.image;
     cardRevealImage.alt = `Kad Raka ${card.title}, Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]}`;
+    cardRevealHeading.textContent = cardRevealMode === 'poster'
+      ? 'KATA RAKA UNTUKMU'
+      : 'KAD RAKA BAHARU!';
     cardRevealTitle.textContent = card.title;
     cardRevealDetails.textContent = `Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]} • ${card.id}`;
-    cardRevealCount.textContent = cardRevealQueue.length > 1
+    cardRevealCount.textContent = cardRevealMode === 'unlock' && cardRevealQueue.length > 1
       ? `Kad ${cardRevealIndex + 1} daripada ${cardRevealQueue.length}`
       : '';
+    saveRevealedCardLink.classList.toggle('hidden', cardRevealMode !== 'poster');
+    saveRevealedCardLink.href = card.image;
+    saveRevealedCardLink.download = `${card.id}.webp`;
     continueCardRevealButton.focus();
   }
 
-  function openCardReveal(cardIds) {
+  function openCardReveal(cardIds, mode = 'unlock') {
     cardRevealQueue = cardIds.filter((cardId) => Boolean(getCardById(cardId)));
     cardRevealIndex = 0;
+    cardRevealMode = mode;
     if (!cardRevealQueue.length) {
       return;
     }
@@ -936,6 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cardRevealImage.src = '';
     cardRevealQueue = [];
     cardRevealIndex = 0;
+    cardRevealMode = 'unlock';
     playAgainButton.focus();
   }
 
@@ -946,6 +1076,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     closeCardReveal();
+  }
+
+  function renderRetroactiveUnlockSummary(cardIds) {
+    const hasNewCards = cardIds.length > 0;
+    retroactiveCardSummary.classList.toggle('hidden', !hasNewCards);
+    retroactiveCardMessage.textContent = hasNewCards
+      ? `${cardIds.length} Kad Raka Baharu!`
+      : '';
   }
 
   function createRakaCardElement(card, collection, progress) {
@@ -1440,7 +1578,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     profileData.activeProfileId = profileId;
     saveProfiles();
-    unlockEligibleKataRaka(getProgressForProfile(profileId), profileId);
     updateActivePlayerLabel();
     showAgeScreen();
   }
@@ -1561,7 +1698,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showAgeScreen() {
-    syncActiveKataRakaUnlocks();
+    const newlyUnlockedIds = syncActiveKataRakaUnlocks();
+    renderRetroactiveUnlockSummary(newlyUnlockedIds);
     updateActivePlayerLabel();
     showScreen(ageScreen);
   }
@@ -1868,7 +2006,12 @@ document.addEventListener('DOMContentLoaded', () => {
       renderVictoryProgress(reward);
       victoryPanel.classList.remove('hidden');
       gameMenuButton.classList.add('hidden');
-      openCardReveal(reward?.newlyUnlockedCardIds || []);
+      const newlyUnlockedCardIds = reward?.newlyUnlockedCardIds || [];
+      if (newlyUnlockedCardIds.length) {
+        openCardReveal(newlyUnlockedCardIds, 'unlock');
+      } else if (reward?.randomPosterCardId) {
+        openCardReveal([reward.randomPosterCardId], 'poster');
+      }
     }
 
     return true;
@@ -2137,6 +2280,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ageGalleryButton.addEventListener('click', () => showKataRakaGallery(ageScreen));
   }
 
+  if (retroactiveGalleryButton) {
+    retroactiveGalleryButton.addEventListener('click', () => {
+      renderRetroactiveUnlockSummary([]);
+      showKataRakaGallery(ageScreen);
+    });
+  }
+
   if (progressGalleryButton) {
     progressGalleryButton.addEventListener('click', () => showKataRakaGallery(progressScreen));
   }
@@ -2249,8 +2399,15 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         closeCardReveal();
       } else if (event.key === 'Tab') {
+        const focusable = cardRevealMode === 'poster'
+          ? [saveRevealedCardLink, continueCardRevealButton]
+          : [continueCardRevealButton];
+        const currentIndex = focusable.indexOf(document.activeElement);
+        const nextIndex = event.shiftKey
+          ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+          : (currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
         event.preventDefault();
-        continueCardRevealButton.focus();
+        focusable[nextIndex].focus();
       }
       return;
     }

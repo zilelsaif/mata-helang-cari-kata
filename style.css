@@ -652,8 +652,9 @@ button:disabled {
   margin-top: 18px;
 }
 
-.gallery-panel {
-  width: min(100%, 1040px);
+#gallery-screen.gallery-panel {
+  width: min(100%, 1100px);
+  padding-inline: clamp(16px, 3vw, 32px);
 }
 
 .gallery-subtitle,
@@ -678,7 +679,7 @@ button:disabled {
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin: 20px 0;
+  margin: 22px auto 26px;
 }
 
 .gallery-filter {
@@ -702,7 +703,7 @@ button:disabled {
 .raka-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   margin: 0 0 22px;
 }
 
@@ -721,6 +722,7 @@ button:disabled {
 button.raka-gallery-card {
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(15, 67, 130, 0.13);
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 button.raka-gallery-card:focus-visible {
@@ -765,19 +767,20 @@ button.raka-gallery-card:focus-visible {
 .raka-card-copy {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 10px;
+  gap: 5px;
+  padding: 11px 12px 13px;
 }
 
 .raka-card-copy strong {
-  font-size: 0.85rem;
-  line-height: 1.2;
+  font-size: 0.92rem;
+  line-height: 1.28;
 }
 
 .raka-card-copy span {
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .raka-card-copy .raka-card-state {
@@ -801,6 +804,13 @@ button.raka-gallery-card:focus-visible {
   font-size: 0.65rem;
   font-weight: 900;
   box-shadow: 0 4px 10px rgba(82, 52, 0, 0.25);
+}
+
+@media (hover: hover) {
+  button.raka-gallery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 13px 24px rgba(15, 67, 130, 0.2);
+  }
 }
 
 .card-viewer {
@@ -873,6 +883,30 @@ button.raka-gallery-card:focus-visible {
 
 .modal-open {
   overflow: hidden;
+}
+
+.retroactive-card-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px auto 4px;
+  padding: 12px 14px;
+  border: 2px solid rgba(237, 165, 59, 0.5);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fffaf0, #ffe9a9);
+  color: #74480b;
+}
+
+.retroactive-card-summary.hidden {
+  display: none;
+}
+
+.retroactive-card-summary .collection-button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 0.75rem;
 }
 
 .card-reveal {
@@ -983,6 +1017,25 @@ button.raka-gallery-card:focus-visible {
 .card-reveal-card .primary-button {
   min-width: min(100%, 220px);
   margin-top: 2px;
+}
+
+.card-reveal-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.card-reveal-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.card-reveal-actions .hidden {
+  display: none;
 }
 
 .card-reveal-sparkle {
@@ -1712,6 +1765,17 @@ button.raka-gallery-card:focus-visible {
   }
 }
 
+@media (max-width: 340px) {
+  .raka-card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .raka-gallery-card {
+    width: min(100%, 260px);
+    justify-self: center;
+  }
+}
+
 @media (min-width: 600px) {
   .panel {
     width: min(100%, 540px);
@@ -1815,12 +1879,25 @@ button.raka-gallery-card:focus-visible {
 
   .raka-card-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    gap: 18px;
   }
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 900px) {
+  #gallery-screen.gallery-panel {
+    padding-inline: 24px;
+  }
+
   .raka-card-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 1.5vw, 18px);
+  }
+
+  .gallery-panel h2 {
+    margin-bottom: 8px;
+  }
+
+  .gallery-filters {
+    gap: 12px;
   }
 }
