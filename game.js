@@ -95,6 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const exitConfirmation = document.getElementById('exit-confirmation');
   const continueGameButton = document.getElementById('continue-game-button');
   const exitGameButton = document.getElementById('exit-game-button');
+  const brandIntro = document.getElementById('brand-intro');
+  const brandIntroSkip = document.getElementById('brand-intro-skip');
+  const brandIntroLogo = document.getElementById('brand-intro-logo');
+  const titleZilterokaButton = document.getElementById('title-zilteroka-button');
+  const playerZilterokaButton = document.getElementById('player-zilteroka-button');
+  const zilterokaDialog = document.getElementById('zilteroka-dialog');
+  const zilterokaDialogCard = zilterokaDialog?.querySelector('.zilteroka-dialog-card');
+  const zilterokaDialogClose = document.getElementById('zilteroka-dialog-close');
+  const zilterokaDialogDone = document.getElementById('zilteroka-dialog-done');
 
   const PROFILE_STORAGE_KEY = 'mataHelangProfiles_v1';
   const PROFILE_DATA_VERSION = 1;
@@ -103,6 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const PROGRESSION_DATA_VERSION = 1;
   const KATA_RAKA_STORAGE_KEY = 'mataHelangKataRaka_v1';
   const KATA_RAKA_DATA_VERSION = 1;
+  const BRAND_INTRO_SESSION_KEY = 'mataHelangZilTerokaIntro_v1';
+
+  let brandIntroTimer = null;
+  let brandIntroDismissed = false;
+  let zilterokaDialogTrigger = null;
 
   const RANKS = [
     { threshold: 0, level: 1, name: 'Pemerhati Baru' },
@@ -2218,6 +2232,148 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
+  function sessionHasSeenBrandIntro() {
+    try {
+      return sessionStorage.getItem(BRAND_INTRO_SESSION_KEY) === 'seen';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function rememberBrandIntro() {
+    try {
+      sessionStorage.setItem(BRAND_INTRO_SESSION_KEY, 'seen');
+    } catch (error) {
+      // The intro still works when session storage is unavailable.
+    }
+  }
+
+  function dismissBrandIntro(options = {}) {
+    if (!brandIntro || brandIntroDismissed) {
+      return;
+    }
+
+    brandIntroDismissed = true;
+    if (brandIntroTimer !== null) {
+      window.clearTimeout(brandIntroTimer);
+      brandIntroTimer = null;
+    }
+
+    const finish = () => {
+      brandIntro.classList.add('hidden');
+      brandIntro.classList.remove('is-leaving');
+      brandIntro.setAttribute('aria-hidden', 'true');
+      document.querySelector('main')?.removeAttribute('inert');
+      if (!options.silent) {
+        startButton?.focus({ preventScroll: true });
+      }
+    };
+
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+    if (options.immediate || reducedMotion) {
+      finish();
+      return;
+    }
+
+    brandIntro.classList.add('is-leaving');
+    window.setTimeout(finish, 220);
+  }
+
+  function startBrandIntro() {
+    if (!brandIntro) {
+      return;
+    }
+
+    if (brandIntroLogo?.complete && brandIntroLogo.naturalWidth === 0) {
+      dismissBrandIntro({ immediate: true, silent: true });
+      return;
+    }
+
+    if (sessionHasSeenBrandIntro()) {
+      dismissBrandIntro({ immediate: true, silent: true });
+      return;
+    }
+
+    rememberBrandIntro();
+    document.querySelector('main')?.setAttribute('inert', '');
+    brandIntroSkip?.focus({ preventScroll: true });
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+    brandIntroTimer = window.setTimeout(
+      dismissBrandIntro,
+      reducedMotion ? 250 : 1750
+    );
+  }
+
+  function getZilterokaDialogFocusables() {
+    if (!zilterokaDialogCard) {
+      return [];
+    }
+
+    return Array.from(zilterokaDialogCard.querySelectorAll(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((element) => !element.hidden && element.getClientRects().length > 0);
+  }
+
+  function openZilterokaDialog(trigger) {
+    if (!zilterokaDialog) {
+      return;
+    }
+
+    zilterokaDialogTrigger = trigger || document.activeElement;
+    zilterokaDialog.classList.remove('hidden');
+    zilterokaDialog.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('zilteroka-modal-open');
+    document.querySelector('main')?.setAttribute('inert', '');
+    zilterokaDialogClose?.focus({ preventScroll: true });
+  }
+
+  function closeZilterokaDialog() {
+    if (!zilterokaDialog || zilterokaDialog.classList.contains('hidden')) {
+      return;
+    }
+
+    zilterokaDialog.classList.add('hidden');
+    zilterokaDialog.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('zilteroka-modal-open');
+    document.querySelector('main')?.removeAttribute('inert');
+    zilterokaDialogTrigger?.focus({ preventScroll: true });
+    zilterokaDialogTrigger = null;
+  }
+
+  function handleZilterokaDialogKeydown(event) {
+    if (!zilterokaDialog || zilterokaDialog.classList.contains('hidden')) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeZilterokaDialog();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusable = getZilterokaDialogFocusables();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      zilterokaDialogCard?.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function startGame() {
     if (!getAgeConfig()) {
       showCategoryMessage('Akan datang');
@@ -2235,6 +2391,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (startButton) {
     startButton.addEventListener('click', showPlayerScreen);
   }
+
+  brandIntroSkip?.addEventListener('click', () => dismissBrandIntro());
+  brandIntroLogo?.addEventListener('error', () => dismissBrandIntro({ immediate: true }));
+  titleZilterokaButton?.addEventListener('click', () => openZilterokaDialog(titleZilterokaButton));
+  playerZilterokaButton?.addEventListener('click', () => openZilterokaDialog(playerZilterokaButton));
+  zilterokaDialogClose?.addEventListener('click', closeZilterokaDialog);
+  zilterokaDialogDone?.addEventListener('click', closeZilterokaDialog);
+  document.addEventListener('keydown', handleZilterokaDialogKeydown, true);
 
   if (addProfileButton) {
     addProfileButton.addEventListener('click', () => openProfileEditor());
@@ -2392,6 +2556,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProgression();
   loadKataRaka();
   updateActivePlayerLabel();
+  startBrandIntro();
 
   document.addEventListener('keydown', (event) => {
     if (!cardReveal.classList.contains('hidden')) {

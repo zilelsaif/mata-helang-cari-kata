@@ -1901,3 +1901,493 @@ button.raka-gallery-card:focus-visible {
     gap: 12px;
   }
 }
+
+/* ZilTeroka brand integration */
+.brand-intro {
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 225, 94, 0.28), transparent 34%),
+    linear-gradient(145deg, #251766, #5f3fc2 58%, #1b73d8);
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.brand-intro.hidden {
+  display: none;
+}
+
+.brand-intro.is-leaving {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.brand-intro::before,
+.brand-intro::after {
+  position: absolute;
+  width: 28vmin;
+  height: 28vmin;
+  border: 3px solid rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  content: "";
+}
+
+.brand-intro::before {
+  top: -12vmin;
+  left: -8vmin;
+}
+
+.brand-intro::after {
+  right: -10vmin;
+  bottom: -13vmin;
+}
+
+.brand-intro-stage {
+  display: grid;
+  width: min(330px, 72vw);
+  justify-items: center;
+  gap: 8px;
+  color: #fff;
+  text-align: center;
+  animation: zilteroka-intro-arrive 0.7s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.brand-intro-stage img {
+  width: min(250px, 58vw);
+  height: min(250px, 58vw);
+  object-fit: contain;
+  border: 5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 30px;
+  box-shadow: 0 20px 55px rgba(11, 17, 71, 0.42);
+}
+
+.brand-intro-stage strong {
+  margin: 0;
+  color: #fff6c9;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.brand-intro-stage strong {
+  margin-top: 6px;
+  font-size: clamp(0.72rem, 2vw, 0.92rem);
+}
+
+.brand-intro-skip {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 1;
+  min-height: 44px;
+  padding: 7px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  background: rgba(26, 16, 76, 0.46);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.brand-intro-skip:hover,
+.brand-intro-skip:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes zilteroka-intro-arrive {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.title-family-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 290px;
+  margin: 0 0 14px;
+  padding: 7px 14px 7px 7px;
+  border: 2px solid rgba(7, 90, 187, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #372477;
+  box-shadow: 0 7px 18px rgba(36, 21, 91, 0.12);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.title-family-brand img {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  object-fit: contain;
+}
+
+.title-family-brand strong {
+  color: #125bd5;
+}
+
+.title-family-brand:hover,
+.title-family-brand:focus-visible,
+.zilteroka-info-button:hover,
+.zilteroka-info-button:focus-visible,
+.zilteroka-play-link:hover,
+.zilteroka-play-link:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 20px rgba(13, 78, 163, 0.2);
+}
+
+.zilteroka-info-button {
+  min-height: 48px;
+  border: 2px solid rgba(7, 90, 187, 0.28);
+  border-radius: 999px;
+  background: #eef7ff;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+body.zilteroka-modal-open {
+  overflow: hidden;
+}
+
+.zilteroka-dialog {
+  position: fixed;
+  z-index: 450;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(20, 27, 68, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.zilteroka-dialog.hidden {
+  display: none;
+}
+
+.zilteroka-dialog-card {
+  position: relative;
+  width: min(1040px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(18px, 3vw, 30px);
+  border: 4px solid #fff;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #fffdf4, #f1f7ff);
+  box-shadow: 0 24px 64px rgba(14, 10, 52, 0.5);
+  color: var(--text);
+  text-align: left;
+}
+
+.zilteroka-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: #e5efff;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.zilteroka-dialog-header {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding-right: 48px;
+}
+
+.zilteroka-dialog-header > img {
+  width: 88px;
+  height: 88px;
+  border: 4px solid #fff;
+  border-radius: 22px;
+  object-fit: contain;
+  box-shadow: 0 8px 18px rgba(28, 82, 175, 0.2);
+}
+
+.zilteroka-dialog-header h2 {
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+}
+
+.zilteroka-tagline {
+  display: block;
+  margin-top: 6px;
+  color: #5f3fc2;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+}
+
+.zilteroka-introduction {
+  margin: 16px 0 20px;
+  color: #4e5f74;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.zilteroka-gallery-title {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+}
+
+.zilteroka-game-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.zilteroka-game-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 2px solid #d8e4f4;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 5px 13px rgba(25, 73, 126, 0.1);
+}
+
+.zilteroka-game-card > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #eae5fa;
+}
+
+.zilteroka-game-card:first-child > img {
+  object-fit: contain;
+  padding: 8px;
+  background: #fff9df;
+}
+
+.zilteroka-game-card > div {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: 12px;
+}
+
+.zilteroka-game-card h4,
+.zilteroka-game-card p {
+  margin: 0;
+}
+
+.zilteroka-game-card h4 {
+  color: var(--primary-dark);
+  font-size: 1rem;
+}
+
+.zilteroka-game-card p {
+  color: #5f6c7e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.zilteroka-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.zilteroka-status.available {
+  background: #c9f5d1;
+  color: #14652a;
+}
+
+.zilteroka-status.development {
+  background: #dce8ff;
+  color: #214f9d;
+}
+
+.zilteroka-play-link {
+  width: max-content;
+  max-width: 100%;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.zilteroka-portal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 3px solid #ffe074;
+  border-radius: 18px;
+  background: #fff9df;
+}
+
+.zilteroka-portal h3,
+.zilteroka-portal p {
+  margin: 0;
+}
+
+.zilteroka-portal a {
+  display: inline-block;
+  margin: 5px 0;
+  color: #135acb;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.zilteroka-portal p {
+  color: #596079;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.zilteroka-portal img {
+  width: 126px;
+  height: 126px;
+  padding: 7px;
+  border: 3px solid #40277f;
+  border-radius: 16px;
+  background: #fff;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+#zilteroka-dialog-done {
+  display: block;
+  min-width: 150px;
+  margin: 18px auto 0;
+}
+
+@media (min-width: 600px) {
+  .title-family-brand img {
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 900px) {
+  .zilteroka-game-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599px) {
+  .title-family-brand {
+    margin-inline: auto;
+  }
+
+  .zilteroka-dialog {
+    padding: 8px;
+  }
+
+  .zilteroka-dialog-card {
+    max-height: calc(100dvh - 16px);
+    padding: 18px 12px;
+    border-radius: 20px;
+  }
+
+  .zilteroka-dialog-header {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 11px;
+    padding-right: 40px;
+  }
+
+  .zilteroka-dialog-header > img {
+    width: 80px;
+    height: 80px;
+    border-radius: 19px;
+  }
+
+  .zilteroka-game-gallery {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .zilteroka-game-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .zilteroka-game-card > img {
+    height: 100%;
+    min-height: 112px;
+    aspect-ratio: auto;
+  }
+
+  .zilteroka-portal {
+    grid-template-columns: minmax(0, 1fr) 104px;
+    padding: 11px;
+  }
+
+  .zilteroka-portal img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 360px) {
+  .title-family-brand img {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+  }
+
+  .brand-intro-stage img {
+    width: min(210px, 60vw);
+    height: min(210px, 60vw);
+    border-radius: 24px;
+  }
+
+  .zilteroka-dialog-header {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .zilteroka-dialog-header > img {
+    width: 72px;
+    height: 72px;
+    border-radius: 17px;
+  }
+
+  .zilteroka-game-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .zilteroka-portal {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .zilteroka-portal img {
+    justify-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-intro-stage {
+    animation: none;
+  }
+}
