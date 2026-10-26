@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileScreen = document.getElementById('profile-screen');
   const ageScreen = document.getElementById('age-screen');
   const progressScreen = document.getElementById('progress-screen');
+  const galleryScreen = document.getElementById('gallery-screen');
   const categoryScreen = document.getElementById('category-screen');
   const gameScreen = document.getElementById('game-screen');
   const startButton = document.getElementById('start-button');
@@ -29,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const activePlayerLabel = document.getElementById('active-player-label');
   const activeProgressSummary = document.getElementById('active-progress-summary');
   const progressButton = document.getElementById('progress-button');
+  const ageGalleryButton = document.getElementById('age-gallery-button');
+  const progressGalleryButton = document.getElementById('progress-gallery-button');
   const progressBackButton = document.getElementById('progress-back-button');
   const progressAvatar = document.getElementById('progress-avatar');
   const progressPlayerName = document.getElementById('progress-player-name');
@@ -42,6 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const completedPuzzleCount = document.getElementById('completed-puzzle-count');
   const totalWordsFound = document.getElementById('total-words-found');
   const badgeList = document.getElementById('badge-list');
+  const galleryOwner = document.getElementById('gallery-owner');
+  const galleryOwnedCount = document.getElementById('gallery-owned-count');
+  const galleryStorageMessage = document.getElementById('gallery-storage-message');
+  const galleryFilters = document.getElementById('gallery-filters');
+  const rakaCardGrid = document.getElementById('raka-card-grid');
+  const galleryBackButton = document.getElementById('gallery-back-button');
+  const cardViewer = document.getElementById('card-viewer');
+  const cardViewerEdition = document.getElementById('card-viewer-edition');
+  const cardViewerTitle = document.getElementById('card-viewer-title');
+  const cardViewerImage = document.getElementById('card-viewer-image');
+  const cardViewerMessage = document.getElementById('card-viewer-message');
+  const saveCardLink = document.getElementById('save-card-link');
+  const closeCardViewerButton = document.getElementById('close-card-viewer-button');
+  const cardReveal = document.getElementById('card-reveal');
+  const cardRevealCard = document.getElementById('card-reveal-card');
+  const cardRevealImage = document.getElementById('card-reveal-image');
+  const cardRevealTitle = document.getElementById('card-reveal-title');
+  const cardRevealDetails = document.getElementById('card-reveal-details');
+  const cardRevealCount = document.getElementById('card-reveal-count');
+  const continueCardRevealButton = document.getElementById('continue-card-reveal-button');
   const ageBackButton = document.getElementById('age-back-button');
   const categoryBackButton = document.getElementById('category-back-button');
   const ageButtons = document.querySelectorAll('.age-button');
@@ -60,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const victoryTotalJejak = document.getElementById('victory-total-jejak');
   const victoryPromotion = document.getElementById('victory-promotion');
   const victoryBadges = document.getElementById('victory-badges');
+  const victoryRakaCards = document.getElementById('victory-raka-cards');
   const playAgainButton = document.getElementById('play-again-button');
   const menuButton = document.getElementById('menu-button');
   const gameMenuButton = document.getElementById('game-menu-button');
@@ -72,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_PROFILES = 5;
   const PROGRESSION_STORAGE_KEY = 'mataHelangProgression_v1';
   const PROGRESSION_DATA_VERSION = 1;
+  const KATA_RAKA_STORAGE_KEY = 'mataHelangKataRaka_v1';
+  const KATA_RAKA_DATA_VERSION = 1;
 
   const RANKS = [
     { threshold: 0, level: 1, name: 'Pemerhati Baru' },
@@ -89,6 +115,56 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'hundred-words', name: 'Pemburu 100 Kata', description: 'Temui 100 kata dalam teka kata yang diselesaikan.' },
     { id: 'four-ages', name: 'Penjelajah Empat Tahap', description: 'Selesaikan teka kata dalam setiap tahap umur.' }
   ];
+
+  const KATA_RAKA_CATALOGUE = [
+    { id: 'KR-I01', title: 'Mata Tajam', edition: 'inspirasi' },
+    { id: 'KR-I02', title: 'Satu Demi Satu', edition: 'inspirasi' },
+    { id: 'KR-I03', title: 'Jangan Mengalah', edition: 'inspirasi' },
+    { id: 'KR-I04', title: 'Lihat Sekali Lagi', edition: 'inspirasi' },
+    { id: 'KR-I05', title: 'Jejak Kecil', edition: 'inspirasi' },
+    { id: 'KR-I06', title: 'Berani Bermula', edition: 'inspirasi' },
+    { id: 'KR-I07', title: 'Terus Mencuba', edition: 'inspirasi' },
+    { id: 'KR-I08', title: 'Cahaya Ilmu', edition: 'inspirasi' },
+    { id: 'KR-I09', title: 'Fokus Hati', edition: 'inspirasi' },
+    { id: 'KR-I10', title: 'Langkah ke Puncak', edition: 'inspirasi' },
+    { id: 'KR-P01', title: 'Hasil Usaha', edition: 'pencapaian' },
+    { id: 'KR-P02', title: 'Jejak Bertambah', edition: 'pencapaian' },
+    { id: 'KR-P03', title: 'Penemuan Baharu', edition: 'pencapaian' },
+    { id: 'KR-P04', title: 'Kemenangan Bermakna', edition: 'pencapaian' },
+    { id: 'KR-P05', title: 'Naik Pangkat', edition: 'pencapaian' },
+    { id: 'KR-P06', title: 'Rentak Kemajuan', edition: 'pencapaian' },
+    { id: 'KR-P07', title: 'Misi Selesai', edition: 'pencapaian' },
+    { id: 'KR-P08', title: 'Kombinasi Baharu', edition: 'pencapaian' },
+    { id: 'KR-P09', title: 'Semua Kategori', edition: 'pencapaian' },
+    { id: 'KR-P10', title: 'Jejak Gemilang', edition: 'pencapaian' },
+    { id: 'KR-L01', title: 'Kemungkinan Baharu', edition: 'legenda' },
+    { id: 'KR-L02', title: 'Sayap Keberanian', edition: 'legenda' },
+    { id: 'KR-L03', title: 'Di Sebalik Cabaran', edition: 'legenda' },
+    { id: 'KR-L04', title: 'Puncak Ketajaman', edition: 'legenda' },
+    { id: 'KR-L05', title: 'Langit Tanpa Batas', edition: 'legenda' },
+    { id: 'KR-L06', title: 'Legenda Sebenar', edition: 'legenda' },
+    { id: 'KR-L07', title: 'Dunia Penemuan', edition: 'legenda' },
+    { id: 'KR-L08', title: 'Rahsia Kehebatan', edition: 'legenda' },
+    { id: 'KR-L09', title: 'Pandangan Helang', edition: 'legenda' },
+    { id: 'KR-L10', title: 'Pengembaraan Seterusnya', edition: 'legenda' }
+  ].map((card) => ({
+    ...card,
+    image: `assets/kata-raka/${card.id}.webp`
+  }));
+
+  const KATA_RAKA_UNLOCKS = {
+    'KR-I01': { type: 'puzzles', value: 1, label: 'Selesaikan teka kata pertama' },
+    'KR-P07': { type: 'puzzles', value: 3, label: 'Selesaikan 3 teka kata' },
+    'KR-P05': { type: 'jejak', value: 80, label: 'Capai Tahap 2 • 80 Jejak' },
+    'KR-L01': { type: 'jejak', value: 360, label: 'Capai Tahap 4 • 360 Jejak' },
+    'KR-L06': { type: 'jejak', value: 1100, label: 'Capai Tahap 7 • 1,100 Jejak' }
+  };
+
+  const KATA_RAKA_EDITION_LABELS = {
+    inspirasi: 'Inspirasi',
+    pencapaian: 'Pencapaian',
+    legenda: 'Legenda'
+  };
 
   const ALL_CATEGORIES = ['Haiwan', 'Buah-buahan', 'Makanan', 'Sekolah', 'Kenderaan', 'Alam'];
 
@@ -226,6 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let guestProgress = createEmptyPlayerProgress();
   let currentPuzzleId = null;
   let currentPuzzleRewarded = false;
+  let kataRakaData = createEmptyKataRakaData();
+  let kataRakaStorageIsAvailable = true;
+  let guestKataRaka = createEmptyKataRakaCollection();
+  let galleryFilter = 'all';
+  let galleryReturnScreen = ageScreen;
+  let galleryProfileId = null;
+  let cardViewerReturnElement = null;
+  let cardRevealQueue = [];
+  let cardRevealIndex = 0;
 
   function getTargetWords() {
     return currentTargetWords;
@@ -335,6 +420,134 @@ document.addEventListener('DOMContentLoaded', () => {
       unlockedAchievements: [],
       recentPuzzleIds: []
     };
+  }
+
+  function createEmptyKataRakaData() {
+    return {
+      version: KATA_RAKA_DATA_VERSION,
+      byProfileId: {}
+    };
+  }
+
+  function createEmptyKataRakaCollection() {
+    return {
+      ownedCards: {},
+      viewedCards: []
+    };
+  }
+
+  function normalizeKataRakaCollection(value) {
+    const validCardIds = new Set(KATA_RAKA_CATALOGUE.map((card) => card.id));
+    const ownedCards = {};
+    if (value?.ownedCards && typeof value.ownedCards === 'object' && !Array.isArray(value.ownedCards)) {
+      Object.entries(value.ownedCards).forEach(([cardId, unlockedAt]) => {
+        if (validCardIds.has(cardId) && typeof unlockedAt === 'string') {
+          ownedCards[cardId] = unlockedAt;
+        }
+      });
+    }
+
+    const viewedCards = Array.isArray(value?.viewedCards)
+      ? [...new Set(value.viewedCards.filter((cardId) => (
+        validCardIds.has(cardId) && Object.prototype.hasOwnProperty.call(ownedCards, cardId)
+      )))]
+      : [];
+
+    return { ownedCards, viewedCards };
+  }
+
+  function loadKataRaka() {
+    try {
+      const storedValue = localStorage.getItem(KATA_RAKA_STORAGE_KEY);
+      if (!storedValue) {
+        kataRakaData = createEmptyKataRakaData();
+        return;
+      }
+
+      const parsedData = JSON.parse(storedValue);
+      if (
+        !parsedData
+        || parsedData.version !== KATA_RAKA_DATA_VERSION
+        || !parsedData.byProfileId
+        || typeof parsedData.byProfileId !== 'object'
+        || Array.isArray(parsedData.byProfileId)
+      ) {
+        throw new Error('Format Kata Raka tidak sah.');
+      }
+
+      const validProfileIds = new Set(profileData.profiles.map((profile) => profile.id));
+      const byProfileId = {};
+      Object.entries(parsedData.byProfileId).forEach(([profileId, collection]) => {
+        if (validProfileIds.has(profileId)) {
+          byProfileId[profileId] = normalizeKataRakaCollection(collection);
+        }
+      });
+      kataRakaData = { version: KATA_RAKA_DATA_VERSION, byProfileId };
+    } catch (error) {
+      kataRakaData = createEmptyKataRakaData();
+      const isStorageError = error?.name === 'SecurityError'
+        || error?.name === 'QuotaExceededError';
+      kataRakaStorageIsAvailable = !isStorageError;
+      profileStorageMessage.textContent = isStorageError
+        ? 'Koleksi Kata Raka hanya tersedia untuk sesi ini.'
+        : 'Data Kata Raka rosak dan telah dimulakan semula dengan selamat.';
+    }
+  }
+
+  function saveKataRaka() {
+    if (!kataRakaStorageIsAvailable) {
+      return false;
+    }
+
+    try {
+      localStorage.setItem(KATA_RAKA_STORAGE_KEY, JSON.stringify(kataRakaData));
+      return true;
+    } catch (error) {
+      kataRakaStorageIsAvailable = false;
+      profileStorageMessage.textContent = 'Koleksi Kata Raka hanya tersedia untuk sesi ini.';
+      return false;
+    }
+  }
+
+  function getKataRakaCollection(profileId = profileData.activeProfileId) {
+    if (!profileId) {
+      return guestKataRaka;
+    }
+
+    if (!kataRakaData.byProfileId[profileId]) {
+      kataRakaData.byProfileId[profileId] = createEmptyKataRakaCollection();
+    }
+    return kataRakaData.byProfileId[profileId];
+  }
+
+  function cardConditionIsMet(cardId, progress) {
+    const condition = KATA_RAKA_UNLOCKS[cardId];
+    if (!condition) {
+      return false;
+    }
+    return condition.type === 'puzzles'
+      ? progress.completedPuzzleCount >= condition.value
+      : progress.totalJejak >= condition.value;
+  }
+
+  function unlockEligibleKataRaka(progress, profileId = profileData.activeProfileId) {
+    const collection = getKataRakaCollection(profileId);
+    const newlyUnlockedIds = [];
+    Object.keys(KATA_RAKA_UNLOCKS).forEach((cardId) => {
+      if (!collection.ownedCards[cardId] && cardConditionIsMet(cardId, progress)) {
+        collection.ownedCards[cardId] = new Date().toISOString();
+        newlyUnlockedIds.push(cardId);
+      }
+    });
+
+    if (newlyUnlockedIds.length && profileId) {
+      saveKataRaka();
+    }
+    return newlyUnlockedIds;
+  }
+
+  function syncActiveKataRakaUnlocks() {
+    return unlockEligibleKataRaka(getActiveProgress());
   }
 
   function getValidModeKeys() {
@@ -575,6 +788,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileData.activeProfileId) {
       saveProgression();
     }
+    // Card checks run after Jejak, rank and badge calculations.
+    const newlyUnlockedCardIds = unlockEligibleKataRaka(progress);
 
     return {
       earnedJejak,
@@ -583,6 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
       previousRank,
       newRank,
       newlyUnlockedIds,
+      newlyUnlockedCardIds,
       isGuest: !profileData.activeProfileId
     };
   }
@@ -606,6 +822,251 @@ document.addEventListener('DOMContentLoaded', () => {
       item.append(icon, copy);
       item.setAttribute('aria-label', `${achievement.name}, ${unlocked ? 'dibuka' : 'terkunci'}`);
       badgeList.appendChild(item);
+    });
+  }
+
+  function getCardById(cardId) {
+    return KATA_RAKA_CATALOGUE.find((card) => card.id === cardId);
+  }
+
+  function getCardConditionProgress(cardId, progress) {
+    const condition = KATA_RAKA_UNLOCKS[cardId];
+    if (!condition) {
+      return '';
+    }
+    const currentValue = condition.type === 'puzzles'
+      ? progress.completedPuzzleCount
+      : progress.totalJejak;
+    const unit = condition.type === 'puzzles' ? 'teka kata' : 'Jejak';
+    return `${Math.min(currentValue, condition.value)}/${condition.value} ${unit}`;
+  }
+
+  function markCardAsViewed(cardId, profileId = galleryProfileId) {
+    const collection = getKataRakaCollection(profileId);
+    if (!collection.ownedCards[cardId] || collection.viewedCards.includes(cardId)) {
+      return;
+    }
+    collection.viewedCards.push(cardId);
+    if (profileId) {
+      saveKataRaka();
+    }
+  }
+
+  function openCardViewer(cardId, returnElement = document.activeElement, profileId = galleryProfileId) {
+    const card = getCardById(cardId);
+    const collection = getKataRakaCollection(profileId);
+    if (!card || !collection.ownedCards[cardId]) {
+      return;
+    }
+
+    galleryProfileId = profileId || null;
+    cardViewerReturnElement = returnElement;
+    markCardAsViewed(cardId, galleryProfileId);
+    cardViewerEdition.textContent = `Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]} • ${card.id}`;
+    cardViewerTitle.textContent = card.title;
+    cardViewerImage.src = card.image;
+    cardViewerImage.alt = `Kad Raka ${card.title}, Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]}`;
+    saveCardLink.href = card.image;
+    saveCardLink.download = `${card.id}.webp`;
+    cardViewerMessage.textContent = 'Jika muat turun tidak bermula, kad akan dibuka dalam pelayar untuk disimpan.';
+    cardViewer.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    closeCardViewerButton.focus();
+    returnElement?.querySelector?.('.raka-new-badge')?.remove();
+  }
+
+  function closeCardViewer() {
+    if (cardViewer.classList.contains('hidden')) {
+      return;
+    }
+    cardViewer.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    cardViewerImage.src = '';
+    if (cardViewerReturnElement?.isConnected) {
+      cardViewerReturnElement.focus();
+    }
+    cardViewerReturnElement = null;
+  }
+
+  function renderCurrentCardReveal() {
+    const cardId = cardRevealQueue[cardRevealIndex];
+    const card = getCardById(cardId);
+    if (!card) {
+      closeCardReveal();
+      return;
+    }
+
+    markCardAsViewed(card.id, profileData.activeProfileId);
+    cardRevealCard.className = `card-reveal-card card-reveal-card--${card.edition}`;
+    window.requestAnimationFrame(() => {
+      if (!cardReveal.classList.contains('hidden')) {
+        cardRevealCard.classList.add('card-reveal-card--animate');
+      }
+    });
+    cardRevealImage.src = card.image;
+    cardRevealImage.alt = `Kad Raka ${card.title}, Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]}`;
+    cardRevealTitle.textContent = card.title;
+    cardRevealDetails.textContent = `Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]} • ${card.id}`;
+    cardRevealCount.textContent = cardRevealQueue.length > 1
+      ? `Kad ${cardRevealIndex + 1} daripada ${cardRevealQueue.length}`
+      : '';
+    continueCardRevealButton.focus();
+  }
+
+  function openCardReveal(cardIds) {
+    cardRevealQueue = cardIds.filter((cardId) => Boolean(getCardById(cardId)));
+    cardRevealIndex = 0;
+    if (!cardRevealQueue.length) {
+      return;
+    }
+
+    renderCurrentCardReveal();
+    cardReveal.classList.remove('hidden');
+    cardRevealCard.classList.add('card-reveal-card--animate');
+    document.body.classList.add('modal-open');
+    continueCardRevealButton.focus();
+  }
+
+  function closeCardReveal() {
+    if (cardReveal.classList.contains('hidden')) {
+      return;
+    }
+    cardReveal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    cardRevealImage.src = '';
+    cardRevealQueue = [];
+    cardRevealIndex = 0;
+    playAgainButton.focus();
+  }
+
+  function continueCardReveal() {
+    if (cardRevealIndex < cardRevealQueue.length - 1) {
+      cardRevealIndex += 1;
+      renderCurrentCardReveal();
+      return;
+    }
+    closeCardReveal();
+  }
+
+  function createRakaCardElement(card, collection, progress) {
+    const isOwned = Boolean(collection.ownedCards[card.id]);
+    const hasApprovedCondition = Boolean(KATA_RAKA_UNLOCKS[card.id]);
+    const isNew = isOwned && !collection.viewedCards.includes(card.id);
+    const item = document.createElement(isOwned ? 'button' : 'article');
+    item.className = `raka-gallery-card raka-gallery-card--${card.edition}`;
+    item.dataset.cardId = card.id;
+
+    if (isOwned) {
+      item.type = 'button';
+      item.classList.add('raka-gallery-card--owned');
+      item.setAttribute('aria-label', `Buka ${card.id}, ${card.title}, Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]}`);
+      const image = document.createElement('img');
+      image.src = card.image;
+      image.alt = '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      item.appendChild(image);
+      item.addEventListener('click', () => openCardViewer(card.id, item, galleryProfileId));
+    } else {
+      item.classList.add(hasApprovedCondition ? 'raka-gallery-card--locked' : 'raka-gallery-card--upcoming');
+      item.setAttribute('aria-label', `${card.id}, ${card.title}, ${hasApprovedCondition ? 'terkunci' : 'akan datang'}`);
+      const silhouette = document.createElement('div');
+      silhouette.className = 'raka-card-silhouette';
+      silhouette.setAttribute('aria-hidden', 'true');
+      silhouette.textContent = hasApprovedCondition ? '🔒' : '✦';
+      item.appendChild(silhouette);
+    }
+
+    const copy = document.createElement('div');
+    copy.className = 'raka-card-copy';
+    const state = document.createElement('span');
+    state.className = 'raka-card-state';
+    state.textContent = isOwned ? 'DIMILIKI' : (hasApprovedCondition ? 'TERKUNCI' : 'AKAN DATANG');
+    const title = document.createElement('strong');
+    title.textContent = card.title;
+    const meta = document.createElement('span');
+    meta.textContent = `${card.id} • ${KATA_RAKA_EDITION_LABELS[card.edition]}`;
+    copy.append(state, title, meta);
+
+    if (!isOwned && hasApprovedCondition) {
+      const condition = document.createElement('span');
+      condition.className = 'raka-card-condition';
+      condition.textContent = `${KATA_RAKA_UNLOCKS[card.id].label} • ${getCardConditionProgress(card.id, progress)}`;
+      copy.appendChild(condition);
+    }
+    item.appendChild(copy);
+
+    if (isNew) {
+      const newBadge = document.createElement('span');
+      newBadge.className = 'raka-new-badge';
+      newBadge.textContent = 'BAHARU';
+      item.appendChild(newBadge);
+    }
+    return item;
+  }
+
+  function renderKataRakaGallery() {
+    const profile = profileData.profiles.find((item) => item.id === galleryProfileId);
+    const progress = getProgressForProfile(galleryProfileId);
+    unlockEligibleKataRaka(progress, galleryProfileId);
+    const collection = getKataRakaCollection(galleryProfileId);
+    const ownedCount = Object.keys(collection.ownedCards).length;
+    galleryOwner.textContent = profile ? `Koleksi ${profile.nickname}` : 'Koleksi Tetamu';
+    galleryOwnedCount.textContent = `${ownedCount}/30 Kad Dimiliki`;
+    galleryStorageMessage.textContent = profile
+      ? (kataRakaStorageIsAvailable ? 'Koleksi disimpan pada peranti ini.' : 'Koleksi tersedia untuk sesi ini sahaja.')
+      : 'Koleksi tetamu untuk sesi ini sahaja.';
+    rakaCardGrid.innerHTML = '';
+
+    KATA_RAKA_CATALOGUE
+      .filter((card) => galleryFilter === 'all' || card.edition === galleryFilter)
+      .forEach((card) => {
+        rakaCardGrid.appendChild(createRakaCardElement(card, collection, progress));
+      });
+
+    galleryFilters.querySelectorAll('.gallery-filter').forEach((button) => {
+      const selected = button.dataset.edition === galleryFilter;
+      button.classList.toggle('selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  }
+
+  function showKataRakaGallery(returnScreen = ageScreen, profileId = profileData.activeProfileId) {
+    galleryReturnScreen = returnScreen;
+    galleryProfileId = profileId || null;
+    galleryFilter = 'all';
+    renderKataRakaGallery();
+    showScreen(galleryScreen);
+  }
+
+  function renderVictoryRakaCards(cardIds) {
+    victoryRakaCards.innerHTML = '';
+    victoryRakaCards.classList.toggle('hidden', !cardIds.length);
+    if (!cardIds.length) {
+      return;
+    }
+
+    const heading = document.createElement('h4');
+    heading.textContent = cardIds.length === 1 ? 'KAD RAKA BAHARU!' : `${cardIds.length} KAD RAKA BAHARU!`;
+    victoryRakaCards.appendChild(heading);
+    cardIds.forEach((cardId) => {
+      const card = getCardById(cardId);
+      if (!card) {
+        return;
+      }
+      const row = document.createElement('div');
+      row.className = 'victory-raka-row';
+      const copy = document.createElement('p');
+      copy.textContent = `${card.title} • Edisi ${KATA_RAKA_EDITION_LABELS[card.edition]}`;
+      const viewButton = document.createElement('button');
+      viewButton.type = 'button';
+      viewButton.className = 'raka-view-button';
+      viewButton.textContent = 'LIHAT KAD';
+      viewButton.addEventListener('click', () => (
+        openCardViewer(card.id, viewButton, profileData.activeProfileId)
+      ));
+      row.append(copy, viewButton);
+      victoryRakaCards.appendChild(row);
     });
   }
 
@@ -657,6 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryBonusList.innerHTML = '';
     victoryBadges.innerHTML = '';
     victoryPromotion.textContent = '';
+    renderVictoryRakaCards([]);
 
     if (!reward) {
       return;
@@ -684,6 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         victoryBadges.appendChild(badge);
       }
     });
+    renderVictoryRakaCards(reward.newlyUnlockedCardIds || []);
   }
 
   function isKnownAvatar(avatarId) {
@@ -896,7 +1359,16 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteButton.setAttribute('aria-label', `Padam profil ${profile.nickname}`);
       deleteButton.addEventListener('click', () => requestProfileDeletion(profile.id));
 
-      controls.append(playButton, editButton, deleteButton);
+      const collectionButton = document.createElement('button');
+      collectionButton.className = 'profile-icon-button profile-collection-button';
+      collectionButton.type = 'button';
+      collectionButton.textContent = 'KOLEKSI';
+      collectionButton.setAttribute('aria-label', `Buka Koleksi Kata Raka ${profile.nickname}`);
+      collectionButton.addEventListener('click', () => (
+        showKataRakaGallery(playerScreen, profile.id)
+      ));
+
+      controls.append(playButton, collectionButton, editButton, deleteButton);
       card.append(avatar, details, controls);
       profileList.appendChild(card);
     });
@@ -968,6 +1440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     profileData.activeProfileId = profileId;
     saveProfiles();
+    unlockEligibleKataRaka(getProgressForProfile(profileId), profileId);
     updateActivePlayerLabel();
     showAgeScreen();
   }
@@ -979,7 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     pendingDeleteProfileId = profile.id;
-    deleteConfirmationText.textContent = `Profil “${profile.nickname}” dan semua kemajuan Jejak Helang akan dipadam. Tindakan ini tidak boleh dibatalkan.`;
+    deleteConfirmationText.textContent = `Profil “${profile.nickname}”, kemajuan Jejak Helang dan Koleksi Kata Raka akan dipadam. Tindakan ini tidak boleh dibatalkan.`;
     deleteConfirmation.hidden = false;
     confirmDeleteButton.focus();
   }
@@ -997,8 +1470,10 @@ document.addEventListener('DOMContentLoaded', () => {
       profileData.activeProfileId = null;
     }
     delete progressionData.byProfileId[deletedProfileId];
+    delete kataRakaData.byProfileId[deletedProfileId];
     saveProfiles();
     saveProgression();
+    saveKataRaka();
     updateActivePlayerLabel();
     closeDeleteConfirmation();
     renderProfileList();
@@ -1069,6 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
       profileScreen,
       ageScreen,
       progressScreen,
+      galleryScreen,
       categoryScreen,
       gameScreen
     ];
@@ -1085,6 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showAgeScreen() {
+    syncActiveKataRakaUnlocks();
     updateActivePlayerLabel();
     showScreen(ageScreen);
   }
@@ -1391,6 +1868,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderVictoryProgress(reward);
       victoryPanel.classList.remove('hidden');
       gameMenuButton.classList.add('hidden');
+      openCardReveal(reward?.newlyUnlockedCardIds || []);
     }
 
     return true;
@@ -1552,6 +2030,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryTotalJejak.textContent = '';
     victoryPromotion.textContent = '';
     victoryBadges.innerHTML = '';
+    renderVictoryRakaCards([]);
     exitConfirmation.classList.add('hidden');
     gameMenuButton.classList.remove('hidden');
     currentPuzzleId = generatePuzzleId();
@@ -1654,6 +2133,51 @@ document.addEventListener('DOMContentLoaded', () => {
     progressButton.addEventListener('click', showProgressScreen);
   }
 
+  if (ageGalleryButton) {
+    ageGalleryButton.addEventListener('click', () => showKataRakaGallery(ageScreen));
+  }
+
+  if (progressGalleryButton) {
+    progressGalleryButton.addEventListener('click', () => showKataRakaGallery(progressScreen));
+  }
+
+  if (galleryFilters) {
+    galleryFilters.addEventListener('click', (event) => {
+      const button = event.target.closest('.gallery-filter');
+      if (!button) {
+        return;
+      }
+      galleryFilter = button.dataset.edition;
+      renderKataRakaGallery();
+    });
+  }
+
+  if (galleryBackButton) {
+    galleryBackButton.addEventListener('click', () => {
+      if (galleryReturnScreen === playerScreen) {
+        showPlayerScreen();
+      } else if (galleryReturnScreen === progressScreen) {
+        showProgressScreen();
+      } else {
+        showAgeScreen();
+      }
+    });
+  }
+
+  if (closeCardViewerButton) {
+    closeCardViewerButton.addEventListener('click', closeCardViewer);
+  }
+
+  if (continueCardRevealButton) {
+    continueCardRevealButton.addEventListener('click', continueCardReveal);
+  }
+
+  if (saveCardLink) {
+    saveCardLink.addEventListener('click', () => {
+      cardViewerMessage.textContent = 'Muat turun dimulakan. Jika disekat, kad akan dibuka untuk disimpan.';
+    });
+  }
+
   if (progressBackButton) {
     progressBackButton.addEventListener('click', showAgeScreen);
   }
@@ -1716,7 +2240,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadProfiles();
   loadProgression();
+  loadKataRaka();
   updateActivePlayerLabel();
+
+  document.addEventListener('keydown', (event) => {
+    if (!cardReveal.classList.contains('hidden')) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeCardReveal();
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        continueCardRevealButton.focus();
+      }
+      return;
+    }
+    if (cardViewer.classList.contains('hidden')) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeCardViewer();
+      return;
+    }
+    if (event.key === 'Tab') {
+      const focusable = [saveCardLink, closeCardViewerButton];
+      const currentIndex = focusable.indexOf(document.activeElement);
+      const nextIndex = event.shiftKey
+        ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+        : (currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
+      event.preventDefault();
+      focusable[nextIndex].focus();
+    }
+  });
 
   document.addEventListener('pointerup', (event) => {
     finishSelection(event);

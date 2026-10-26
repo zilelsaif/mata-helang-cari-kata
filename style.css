@@ -414,7 +414,7 @@ h2 {
 .profile-card-controls {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -436,6 +436,11 @@ h2 {
 .profile-delete-button {
   color: #9b3535;
   background: #fff0f0;
+}
+
+.profile-collection-button {
+  color: #69450a;
+  background: #fff3c8;
 }
 
 .profile-actions,
@@ -620,6 +625,455 @@ button:disabled {
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 7px 16px rgba(237, 165, 59, 0.18);
+}
+
+.player-feature-actions,
+.progress-screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+}
+
+.collection-button {
+  min-height: 46px;
+  padding: 11px 18px;
+  border: 2px solid #d6aa47;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8de, #f8df91);
+  color: #65420a;
+  font-size: 0.87rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 7px 16px rgba(132, 82, 14, 0.14);
+}
+
+.progress-screen-actions {
+  margin-top: 18px;
+}
+
+.gallery-panel {
+  width: min(100%, 1040px);
+}
+
+.gallery-subtitle,
+.gallery-owner,
+.gallery-owned-count {
+  margin: 5px 0;
+  font-weight: 800;
+}
+
+.gallery-subtitle,
+.gallery-owner {
+  color: var(--muted);
+}
+
+.gallery-owned-count {
+  color: var(--primary-dark);
+  font-size: 1.08rem;
+}
+
+.gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.gallery-filter {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 2px solid #d6e5f6;
+  border-radius: 999px;
+  background: #f4f8fd;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.gallery-filter.selected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.raka-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 22px;
+}
+
+.raka-gallery-card {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid #dce8f5;
+  border-radius: 16px;
+  background: #f7f9fc;
+  color: var(--text);
+  text-align: left;
+}
+
+button.raka-gallery-card {
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 67, 130, 0.13);
+}
+
+button.raka-gallery-card:focus-visible {
+  outline: 4px solid rgba(43, 184, 232, 0.35);
+  outline-offset: 2px;
+}
+
+.raka-gallery-card img,
+.raka-card-silhouette {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+
+.raka-gallery-card img {
+  object-fit: contain;
+}
+
+.raka-card-silhouette {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.15), transparent),
+    linear-gradient(180deg, #8b9caf, #4f6074);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(2rem, 10vw, 4rem);
+}
+
+.raka-gallery-card--inspirasi { border-color: rgba(43, 184, 232, 0.62); }
+.raka-gallery-card--pencapaian { border-color: rgba(237, 165, 59, 0.72); }
+.raka-gallery-card--legenda { border-color: rgba(119, 76, 169, 0.65); }
+
+.raka-gallery-card--locked,
+.raka-gallery-card--upcoming {
+  opacity: 0.88;
+}
+
+.raka-gallery-card--upcoming .raka-card-silhouette {
+  background: linear-gradient(180deg, #d9dde5, #8994a3);
+}
+
+.raka-card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px;
+}
+
+.raka-card-copy strong {
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.raka-card-copy span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.raka-card-copy .raka-card-state {
+  color: var(--primary-dark);
+  letter-spacing: 0.05em;
+}
+
+.raka-card-copy .raka-card-condition {
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.raka-new-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #ffcf4f;
+  color: #4e3300;
+  font-size: 0.65rem;
+  font-weight: 900;
+  box-shadow: 0 4px 10px rgba(82, 52, 0, 0.25);
+}
+
+.card-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(5, 24, 48, 0.88);
+}
+
+.card-viewer.hidden {
+  display: none;
+}
+
+.card-viewer-card {
+  width: min(100%, 620px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 18px;
+  border: 2px solid rgba(255, 209, 102, 0.7);
+  border-radius: 22px;
+  background: #f8fbff;
+  text-align: center;
+}
+
+.card-viewer-edition {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.card-viewer-card h2 {
+  margin: 0 0 12px;
+  color: var(--primary-dark);
+  font-size: clamp(1.45rem, 5vw, 2.2rem);
+}
+
+.card-viewer-card img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: min(64vh, 720px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.card-viewer-message {
+  margin: 10px auto;
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.card-viewer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.card-viewer-actions a {
+  text-decoration: none;
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
+.card-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 12px;
+  background: rgba(3, 17, 38, 0.92);
+  animation: card-reveal-overlay 560ms ease-out both;
+  overscroll-behavior: contain;
+}
+
+.card-reveal.hidden {
+  display: none;
+}
+
+.card-reveal-card {
+  --reveal-glow: rgba(43, 184, 232, 0.5);
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 500px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(15, 46, 83, 0.98), rgba(5, 24, 48, 0.98));
+  box-shadow: 0 0 48px var(--reveal-glow), 0 24px 60px rgba(0, 0, 0, 0.48);
+  color: #fff;
+  text-align: center;
+}
+
+.card-reveal-card--animate {
+  animation: card-reveal-arrive 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.card-reveal-card--pencapaian {
+  --reveal-glow: rgba(237, 165, 59, 0.58);
+}
+
+.card-reveal-card--legenda {
+  --reveal-glow: rgba(167, 116, 214, 0.58);
+}
+
+.card-reveal-heading {
+  margin: 0 0 8px;
+  color: #ffd166;
+  font-size: clamp(1.15rem, 4vw, 1.55rem);
+  font-weight: 1000;
+  letter-spacing: 0.05em;
+}
+
+.card-reveal-artwork {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.card-reveal-artwork::before {
+  content: '';
+  position: absolute;
+  inset: 8% 16%;
+  border-radius: 50%;
+  background: var(--reveal-glow);
+  filter: blur(30px);
+  opacity: 0.85;
+}
+
+.card-reveal-image {
+  display: block;
+}
+
+.card-reveal-artwork img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: min(60dvh, 610px);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.42));
+}
+
+.card-reveal-card h2 {
+  margin: 9px 0 2px;
+  color: #fff;
+  font-size: clamp(1.2rem, 4.5vw, 1.65rem);
+}
+
+.card-reveal-details,
+.card-reveal-count {
+  margin: 2px 0 8px;
+  color: #dcefff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.card-reveal-count:empty {
+  display: none;
+}
+
+.card-reveal-card .primary-button {
+  min-width: min(100%, 220px);
+  margin-top: 2px;
+}
+
+.card-reveal-sparkle {
+  position: absolute;
+  z-index: 2;
+  color: #ffd166;
+  font-size: 1.4rem;
+  opacity: 0;
+  pointer-events: none;
+  animation: card-reveal-sparkle 620ms 180ms ease-out both;
+}
+
+.card-reveal-sparkle--one {
+  top: 12%;
+  left: 8%;
+}
+
+.card-reveal-sparkle--two {
+  top: 24%;
+  right: 7%;
+  animation-delay: 280ms;
+}
+
+@keyframes card-reveal-overlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes card-reveal-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes card-reveal-sparkle {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  55% { opacity: 0.95; }
+  to {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+.victory-raka-cards {
+  margin: 14px 0;
+  padding: 14px;
+  border: 2px solid rgba(237, 165, 59, 0.52);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fffaf0, #ffe9a9);
+}
+
+.victory-raka-cards h4 {
+  margin: 0 0 10px;
+  color: #74480b;
+  font-size: 1.08rem;
+}
+
+.victory-raka-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(116, 72, 11, 0.16);
+}
+
+.victory-raka-row p {
+  margin: 0;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.raka-view-button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary-dark);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .progression-panel {
@@ -1128,6 +1582,12 @@ button:disabled {
   .word-grid.wrong-selection {
     animation: none;
   }
+
+  .card-reveal,
+  .card-reveal-card--animate,
+  .card-reveal-sparkle {
+    animation: none;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1175,6 +1635,50 @@ button:disabled {
     width: 100%;
     padding-left: 24px;
     font-size: 0.94rem;
+  }
+
+  .gallery-panel {
+    padding-inline: 8px;
+  }
+
+  .gallery-filters {
+    gap: 6px;
+  }
+
+  .gallery-filter {
+    min-height: 40px;
+    padding-inline: 10px;
+    font-size: 0.69rem;
+  }
+
+  .raka-card-grid {
+    gap: 8px;
+  }
+
+  .raka-card-copy {
+    padding: 8px;
+  }
+
+  .card-viewer-card {
+    padding: 12px;
+  }
+
+  .card-viewer-card img {
+    height: min(62vh, 600px);
+  }
+
+  .card-reveal {
+    padding: 8px;
+  }
+
+  .card-reveal-card {
+    max-height: calc(100dvh - 16px);
+    padding: 10px 11px 12px;
+    border-radius: 18px;
+  }
+
+  .card-reveal-artwork img {
+    height: min(56dvh, 520px);
   }
 
   .word-grid {
@@ -1307,5 +1811,16 @@ button:disabled {
 
   .badge-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .raka-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .raka-card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

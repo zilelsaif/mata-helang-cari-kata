@@ -118,7 +118,10 @@
         <h2 id="age-title">PILIH UMUR</h2>
         <p id="active-player-label" class="active-player-label">Pemain: Tetamu</p>
         <p id="active-progress-summary" class="active-progress-summary">0 Jejak • Tahap 1</p>
-        <button id="progress-button" class="progress-button" type="button">JEJAK HELANG</button>
+        <div class="player-feature-actions">
+          <button id="progress-button" class="progress-button" type="button">JEJAK HELANG</button>
+          <button id="age-gallery-button" class="collection-button" type="button">KOLEKSI KATA RAKA</button>
+        </div>
 
         <div class="age-list" aria-label="Pilihan umur">
           <button class="age-button" data-age="5–7 Tahun" type="button">🐣 5–7 Tahun</button>
@@ -164,7 +167,29 @@
           <div id="badge-list" class="badge-list"></div>
         </section>
 
-        <button id="progress-back-button" class="secondary-button" type="button">KEMBALI</button>
+        <div class="progress-screen-actions">
+          <button id="progress-gallery-button" class="collection-button" type="button">KOLEKSI KATA RAKA</button>
+          <button id="progress-back-button" class="secondary-button" type="button">KEMBALI</button>
+        </div>
+      </section>
+
+      <section id="gallery-screen" class="panel gallery-panel" aria-labelledby="gallery-title" aria-hidden="true">
+        <p class="eyebrow">Siri 01</p>
+        <h2 id="gallery-title">KOLEKSI KATA RAKA</h2>
+        <p class="gallery-subtitle">Siri 01 • 30 Kad Koleksi</p>
+        <p id="gallery-owner" class="gallery-owner">Koleksi Tetamu</p>
+        <p id="gallery-owned-count" class="gallery-owned-count">0/30 Kad Dimiliki</p>
+        <p id="gallery-storage-message" class="profile-message" aria-live="polite"></p>
+
+        <div id="gallery-filters" class="gallery-filters" aria-label="Tapis edisi kad">
+          <button class="gallery-filter selected" type="button" data-edition="all" aria-pressed="true">SEMUA</button>
+          <button class="gallery-filter" type="button" data-edition="inspirasi" aria-pressed="false">INSPIRASI</button>
+          <button class="gallery-filter" type="button" data-edition="pencapaian" aria-pressed="false">PENCAPAIAN</button>
+          <button class="gallery-filter" type="button" data-edition="legenda" aria-pressed="false">LEGENDA</button>
+        </div>
+
+        <div id="raka-card-grid" class="raka-card-grid" aria-live="polite"></div>
+        <button id="gallery-back-button" class="secondary-button" type="button">KEMBALI</button>
       </section>
 
       <section id="category-screen" class="panel" aria-labelledby="category-title" aria-hidden="true">
@@ -216,6 +241,7 @@
             <p id="victory-promotion" class="victory-promotion"></p>
             <div id="victory-badges" class="victory-badges"></div>
           </div>
+          <div id="victory-raka-cards" class="victory-raka-cards hidden"></div>
           <div class="victory-actions">
             <button id="play-again-button" class="primary-button" type="button">MAIN LAGI</button>
             <button id="menu-button" class="secondary-button" type="button">MENU</button>
@@ -240,10 +266,45 @@
           </div>
         </div>
       </section>
+
+      <div
+        id="card-reveal"
+        class="card-reveal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="card-reveal-heading"
+        aria-describedby="card-reveal-details"
+      >
+        <div id="card-reveal-card" class="card-reveal-card">
+          <span class="card-reveal-sparkle card-reveal-sparkle--one" aria-hidden="true">✦</span>
+          <span class="card-reveal-sparkle card-reveal-sparkle--two" aria-hidden="true">✦</span>
+          <p id="card-reveal-heading" class="card-reveal-heading">KAD RAKA BAHARU!</p>
+          <div class="card-reveal-artwork">
+            <img id="card-reveal-image" src="" alt="" />
+          </div>
+          <h2 id="card-reveal-title">Kad Raka</h2>
+          <p id="card-reveal-details" class="card-reveal-details"></p>
+          <p id="card-reveal-count" class="card-reveal-count" aria-live="polite"></p>
+          <button id="continue-card-reveal-button" class="primary-button" type="button">TERUSKAN</button>
+        </div>
+      </div>
+
+      <div id="card-viewer" class="card-viewer hidden" role="dialog" aria-modal="true" aria-labelledby="card-viewer-title">
+        <div class="card-viewer-card">
+          <p id="card-viewer-edition" class="card-viewer-edition"></p>
+          <h2 id="card-viewer-title">Kad Raka</h2>
+          <img id="card-viewer-image" src="" alt="" />
+          <p id="card-viewer-message" class="card-viewer-message" aria-live="polite"></p>
+          <div class="card-viewer-actions">
+            <a id="save-card-link" class="primary-button" href="#" download target="_blank" rel="noopener">SIMPAN KAD</a>
+            <button id="close-card-viewer-button" class="secondary-button" type="button">TUTUP</button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.15.1 by Zil-el-Saif
+      v0.16.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>
