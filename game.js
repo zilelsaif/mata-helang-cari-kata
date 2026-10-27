@@ -89,6 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameSessionLabel = document.getElementById('game-session-label');
   const gameModeLabel = document.getElementById('game-mode-label');
   const gameFeedback = document.getElementById('game-feedback');
+  const hintPanel = document.getElementById('hint-panel');
+  const hintButton = document.getElementById('hint-button');
+  const hintStatus = document.getElementById('hint-status');
+  const hintList = document.getElementById('hint-list');
   const victoryPanel = document.getElementById('victory-panel');
   const victorySummary = document.getElementById('victory-summary');
   const victoryProgress = document.getElementById('victory-progress');
@@ -126,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const GAME_MODES = {
     classic: { label: 'MOD KLASIK' },
     secret: { label: 'PENCARIAN RAHSIA' },
-    hidden: { label: 'HURUF TERSEMBUNYI' }
+    hidden: { label: 'HURUF TERSEMBUNYI' },
+    combined: { label: 'MISTERI BERGANDA' }
   };
 
   let brandIntroTimer = null;
@@ -353,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let targetHiddenCellKeys = new Set();
   let fillerHiddenCellKeys = new Set();
   let revealedHiddenCellKeys = new Set();
+  let hintedWords = new Set();
   let isDragging = false;
   let activePointerId = null;
   let dragStartCell = null;
@@ -2042,6 +2048,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
+  function buildCombinedPuzzle(config) {
+    // Combined mode accepts only a fully validated Secret board with a valid mask.
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const secretResult = buildSecretPuzzle(config);
+      if (!secretResult) {
+        continue;
+      }
+      const hiddenMask = buildHiddenCellMask(
+        secretResult.generatedPuzzle,
+        secretResult.targetWords,
+        config
+      );
+      if (hiddenMask) {
+        return { ...secretResult, hiddenMask, combinedAttempts: attempt + 1 };
+      }
+    }
+    return null;
+  }
+
   function getSearchDirections(config) {
     const directions = [];
     config.directions.forEach((directionName) => {
@@ -2121,7 +2146,12 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let boardAttempt = 0; boardAttempt < 6; boardAttempt += 1) {
         const generatedPuzzle = buildBoard(targetWords, config, 12);
         if (generatedPuzzle && secretPuzzleIsFair(generatedPuzzle, targetWords, config)) {
-          return { targetWords, generatedPuzzle };
+          return {
+            targetWords,
+            generatedPuzzle,
+            secretWordSetAttempts: setAttempt + 1,
+            secretBoardAttempts: (setAttempt * 6) + boardAttempt + 1
+          };
         }
       }
     }
@@ -2132,12 +2162,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderWordList() {
     wordList.innerHTML = '';
 
-    const isSecretMode = selectedGameMode === 'secret';
-    wordPanel.classList.toggle('word-panel--secret', isSecretMode);
-    wordListTitle.textContent = isSecretMode ? 'PENEMUAN' : 'Senarai Kata';
-    secretProgress.classList.toggle('hidden', !isSecretMode);
+    const isDiscoveryMode = ['secret', 'combined'].includes(selectedGameMode);
+    wordPanel.classList.toggle('word-panel--secret', isDiscoveryMode);
+    wordListTitle.textContent = isDiscoveryMode ? 'PENEMUAN' : 'Senarai Kata';
+    secretProgress.classList.toggle('hidden', !isDiscoveryMode);
     secretProgress.replaceChildren();
-    if (isSecretMode) {
+    if (isDiscoveryMode) {
       const progressNumber = document.createElement('strong');
       const progressLabel = document.createElement('span');
       progressNumber.textContent = `${foundWords.size}/${getTargetWords().length}`;
@@ -2152,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     wordList.setAttribute(
       'aria-label',
-      isSecretMode ? 'Kata rahsia yang telah ditemui' : 'Senarai kata'
+      isDiscoveryMode ? 'Kata rahsia yang telah ditemui' : 'Senarai kata'
     );
 
     getTargetWords().forEach((word) => {
@@ -2160,7 +2190,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const wordLabel = getWordLabel(word);
       item.className = 'word-item';
 
-      if (isSecretMode && !foundWords.has(word)) {
+      if (isDiscoveryMode && !foundWords.has(word)) {
         item.classList.add('mystery-slot');
         item.textContent = '?';
         item.setAttribute('aria-label', 'Kata rahsia belum ditemui');
@@ -2187,6 +2217,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
       wordList.appendChild(item);
     });
+  }
+
+  function getHintText(word) {
+    return `Salah satu kata bermula dengan ${word[0]}. Panjangnya ${word.length} huruf.`;
+  }
+
+  function renderHints() {
+    const isCombinedMode = selectedGameMode === 'combined';
+    hintPanel.classList.toggle('hidden', !isCombinedMode);
+    hintList.innerHTML = '';
+
+    if (!isCombinedMode) {
+      hintStatus.textContent = '';
+      return;
+    }
+
+    hintedWords.forEach((word) => {
+      if (foundWords.has(word)) {
+        return;
+      }
+      const item = document.createElement('li');
+      item.textContent = getHintText(word);
+      hintList.appendChild(item);
+    });
+  }
+
+  function requestHint() {
+    if (selectedGameMode !== 'combined') {
+      return;
+    }
+
+    const availableWords = getTargetWords().filter((word) => (
+      !foundWords.has(word) && !hintedWords.has(word)
+    ));
+    if (!availableWords.length) {
+      hintStatus.textContent = 'Semua petunjuk untuk kata yang belum ditemui telah dipaparkan.';
+      return;
+    }
+
+    const word = availableWords[Math.floor(Math.random() * availableWords.length)];
+    hintedWords.add(word);
+    hintStatus.textContent = 'Petunjuk baharu daripada Raka.';
+    renderHints();
   }
 
   function assignWordColors() {
@@ -2337,6 +2410,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderWordList();
+    renderHints();
 
     victorySummary.textContent = `${foundWords.size}/${getTargetWords().length} kata ditemui`;
 
@@ -2375,7 +2449,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (matchedWord) {
       if (markWordAsFound(matchedWord)) {
         showFeedback(
-          selectedGameMode === 'secret'
+          ['secret', 'combined'].includes(selectedGameMode)
             ? `Hebat! ${getWordLabel(matchedWord)} ditemui!`
             : 'Betul!',
           'success'
@@ -2385,8 +2459,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       showFeedback(
-        selectedGameMode === 'secret' ? 'Belum tepat. Cuba laluan lain.' : 'Cuba lagi',
-        selectedGameMode === 'secret' ? 'neutral' : 'retry'
+        ['secret', 'combined'].includes(selectedGameMode)
+          ? 'Belum tepat. Cuba laluan lain.'
+          : 'Cuba lagi',
+        ['secret', 'combined'].includes(selectedGameMode) ? 'neutral' : 'retry'
       );
     }
 
@@ -2490,6 +2566,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const secretResult = buildSecretPuzzle(config);
       currentTargetWords = secretResult?.targetWords || [];
       generatedPuzzle = secretResult?.generatedPuzzle || null;
+    } else if (selectedGameMode === 'combined') {
+      const combinedResult = buildCombinedPuzzle(config);
+      currentTargetWords = combinedResult?.targetWords || [];
+      generatedPuzzle = combinedResult?.generatedPuzzle || null;
+      generatedHiddenMask = combinedResult?.hiddenMask.all || new Set();
+      generatedTargetHiddenMask = combinedResult?.hiddenMask.target || new Set();
+      generatedFillerHiddenMask = combinedResult?.hiddenMask.filler || new Set();
     } else if (selectedGameMode === 'hidden') {
       const hiddenResult = buildHiddenPuzzle(config);
       currentTargetWords = hiddenResult?.targetWords || [];
@@ -2506,6 +2589,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showCategoryMessage(
         selectedGameMode === 'secret'
           ? 'Papan rahsia yang adil tidak dapat dibina. Sila pilih mod semula.'
+          : selectedGameMode === 'combined'
+            ? 'Papan misteri berganda yang adil tidak dapat dibina. Sila pilih mod semula.'
           : selectedGameMode === 'hidden'
             ? 'Papan huruf tersembunyi tidak dapat dibina. Sila cuba lagi.'
             : 'Papan tidak dapat dibina. Cuba lagi.'
@@ -2534,6 +2619,8 @@ document.addEventListener('DOMContentLoaded', () => {
     targetHiddenCellKeys = new Set(generatedTargetHiddenMask);
     fillerHiddenCellKeys = new Set(generatedFillerHiddenMask);
     revealedHiddenCellKeys = new Set();
+    hintedWords = new Set();
+    hintStatus.textContent = '';
     assignWordColors();
     clearSelection();
     clearFeedback();
@@ -2565,7 +2652,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.dataset.row = String(row);
         cell.dataset.col = String(col);
         const cellKey = getCellKey(row, col);
-        if (selectedGameMode === 'hidden' && hiddenCellKeys.has(cellKey)) {
+        if (['hidden', 'combined'].includes(selectedGameMode) && hiddenCellKeys.has(cellKey)) {
           cell.classList.add('cell--hidden');
           cell.textContent = '?';
           cell.setAttribute(
@@ -2584,6 +2671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderWordList();
+    renderHints();
 
     wordGrid.querySelectorAll('.cell').forEach((cell) => {
       cell.addEventListener('pointerdown', (event) => {
@@ -2892,6 +2980,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (gameMenuButton) {
     gameMenuButton.addEventListener('click', requestGameplayExit);
+  }
+
+  if (hintButton) {
+    hintButton.addEventListener('click', requestHint);
   }
 
   if (continueGameButton) {

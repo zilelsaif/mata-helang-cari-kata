@@ -256,6 +256,10 @@
             <strong>HURUF TERSEMBUNYI</strong>
             <span>Cari perkataan walaupun sebahagian huruf disembunyikan!</span>
           </button>
+          <button class="mode-button mode-button--combined" data-mode="combined" type="button">
+            <strong>MISTERI BERGANDA</strong>
+            <span>Cari perkataan tanpa senarai kata, dengan sebahagian huruf tersembunyi!</span>
+          </button>
         </div>
 
         <button id="mode-back-button" class="secondary-button" type="button">KEMBALI</button>
@@ -270,6 +274,12 @@
         <p id="game-session-label" class="selected-age">Umur: --</p>
         <p id="game-mode-label" class="game-mode-label">MOD KLASIK</p>
         <p id="game-feedback" class="game-feedback" aria-live="polite"></p>
+
+        <section id="hint-panel" class="hint-panel hidden" aria-label="Petunjuk Raka">
+          <button id="hint-button" class="hint-button" type="button">PETUNJUK</button>
+          <p id="hint-status" class="hint-status" aria-live="polite"></p>
+          <ul id="hint-list" class="hint-list" aria-label="Petunjuk yang masih aktif"></ul>
+        </section>
 
         <div class="game-layout">
           <div id="word-grid" class="word-grid" aria-label="Papan permainan"></div>
@@ -414,7 +424,7 @@
     </div>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.20.0 by Zil-el-Saif
+      v0.21.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

@@ -1353,6 +1353,62 @@ button.raka-gallery-card:focus-visible {
   color: var(--muted);
 }
 
+.hint-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: -4px 0 14px;
+  padding: 12px;
+  border: 1px solid #b9dfe3;
+  border-radius: 16px;
+  background: #eefafa;
+}
+
+.hint-panel.hidden {
+  display: none;
+}
+
+.hint-button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 2px solid #4c9fa6;
+  border-radius: 999px;
+  background: #fff;
+  color: #145b66;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hint-button:hover,
+.hint-button:focus-visible {
+  background: #d9f3f3;
+  outline: 3px solid rgba(29, 111, 214, 0.2);
+  outline-offset: 2px;
+}
+
+.hint-status {
+  min-height: 1.3em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.hint-list {
+  width: 100%;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--primary-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hint-list:empty {
+  display: none;
+}
+
 .word-grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-size, 6), minmax(0, 1fr));
@@ -1521,6 +1577,11 @@ button.raka-gallery-card:focus-visible {
 .mode-button--hidden {
   background: linear-gradient(145deg, #e9fbfa, #eef7ff);
   border-color: #7cc8ce;
+}
+
+.mode-button--combined {
+  background: linear-gradient(145deg, #f4ecff, #e9fbfa);
+  border-color: #bca5dc;
 }
 
 .mode-button:hover,
@@ -1931,6 +1992,10 @@ button.raka-gallery-card:focus-visible {
 }
 
 @media (min-width: 600px) {
+  .mode-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .panel {
     width: min(100%, 540px);
     padding: 36px 28px 26px;
