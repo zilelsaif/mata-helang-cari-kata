@@ -125,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const GAME_MODES = {
     classic: { label: 'MOD KLASIK' },
-    secret: { label: 'PENCARIAN RAHSIA' }
+    secret: { label: 'PENCARIAN RAHSIA' },
+    hidden: { label: 'HURUF TERSEMBUNYI' }
   };
 
   let brandIntroTimer = null;
@@ -262,24 +263,28 @@ document.addEventListener('DOMContentLoaded', () => {
     '5–7 Tahun': {
       gridSize: 6,
       wordCount: 4,
+      hiddenPercentage: 0.05,
       directions: ['horizontal', 'vertical'],
       reverse: false
     },
     '8–10 Tahun': {
       gridSize: 8,
       wordCount: 6,
+      hiddenPercentage: 0.10,
       directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
       reverse: false
     },
     '11–12 Tahun': {
       gridSize: 10,
       wordCount: 8,
+      hiddenPercentage: 0.15,
       directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
       reverse: true
     },
     '13–15 Tahun': {
       gridSize: 12,
       wordCount: 10,
+      hiddenPercentage: 0.20,
       directions: ['horizontal', 'vertical', 'diagonalDownRight', 'diagonalDownLeft'],
       reverse: true
     }
@@ -344,6 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let foundWords = new Set();
   let wordColors = new Map();
   let foundCellDetails = new Map();
+  let hiddenCellKeys = new Set();
+  let targetHiddenCellKeys = new Set();
+  let fillerHiddenCellKeys = new Set();
+  let revealedHiddenCellKeys = new Set();
   let isDragging = false;
   let activePointerId = null;
   let dragStartCell = null;
@@ -1900,6 +1909,139 @@ document.addEventListener('DOMContentLoaded', () => {
     return generatedPuzzle;
   }
 
+  function getCellKey(row, col) {
+    return `${row},${col}`;
+  }
+
+  function buildHiddenCellMask(generatedPuzzle, targetWords, config) {
+    const hiddenCount = Math.round(
+      config.gridSize * config.gridSize * config.hiddenPercentage
+    );
+    const targetHiddenQuota = Math.floor(hiddenCount / 2);
+    const fillerHiddenQuota = hiddenCount - targetHiddenQuota;
+    const targetCells = new Map();
+
+    targetWords.forEach((word) => {
+      generatedPuzzle.cellsByWord[word].forEach((cell, index) => {
+        const key = getCellKey(cell.row, cell.col);
+        const memberships = targetCells.get(key) || [];
+        memberships.push({ word, index });
+        targetCells.set(key, memberships);
+      });
+    });
+
+    const fillerKeys = [];
+    for (let row = 0; row < config.gridSize; row += 1) {
+      for (let col = 0; col < config.gridSize; col += 1) {
+        const key = getCellKey(row, col);
+        if (!targetCells.has(key)) {
+          fillerKeys.push(key);
+        }
+      }
+    }
+
+    const minimumCoveredWords = Math.min(targetHiddenQuota, targetWords.length);
+
+    // Retry a shuffled, constraint-aware mask without ever changing board letters.
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      const selected = new Set();
+      const coveredWords = new Set();
+      const hiddenCountByWord = new Map(targetWords.map((word) => [word, 0]));
+
+      const canHideTargetCell = (key) => {
+        const memberships = targetCells.get(key) || [];
+        return memberships.every(({ word, index }) => {
+          if (hiddenCountByWord.get(word) >= word.length - 2) {
+            return false;
+          }
+          const wordCells = generatedPuzzle.cellsByWord[word];
+          return !wordCells.some((cell, cellIndex) => (
+            Math.abs(cellIndex - index) === 1
+            && selected.has(getCellKey(cell.row, cell.col))
+          ));
+        });
+      };
+
+      const addTargetCell = (key) => {
+        if (selected.has(key) || !canHideTargetCell(key)) {
+          return false;
+        }
+        selected.add(key);
+        (targetCells.get(key) || []).forEach(({ word }) => {
+          hiddenCountByWord.set(word, hiddenCountByWord.get(word) + 1);
+          coveredWords.add(word);
+        });
+        return true;
+      };
+
+      // First spread hidden letters across different target words.
+      shuffleWords(targetWords).forEach((word) => {
+        if (selected.size >= targetHiddenQuota || coveredWords.has(word)) {
+          return;
+        }
+        const candidates = shuffleWords(
+          generatedPuzzle.cellsByWord[word].map((cell) => getCellKey(cell.row, cell.col))
+        );
+        candidates.some((key) => addTargetCell(key));
+      });
+
+      // Then add a modest number of extra target cells while avoiding neighbours.
+      const remainingTargetCells = shuffleWords([...targetCells.keys()]);
+      for (const key of remainingTargetCells) {
+        if (selected.size >= targetHiddenQuota) {
+          break;
+        }
+        addTargetCell(key);
+      }
+
+      if (
+        selected.size !== targetHiddenQuota
+        || coveredWords.size < minimumCoveredWords
+      ) {
+        continue;
+      }
+
+      // Filler coordinates are shuffled independently and never overlap a word path.
+      const selectedFillerKeys = shuffleWords(fillerKeys).slice(0, fillerHiddenQuota);
+      if (selectedFillerKeys.length !== fillerHiddenQuota) {
+        continue;
+      }
+
+      if (fillerHiddenQuota > 1) {
+        const fillerRows = new Set(selectedFillerKeys.map((key) => key.split(',')[0]));
+        const fillerCols = new Set(selectedFillerKeys.map((key) => key.split(',')[1]));
+        if (fillerRows.size < 2 || fillerCols.size < 2) {
+          continue;
+        }
+      }
+
+      const filler = new Set(selectedFillerKeys);
+      return {
+        all: new Set([...selected, ...filler]),
+        target: selected,
+        filler
+      };
+    }
+
+    return null;
+  }
+
+  function buildHiddenPuzzle(config) {
+    // A failed mask causes a bounded full-board retry, never a weakened puzzle.
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const targetWords = chooseTargetWords(selectedCategory, config);
+      const generatedPuzzle = buildBoard(targetWords, config);
+      if (!generatedPuzzle || targetWords.length !== config.wordCount) {
+        continue;
+      }
+      const hiddenMask = buildHiddenCellMask(generatedPuzzle, targetWords, config);
+      if (hiddenMask) {
+        return { targetWords, generatedPuzzle, hiddenMask };
+      }
+    }
+    return null;
+  }
+
   function getSearchDirections(config) {
     const directions = [];
     config.directions.forEach((directionName) => {
@@ -2085,6 +2227,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyFoundCellColor(cell, word, color) {
     const cellKey = `${cell.dataset.row},${cell.dataset.col}`;
     const details = foundCellDetails.get(cellKey) || [];
+    const row = Number(cell.dataset.row);
+    const col = Number(cell.dataset.col);
 
     if (!details.some((detail) => detail.word === word)) {
       details.push({ word, color });
@@ -2099,8 +2243,34 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     cell.setAttribute(
       'aria-label',
-      `${cell.dataset.letter}, ditemui dalam ${details.map((detail) => getWordLabel(detail.word)).join(' dan ')}`
+      `${puzzle.board[row][col]}, ditemui dalam ${details.map((detail) => getWordLabel(detail.word)).join(' dan ')}`
     );
+  }
+
+  function revealHiddenCell(cell, row, col) {
+    const key = getCellKey(row, col);
+    if (!hiddenCellKeys.has(key) || revealedHiddenCellKeys.has(key)) {
+      return;
+    }
+
+    revealedHiddenCellKeys.add(key);
+    cell.classList.remove('cell--hidden');
+    cell.classList.add('cell--revealed');
+    cell.textContent = puzzle.board[row][col];
+    cell.setAttribute('aria-label', `${puzzle.board[row][col]}, baris ${row + 1}, lajur ${col + 1}`);
+  }
+
+  function revealRemainingFillerCells() {
+    fillerHiddenCellKeys.forEach((key) => {
+      if (revealedHiddenCellKeys.has(key)) {
+        return;
+      }
+      const [row, col] = key.split(',').map(Number);
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (cell) {
+        revealHiddenCell(cell, row, col);
+      }
+    });
   }
 
   function clearSelection() {
@@ -2160,6 +2330,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wordCells.forEach(({ row, col }) => {
         const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
         if (cell && color) {
+          revealHiddenCell(cell, row, col);
           applyFoundCellColor(cell, word, color);
         }
       });
@@ -2174,6 +2345,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderVictoryProgress(reward);
       victoryPanel.classList.remove('hidden');
       gameMenuButton.classList.add('hidden');
+      revealRemainingFillerCells();
       const newlyUnlockedCardIds = reward?.newlyUnlockedCardIds || [];
       if (newlyUnlockedCardIds.length) {
         openCardReveal(newlyUnlockedCardIds, 'unlock');
@@ -2311,10 +2483,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let generatedPuzzle = null;
+    let generatedHiddenMask = new Set();
+    let generatedTargetHiddenMask = new Set();
+    let generatedFillerHiddenMask = new Set();
     if (selectedGameMode === 'secret') {
       const secretResult = buildSecretPuzzle(config);
       currentTargetWords = secretResult?.targetWords || [];
       generatedPuzzle = secretResult?.generatedPuzzle || null;
+    } else if (selectedGameMode === 'hidden') {
+      const hiddenResult = buildHiddenPuzzle(config);
+      currentTargetWords = hiddenResult?.targetWords || [];
+      generatedPuzzle = hiddenResult?.generatedPuzzle || null;
+      generatedHiddenMask = hiddenResult?.hiddenMask.all || new Set();
+      generatedTargetHiddenMask = hiddenResult?.hiddenMask.target || new Set();
+      generatedFillerHiddenMask = hiddenResult?.hiddenMask.filler || new Set();
     } else {
       currentTargetWords = chooseTargetWords(selectedCategory, config);
       generatedPuzzle = buildBoard(currentTargetWords, config);
@@ -2324,7 +2506,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showCategoryMessage(
         selectedGameMode === 'secret'
           ? 'Papan rahsia yang adil tidak dapat dibina. Sila pilih mod semula.'
-          : 'Papan tidak dapat dibina. Cuba lagi.'
+          : selectedGameMode === 'hidden'
+            ? 'Papan huruf tersembunyi tidak dapat dibina. Sila cuba lagi.'
+            : 'Papan tidak dapat dibina. Cuba lagi.'
       );
       showCategoryScreen();
       return false;
@@ -2346,6 +2530,10 @@ document.addEventListener('DOMContentLoaded', () => {
     wordGrid.innerHTML = '';
     foundWords = new Set();
     foundCellDetails = new Map();
+    hiddenCellKeys = new Set(generatedHiddenMask);
+    targetHiddenCellKeys = new Set(generatedTargetHiddenMask);
+    fillerHiddenCellKeys = new Set(generatedFillerHiddenMask);
+    revealedHiddenCellKeys = new Set();
     assignWordColors();
     clearSelection();
     clearFeedback();
@@ -2376,8 +2564,21 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.className = 'cell';
         cell.dataset.row = String(row);
         cell.dataset.col = String(col);
-        cell.dataset.letter = board[row][col];
-        cell.textContent = board[row][col];
+        const cellKey = getCellKey(row, col);
+        if (selectedGameMode === 'hidden' && hiddenCellKeys.has(cellKey)) {
+          cell.classList.add('cell--hidden');
+          cell.textContent = '?';
+          cell.setAttribute(
+            'aria-label',
+            `Huruf tersembunyi, baris ${row + 1}, lajur ${col + 1}`
+          );
+        } else {
+          cell.textContent = board[row][col];
+          cell.setAttribute(
+            'aria-label',
+            `${board[row][col]}, baris ${row + 1}, lajur ${col + 1}`
+          );
+        }
         wordGrid.appendChild(cell);
       }
     }

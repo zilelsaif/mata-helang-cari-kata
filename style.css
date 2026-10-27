@@ -1409,6 +1409,17 @@ button.raka-gallery-card:focus-visible {
   touch-action: none;
 }
 
+.cell.cell--hidden {
+  background: #d9f3f3;
+  border: 2px dashed #4c9fa6;
+  color: #145b66;
+  font-weight: 900;
+}
+
+.cell.cell--revealed {
+  border-style: solid;
+}
+
 .cell.selected {
   background: var(--accent);
   color: var(--text);
@@ -1505,6 +1516,11 @@ button.raka-gallery-card:focus-visible {
 .mode-button--secret {
   background: linear-gradient(145deg, #fff9e3, #eef7ff);
   border-color: #f2d279;
+}
+
+.mode-button--hidden {
+  background: linear-gradient(145deg, #e9fbfa, #eef7ff);
+  border-color: #7cc8ce;
 }
 
 .mode-button:hover,
