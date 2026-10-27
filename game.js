@@ -94,6 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const hintHelper = document.getElementById('hint-helper');
   const hintStatus = document.getElementById('hint-status');
   const hintList = document.getElementById('hint-list');
+  const chainPanel = document.getElementById('chain-panel');
+  const chainTarget = document.getElementById('chain-target');
+  const chainStage = document.getElementById('chain-stage');
+  const chainProgress = document.getElementById('chain-progress');
+  const chainProgressFill = document.getElementById('chain-progress-fill');
+  const chainStatus = document.getElementById('chain-status');
   const victoryPanel = document.getElementById('victory-panel');
   const victorySummary = document.getElementById('victory-summary');
   const victoryProgress = document.getElementById('victory-progress');
@@ -132,7 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
     classic: { label: 'MOD KLASIK' },
     secret: { label: 'PENCARIAN RAHSIA' },
     hidden: { label: 'HURUF TERSEMBUNYI' },
-    combined: { label: 'MISTERI BERGANDA' }
+    combined: { label: 'MISTERI BERGANDA' },
+    chain: { label: 'RANTAIAN KATA' }
   };
 
   let brandIntroTimer = null;
@@ -360,6 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let fillerHiddenCellKeys = new Set();
   let revealedHiddenCellKeys = new Set();
   let hintedWords = new Set();
+  let chainPlan = null;
+  let chainStageIndex = 0;
+  let chainTransitioning = false;
+  let chainTransitionTimer = null;
   let isDragging = false;
   let activePointerId = null;
   let dragStartCell = null;
@@ -1787,6 +1798,10 @@ document.addEventListener('DOMContentLoaded', () => {
     isDragging = false;
     activePointerId = null;
     dragStartCell = null;
+    window.clearTimeout(chainTransitionTimer);
+    chainTransitionTimer = null;
+    chainTransitioning = false;
+    wordGrid.classList.remove('word-grid--transitioning');
     exitConfirmation.classList.add('hidden');
     showCategoryScreen();
   }
@@ -1914,6 +1929,287 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     return generatedPuzzle;
+  }
+
+  function getChainPlacementCandidates(word, config, plannedLetters, minimumNewCells) {
+    const candidates = [];
+    const orientations = config.reverse
+      ? [
+          { letters: word, reversed: false },
+          { letters: word.split('').reverse().join(''), reversed: true }
+        ]
+      : [{ letters: word, reversed: false }];
+
+    orientations.forEach(({ letters, reversed }) => {
+      config.directions.forEach((directionName) => {
+        const direction = DIRECTIONS[directionName];
+        for (let row = 0; row < config.gridSize; row += 1) {
+          for (let col = 0; col < config.gridSize; col += 1) {
+            const endRow = row + direction.row * (letters.length - 1);
+            const endCol = col + direction.col * (letters.length - 1);
+            if (
+              endRow < 0 || endRow >= config.gridSize
+              || endCol < 0 || endCol >= config.gridSize
+            ) {
+              continue;
+            }
+
+            const cells = [];
+            let compatible = true;
+            let newCellCount = 0;
+            for (let index = 0; index < letters.length; index += 1) {
+              const nextRow = row + direction.row * index;
+              const nextCol = col + direction.col * index;
+              const key = getCellKey(nextRow, nextCol);
+              const existingLetter = plannedLetters.get(key);
+              if (existingLetter && existingLetter !== letters[index]) {
+                compatible = false;
+                break;
+              }
+              if (!existingLetter) {
+                newCellCount += 1;
+              }
+              cells.push({ row: nextRow, col: nextCol, letter: letters[index] });
+            }
+
+            if (compatible && newCellCount >= minimumNewCells) {
+              candidates.push({ cells, reversed, newCellCount });
+            }
+          }
+        }
+      });
+    });
+
+    return shuffleWords(candidates);
+  }
+
+  function planChainPaths(targetWords, config, minimumNewCells) {
+    const plannedLetters = new Map();
+    const cellsByWord = {};
+    const introducedCellsByWord = {};
+    const reversedWords = new Set();
+    let visitedNodes = 0;
+
+    const placeNextWord = (wordIndex) => {
+      if (wordIndex === targetWords.length) {
+        return !config.reverse || reversedWords.size > 0;
+      }
+      if (visitedNodes >= 5000) {
+        return false;
+      }
+
+      const word = targetWords[wordIndex];
+      const candidates = getChainPlacementCandidates(
+        word,
+        config,
+        plannedLetters,
+        minimumNewCells
+      ).slice(0, 240);
+
+      for (const candidate of candidates) {
+        visitedNodes += 1;
+        const addedKeys = [];
+        candidate.cells.forEach((cell) => {
+          const key = getCellKey(cell.row, cell.col);
+          if (!plannedLetters.has(key)) {
+            plannedLetters.set(key, cell.letter);
+            addedKeys.push(key);
+          }
+        });
+        cellsByWord[word] = candidate.cells.map(({ row, col }) => ({ row, col }));
+        introducedCellsByWord[word] = candidate.newCellCount;
+        if (candidate.reversed) {
+          reversedWords.add(word);
+        }
+
+        if (placeNextWord(wordIndex + 1)) {
+          return true;
+        }
+
+        addedKeys.forEach((key) => plannedLetters.delete(key));
+        delete cellsByWord[word];
+        delete introducedCellsByWord[word];
+        reversedWords.delete(word);
+      }
+      return false;
+    };
+
+    if (!placeNextWord(0)) {
+      return null;
+    }
+
+    return {
+      cellsByWord,
+      introducedCellsByWord,
+      reversedWords,
+      visitedNodes
+    };
+  }
+
+  function getRandomLetterExcept(excludedLetters) {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const availableLetters = [...letters].filter((letter) => !excludedLetters.has(letter));
+    return availableLetters[Math.floor(Math.random() * availableLetters.length)];
+  }
+
+  function buildChainFrames(targetWords, pathPlan, config) {
+    const frames = [];
+    const lockedLetters = new Map();
+
+    for (let stageIndex = 0; stageIndex < targetWords.length; stageIndex += 1) {
+      const activeWord = targetWords[stageIndex];
+      const activeCells = pathPlan.cellsByWord[activeWord];
+      const previousFrame = frames[stageIndex - 1] || null;
+      const lockedAfterStage = new Set(lockedLetters.keys());
+      activeCells.forEach((cell) => lockedAfterStage.add(getCellKey(cell.row, cell.col)));
+      const nextWord = targetWords[stageIndex + 1];
+      const nextLettersByCell = new Map();
+      if (nextWord) {
+        const placedNextWord = pathPlan.reversedWords.has(nextWord)
+          ? nextWord.split('').reverse().join('')
+          : nextWord;
+        pathPlan.cellsByWord[nextWord].forEach((cell, index) => {
+          const key = getCellKey(cell.row, cell.col);
+          if (!lockedAfterStage.has(key)) {
+            nextLettersByCell.set(key, placedNextWord[index]);
+          }
+        });
+      }
+
+      let acceptedFrame = null;
+      for (let frameAttempt = 0; frameAttempt < 120 && !acceptedFrame; frameAttempt += 1) {
+        const board = Array.from(
+          { length: config.gridSize },
+          () => Array(config.gridSize).fill('')
+        );
+        lockedLetters.forEach((letter, key) => {
+          const [row, col] = key.split(',').map(Number);
+          board[row][col] = letter;
+        });
+
+        const placedActiveWord = pathPlan.reversedWords.has(activeWord)
+          ? activeWord.split('').reverse().join('')
+          : activeWord;
+        let activeWordFitsTransition = true;
+        activeCells.forEach((cell, index) => {
+          const key = getCellKey(cell.row, cell.col);
+          const letter = placedActiveWord[index];
+          if (
+            previousFrame
+            && !lockedLetters.has(key)
+            && previousFrame[cell.row][cell.col] === letter
+          ) {
+            activeWordFitsTransition = false;
+          }
+          board[cell.row][cell.col] = letter;
+        });
+        if (!activeWordFitsTransition) {
+          return null;
+        }
+
+        for (let row = 0; row < config.gridSize; row += 1) {
+          for (let col = 0; col < config.gridSize; col += 1) {
+            if (board[row][col]) {
+              continue;
+            }
+            const key = getCellKey(row, col);
+            const excludedLetters = new Set();
+            if (previousFrame && !lockedLetters.has(key)) {
+              excludedLetters.add(previousFrame[row][col]);
+            }
+            if (nextLettersByCell.has(key)) {
+              excludedLetters.add(nextLettersByCell.get(key));
+            }
+            board[row][col] = getRandomLetterExcept(excludedLetters);
+          }
+        }
+
+        if (getWordOccurrences(board, activeWord, config).size === 1) {
+          acceptedFrame = board;
+        }
+      }
+
+      if (!acceptedFrame) {
+        return null;
+      }
+      frames.push(acceptedFrame);
+
+      const placedActiveWord = pathPlan.reversedWords.has(activeWord)
+        ? activeWord.split('').reverse().join('')
+        : activeWord;
+      activeCells.forEach((cell, index) => {
+        lockedLetters.set(getCellKey(cell.row, cell.col), placedActiveWord[index]);
+      });
+    }
+
+    return frames;
+  }
+
+  function chainPlanIsValid(targetWords, pathPlan, frames, config) {
+    if (!frames || frames.length !== targetWords.length) {
+      return false;
+    }
+    const lockedKeys = new Set();
+
+    return targetWords.every((word, stageIndex) => {
+      const frame = frames[stageIndex];
+      const cells = pathPlan.cellsByWord[word];
+      const pathText = cells.map((cell) => frame[cell.row][cell.col]).join('');
+      if (
+        pathText !== word
+        && pathText !== word.split('').reverse().join('')
+        || getWordOccurrences(frame, word, config).size !== 1
+      ) {
+        return false;
+      }
+
+      if (stageIndex > 0) {
+        const previousFrame = frames[stageIndex - 1];
+        for (let row = 0; row < config.gridSize; row += 1) {
+          for (let col = 0; col < config.gridSize; col += 1) {
+            const key = getCellKey(row, col);
+            if (lockedKeys.has(key)) {
+              if (frame[row][col] !== previousFrame[row][col]) {
+                return false;
+              }
+            } else if (frame[row][col] === previousFrame[row][col]) {
+              return false;
+            }
+          }
+        }
+      }
+
+      cells.forEach((cell) => lockedKeys.add(getCellKey(cell.row, cell.col)));
+      return true;
+    });
+  }
+
+  function buildChainPuzzle(config) {
+    for (let wordSetAttempt = 0; wordSetAttempt < 24; wordSetAttempt += 1) {
+      const targetWords = chooseTargetWords(selectedCategory, config);
+      if (targetWords.length !== config.wordCount) {
+        continue;
+      }
+
+      for (let planAttempt = 0; planAttempt < 8; planAttempt += 1) {
+        const pathPlan = planChainPaths(targetWords, config, 2)
+          || planChainPaths(targetWords, config, 1);
+        if (!pathPlan) {
+          continue;
+        }
+        const frames = buildChainFrames(targetWords, pathPlan, config);
+        if (chainPlanIsValid(targetWords, pathPlan, frames, config)) {
+          return {
+            targetWords,
+            ...pathPlan,
+            frames,
+            wordSetAttempts: wordSetAttempt + 1,
+            planAttempts: planAttempt + 1
+          };
+        }
+      }
+    }
+    return null;
   }
 
   function getCellKey(row, col) {
@@ -2164,8 +2460,14 @@ document.addEventListener('DOMContentLoaded', () => {
     wordList.innerHTML = '';
 
     const isDiscoveryMode = ['secret', 'combined'].includes(selectedGameMode);
+    const isChainMode = selectedGameMode === 'chain';
     wordPanel.classList.toggle('word-panel--secret', isDiscoveryMode);
-    wordListTitle.textContent = isDiscoveryMode ? 'PENEMUAN' : 'Senarai Kata';
+    wordPanel.classList.toggle('word-panel--chain', isChainMode);
+    wordListTitle.textContent = isChainMode
+      ? 'KATA DITEMUI'
+      : isDiscoveryMode
+        ? 'PENEMUAN'
+        : 'Senarai Kata';
     secretProgress.classList.toggle('hidden', !isDiscoveryMode);
     secretProgress.replaceChildren();
     if (isDiscoveryMode) {
@@ -2183,8 +2485,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     wordList.setAttribute(
       'aria-label',
-      isDiscoveryMode ? 'Kata rahsia yang telah ditemui' : 'Senarai kata'
+      isChainMode
+        ? 'Sejarah kata rantaian yang telah ditemui'
+        : isDiscoveryMode
+          ? 'Kata rahsia yang telah ditemui'
+          : 'Senarai kata'
     );
+
+    if (isChainMode) {
+      const completedWords = getTargetWords().filter((word) => foundWords.has(word));
+      if (!completedWords.length) {
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'chain-history-empty';
+        emptyItem.textContent = 'Belum ada kata ditemui.';
+        wordList.appendChild(emptyItem);
+        return;
+      }
+
+      completedWords.forEach((word) => {
+        const item = document.createElement('li');
+        const wordLabel = getWordLabel(word);
+        const color = wordColors.get(word);
+        item.className = 'word-item completed';
+        item.textContent = wordLabel;
+        item.setAttribute('aria-label', `${wordLabel} ditemui`);
+        if (wordLabel.length > 7 || /[\s-]/.test(wordLabel)) {
+          item.classList.add('word-item--wide');
+        }
+        if (color) {
+          item.style.setProperty('--word-color', color.background);
+          item.style.setProperty('--word-border', color.border);
+        }
+        wordList.appendChild(item);
+      });
+      return;
+    }
 
     getTargetWords().forEach((word) => {
       const item = document.createElement('li');
@@ -2256,6 +2591,37 @@ document.addEventListener('DOMContentLoaded', () => {
       item.append(title, text);
       hintList.appendChild(item);
     });
+  }
+
+  function renderChainPanel() {
+    const isChainMode = selectedGameMode === 'chain';
+    chainPanel.classList.toggle('hidden', !isChainMode);
+    if (!isChainMode || !chainPlan) {
+      chainStatus.textContent = '';
+      return;
+    }
+
+    const totalWords = getTargetWords().length;
+    const isComplete = foundWords.size === totalWords;
+    chainTarget.textContent = isComplete
+      ? 'RANTAIAN LENGKAP!'
+      : getWordLabel(getTargetWords()[chainStageIndex]);
+    chainStage.textContent = isComplete
+      ? `Rantaian ${totalWords} daripada ${totalWords}`
+      : `Rantaian ${chainStageIndex + 1} daripada ${totalWords}`;
+    chainProgress.textContent = `${foundWords.size}/${totalWords} selesai`;
+    chainProgressFill.style.width = `${(foundWords.size / totalWords) * 100}%`;
+    chainProgressFill.parentElement.setAttribute('role', 'progressbar');
+    chainProgressFill.parentElement.setAttribute('aria-valuemin', '0');
+    chainProgressFill.parentElement.setAttribute('aria-valuemax', String(totalWords));
+    chainProgressFill.parentElement.setAttribute('aria-valuenow', String(foundWords.size));
+    chainProgressFill.parentElement.setAttribute(
+      'aria-label',
+      `${foundWords.size} daripada ${totalWords} kata rantaian selesai`
+    );
+    if (isComplete) {
+      chainStatus.textContent = 'Semua kata rantaian ditemui.';
+    }
   }
 
   function requestHint() {
@@ -2361,6 +2727,65 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function applyChainFrame(stageIndex) {
+    if (!chainPlan?.frames[stageIndex]) {
+      return;
+    }
+
+    const nextBoard = chainPlan.frames[stageIndex];
+    const lockedKeys = new Set();
+    foundWords.forEach((word) => {
+      puzzle.cellsByWord[word].forEach((cell) => {
+        lockedKeys.add(getCellKey(cell.row, cell.col));
+      });
+    });
+
+    puzzle.board = nextBoard.map((row) => [...row]);
+    wordGrid.querySelectorAll('.cell').forEach((cell) => {
+      const row = Number(cell.dataset.row);
+      const col = Number(cell.dataset.col);
+      if (lockedKeys.has(getCellKey(row, col))) {
+        return;
+      }
+      cell.textContent = puzzle.board[row][col];
+      cell.setAttribute(
+        'aria-label',
+        `${puzzle.board[row][col]}, baris ${row + 1}, lajur ${col + 1}`
+      );
+    });
+  }
+
+  function beginChainTransition() {
+    chainTransitioning = true;
+    chainStatus.textContent = 'Bagus! Papan sedang berubah untuk sasaran seterusnya.';
+    chainTarget.textContent = 'PAPAN SEDANG BERUBAH…';
+    wordGrid.classList.add('word-grid--transitioning');
+    clearSelection();
+
+    const updateBoard = () => {
+      chainStageIndex += 1;
+      applyChainFrame(chainStageIndex);
+      renderChainPanel();
+      chainStatus.textContent = `Sasaran ${chainStageIndex + 1} sudah tersedia.`;
+    };
+    const finishTransition = () => {
+      wordGrid.classList.remove('word-grid--transitioning');
+      chainTransitioning = false;
+    };
+
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+    window.clearTimeout(chainTransitionTimer);
+    if (reducedMotion) {
+      updateBoard();
+      finishTransition();
+      return;
+    }
+    chainTransitionTimer = window.setTimeout(() => {
+      updateBoard();
+      chainTransitionTimer = window.setTimeout(finishTransition, 250);
+    }, 250);
+  }
+
   function clearSelection() {
     document.querySelectorAll('.cell').forEach((cell) => {
       cell.classList.remove('selected');
@@ -2426,8 +2851,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderWordList();
     renderHints();
+    renderChainPanel();
 
     victorySummary.textContent = `${foundWords.size}/${getTargetWords().length} kata ditemui`;
+
+    if (selectedGameMode === 'chain' && foundWords.size < getTargetWords().length) {
+      beginChainTransition();
+      return true;
+    }
 
     if (foundWords.size === getTargetWords().length) {
       const reward = awardPuzzleCompletion();
@@ -2447,7 +2878,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function finishSelection(event) {
-    if (!isDragging) {
+    if (!isDragging || chainTransitioning) {
       return;
     }
 
@@ -2455,7 +2886,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const matchedWord = getTargetWords().find((word) => (
+    const selectableWords = selectedGameMode === 'chain'
+      ? [getTargetWords()[chainStageIndex]]
+      : getTargetWords();
+    const matchedWord = selectableWords.find((word) => (
       selectionsMatch(currentSelection, puzzle.cellsByWord[word])
     ));
 
@@ -2466,7 +2900,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(
           ['secret', 'combined'].includes(selectedGameMode)
             ? `Hebat! ${getWordLabel(matchedWord)} ditemui!`
-            : 'Betul!',
+            : selectedGameMode === 'chain'
+              ? 'Betul! Papan berubah…'
+              : 'Betul!',
           'success'
         );
       } else {
@@ -2577,6 +3013,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let generatedHiddenMask = new Set();
     let generatedTargetHiddenMask = new Set();
     let generatedFillerHiddenMask = new Set();
+    let generatedChainPlan = null;
     if (selectedGameMode === 'secret') {
       const secretResult = buildSecretPuzzle(config);
       currentTargetWords = secretResult?.targetWords || [];
@@ -2595,6 +3032,16 @@ document.addEventListener('DOMContentLoaded', () => {
       generatedHiddenMask = hiddenResult?.hiddenMask.all || new Set();
       generatedTargetHiddenMask = hiddenResult?.hiddenMask.target || new Set();
       generatedFillerHiddenMask = hiddenResult?.hiddenMask.filler || new Set();
+    } else if (selectedGameMode === 'chain') {
+      generatedChainPlan = buildChainPuzzle(config);
+      currentTargetWords = generatedChainPlan?.targetWords || [];
+      generatedPuzzle = generatedChainPlan
+        ? {
+            board: generatedChainPlan.frames[0],
+            cellsByWord: generatedChainPlan.cellsByWord,
+            reversedWords: generatedChainPlan.reversedWords
+          }
+        : null;
     } else {
       currentTargetWords = chooseTargetWords(selectedCategory, config);
       generatedPuzzle = buildBoard(currentTargetWords, config);
@@ -2608,6 +3055,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ? 'Papan misteri berganda yang adil tidak dapat dibina. Sila pilih mod semula.'
           : selectedGameMode === 'hidden'
             ? 'Papan huruf tersembunyi tidak dapat dibina. Sila cuba lagi.'
+            : selectedGameMode === 'chain'
+              ? 'Rantaian lengkap tidak dapat dirancang. Sila cuba mod ini semula.'
             : 'Papan tidak dapat dibina. Cuba lagi.'
       );
       showCategoryScreen();
@@ -2635,6 +3084,13 @@ document.addEventListener('DOMContentLoaded', () => {
     fillerHiddenCellKeys = new Set(generatedFillerHiddenMask);
     revealedHiddenCellKeys = new Set();
     hintedWords = new Set();
+    chainPlan = generatedChainPlan;
+    chainStageIndex = 0;
+    chainTransitioning = false;
+    window.clearTimeout(chainTransitionTimer);
+    chainTransitionTimer = null;
+    wordGrid.classList.remove('word-grid--transitioning');
+    chainStatus.textContent = '';
     hintStatus.textContent = '';
     assignWordColors();
     clearSelection();
@@ -2687,9 +3143,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderWordList();
     renderHints();
+    renderChainPanel();
 
     wordGrid.querySelectorAll('.cell').forEach((cell) => {
       cell.addEventListener('pointerdown', (event) => {
+        if (chainTransitioning) {
+          event.preventDefault();
+          return;
+        }
         if (event.pointerType === 'mouse' && event.button !== 0) {
           return;
         }

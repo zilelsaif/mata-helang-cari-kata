@@ -1458,6 +1458,87 @@ button.raka-gallery-card:focus-visible {
   font-weight: 900;
 }
 
+.chain-panel {
+  display: grid;
+  gap: 7px;
+  margin: -4px 0 14px;
+  padding: 13px 14px;
+  border: 1px solid #bca5dc;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #faf7ff, #eefafa);
+  text-align: center;
+}
+
+.chain-panel.hidden {
+  display: none;
+}
+
+.chain-target-heading {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.chain-target {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: clamp(1.35rem, 5vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: normal;
+}
+
+.chain-progress-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.chain-progress-row strong {
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.chain-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfeaf2;
+}
+
+.chain-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2bb8e8, #eda53b);
+  transition: width 240ms ease;
+}
+
+.chain-status {
+  min-height: 1.3em;
+  margin: 0;
+  color: #145b66;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.word-grid--transitioning .cell:not(.found) {
+  animation: chain-board-change 500ms ease both;
+  pointer-events: none;
+}
+
+@keyframes chain-board-change {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  45%, 55% { opacity: 0.28; transform: scale(0.94); }
+}
+
 .word-grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-size, 6), minmax(0, 1fr));
@@ -1633,6 +1714,11 @@ button.raka-gallery-card:focus-visible {
   border-color: #bca5dc;
 }
 
+.mode-button--chain {
+  background: linear-gradient(145deg, #fff6df, #f4ecff);
+  border-color: #d9ad67;
+}
+
 .mode-button:hover,
 .mode-button:focus-visible,
 .mode-button.selected {
@@ -1705,6 +1791,36 @@ button.raka-gallery-card:focus-visible {
 
 .word-panel--secret .word-item.completed {
   text-decoration: none;
+}
+
+.word-panel--chain .word-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.word-panel--chain .word-item {
+  min-width: 0;
+  padding: 7px 6px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  overflow-wrap: normal;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.word-panel--chain .word-item--wide {
+  grid-column: 1 / -1;
+  white-space: normal;
+}
+
+.chain-history-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .word-grid.wrong-selection {
@@ -2043,6 +2159,10 @@ button.raka-gallery-card:focus-visible {
 @media (min-width: 600px) {
   .mode-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mode-button--chain {
+    grid-column: 1 / -1;
   }
 
   .panel {

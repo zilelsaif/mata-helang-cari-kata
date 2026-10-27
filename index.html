@@ -260,6 +260,10 @@
             <strong>MISTERI BERGANDA</strong>
             <span>Cari perkataan tanpa senarai kata, dengan sebahagian huruf tersembunyi!</span>
           </button>
+          <button class="mode-button mode-button--chain" data-mode="chain" type="button">
+            <strong>RANTAIAN KATA</strong>
+            <span>Cari satu perkataan demi satu. Setiap penemuan mengubah papan!</span>
+          </button>
         </div>
 
         <button id="mode-back-button" class="secondary-button" type="button">KEMBALI</button>
@@ -280,6 +284,19 @@
           <p id="hint-helper" class="hint-helper">Perlukan bantuan? Raka boleh berikan petunjuk!</p>
           <p id="hint-status" class="hint-status" aria-live="polite"></p>
           <ul id="hint-list" class="hint-list" aria-label="Petunjuk yang masih aktif"></ul>
+        </section>
+
+        <section id="chain-panel" class="chain-panel hidden" aria-label="Kemajuan Rantaian Kata">
+          <p class="chain-target-heading">SASARAN SEKARANG</p>
+          <p id="chain-target" class="chain-target"></p>
+          <div class="chain-progress-row">
+            <span id="chain-stage"></span>
+            <strong id="chain-progress"></strong>
+          </div>
+          <div class="chain-progress-track" aria-hidden="true">
+            <span id="chain-progress-fill"></span>
+          </div>
+          <p id="chain-status" class="chain-status" aria-live="polite"></p>
         </section>
 
         <div class="game-layout">
@@ -425,7 +442,7 @@
     </div>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.21.0 by Zil-el-Saif
+      v0.22.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>
