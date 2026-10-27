@@ -2029,6 +2029,11 @@ document.addEventListener('DOMContentLoaded', () => {
       item.textContent = wordLabel;
 
       if (foundWords.has(word)) {
+        // Keep longer or naturally separated labels readable in the two-column panel.
+        if (wordLabel.length > 7 || /[\s-]/.test(wordLabel)) {
+          item.classList.add('word-item--wide');
+        }
+
         const color = wordColors.get(word);
         item.classList.add('completed');
         item.setAttribute('aria-label', `${wordLabel} ditemui`);

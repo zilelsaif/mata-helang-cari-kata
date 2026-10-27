@@ -1553,10 +1553,20 @@ button.raka-gallery-card:focus-visible {
   min-width: 0;
   min-height: 44px;
   place-items: center;
-  padding: 7px 8px;
+  padding: 7px 5px;
   border-radius: 12px;
-  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
   text-align: center;
+}
+
+.word-panel--secret .word-item--wide {
+  grid-column: 1 / -1;
+  padding-inline: 8px;
+  white-space: normal;
 }
 
 .word-panel--secret .mystery-slot {
