@@ -1521,10 +1521,25 @@ button.raka-gallery-card:focus-visible {
 }
 
 .secret-progress {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
   margin: 0 0 12px;
   color: var(--primary-dark);
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 900;
+}
+
+.secret-progress.hidden {
+  display: none;
+}
+
+.secret-progress strong {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 .word-panel--secret .word-list {
@@ -1870,6 +1885,15 @@ button.raka-gallery-card:focus-visible {
 }
 
 @media (max-width: 340px) {
+  .secret-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
   .raka-card-grid {
     grid-template-columns: minmax(0, 1fr);
   }

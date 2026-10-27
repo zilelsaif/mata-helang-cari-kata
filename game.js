@@ -1992,11 +1992,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isSecretMode = selectedGameMode === 'secret';
     wordPanel.classList.toggle('word-panel--secret', isSecretMode);
-    wordListTitle.textContent = isSecretMode ? 'PENCARIAN RAHSIA' : 'Senarai Kata';
+    wordListTitle.textContent = isSecretMode ? 'PENEMUAN' : 'Senarai Kata';
     secretProgress.classList.toggle('hidden', !isSecretMode);
-    secretProgress.textContent = isSecretMode
-      ? `Kata Ditemui: ${foundWords.size} / ${getTargetWords().length}`
-      : '';
+    secretProgress.replaceChildren();
+    if (isSecretMode) {
+      const progressNumber = document.createElement('strong');
+      const progressLabel = document.createElement('span');
+      progressNumber.textContent = `${foundWords.size}/${getTargetWords().length}`;
+      progressLabel.textContent = 'Ditemui';
+      secretProgress.append(progressNumber, progressLabel);
+      secretProgress.setAttribute(
+        'aria-label',
+        `${foundWords.size} daripada ${getTargetWords().length} kata ditemui`
+      );
+    } else {
+      secretProgress.removeAttribute('aria-label');
+    }
     wordList.setAttribute(
       'aria-label',
       isSecretMode ? 'Kata rahsia yang telah ditemui' : 'Senarai kata'
@@ -2538,9 +2549,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    gameHeading.textContent = selectedGameMode === 'secret'
-      ? 'PENCARIAN RAHSIA'
-      : 'CARI KATA';
+    gameHeading.textContent = 'CARI KATA';
     gameSessionLabel.textContent = `Umur: ${selectedAge} | Kategori: ${selectedCategory}`;
     gameModeLabel.textContent = GAME_MODES[selectedGameMode].label;
     showCategoryMessage('');
