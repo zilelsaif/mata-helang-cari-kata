@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameFeedback = document.getElementById('game-feedback');
   const hintPanel = document.getElementById('hint-panel');
   const hintButton = document.getElementById('hint-button');
+  const hintHelper = document.getElementById('hint-helper');
   const hintStatus = document.getElementById('hint-status');
   const hintList = document.getElementById('hint-list');
   const victoryPanel = document.getElementById('victory-panel');
@@ -2219,10 +2220,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function getHintText(word) {
-    return `Salah satu kata bermula dengan ${word[0]}. Panjangnya ${word.length} huruf.`;
-  }
-
   function renderHints() {
     const isCombinedMode = selectedGameMode === 'combined';
     hintPanel.classList.toggle('hidden', !isCombinedMode);
@@ -2233,12 +2230,30 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    hintedWords.forEach((word) => {
-      if (foundWords.has(word)) {
-        return;
-      }
+    const activeHints = [...hintedWords].filter((word) => !foundWords.has(word));
+    hintHelper.classList.toggle('hidden', activeHints.length > 0);
+
+    activeHints.forEach((word, index) => {
       const item = document.createElement('li');
-      item.textContent = getHintText(word);
+      item.className = 'hint-card';
+      const title = document.createElement('strong');
+      const text = document.createElement('p');
+      const firstLetter = document.createElement('span');
+      const wordLength = document.createElement('span');
+
+      title.textContent = `Petunjuk ${index + 1}`;
+      firstLetter.className = 'hint-emphasis';
+      firstLetter.textContent = word[0];
+      wordLength.className = 'hint-emphasis';
+      wordLength.textContent = String(word.length);
+      text.append(
+        'Salah satu kata bermula dengan ',
+        firstLetter,
+        '. Panjangnya ',
+        wordLength,
+        ' huruf.'
+      );
+      item.append(title, text);
       hintList.appendChild(item);
     });
   }

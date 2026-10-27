@@ -1356,9 +1356,9 @@ button.raka-gallery-card:focus-visible {
 .hint-panel {
   display: grid;
   justify-items: center;
-  gap: 8px;
+  gap: 4px;
   margin: -4px 0 14px;
-  padding: 12px;
+  padding: 8px 12px;
   border: 1px solid #b9dfe3;
   border-radius: 16px;
   background: #eefafa;
@@ -1379,6 +1379,19 @@ button.raka-gallery-card:focus-visible {
   cursor: pointer;
 }
 
+.hint-helper {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.hint-helper.hidden {
+  display: none;
+}
+
 .hint-button:hover,
 .hint-button:focus-visible {
   background: #d9f3f3;
@@ -1387,7 +1400,6 @@ button.raka-gallery-card:focus-visible {
 }
 
 .hint-status {
-  min-height: 1.3em;
   margin: 0;
   color: var(--muted);
   font-size: 0.86rem;
@@ -1395,10 +1407,17 @@ button.raka-gallery-card:focus-visible {
   text-align: center;
 }
 
+.hint-status:empty {
+  display: none;
+}
+
 .hint-list {
+  display: grid;
+  gap: 7px;
   width: 100%;
   margin: 0;
-  padding-left: 1.25rem;
+  padding: 0;
+  list-style: none;
   color: var(--primary-dark);
   font-size: 0.9rem;
   font-weight: 700;
@@ -1407,6 +1426,36 @@ button.raka-gallery-card:focus-visible {
 
 .hint-list:empty {
   display: none;
+}
+
+.hint-card {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #b9dfe3;
+  border-radius: 12px;
+  background: #fff;
+  overflow-wrap: normal;
+  text-align: left;
+}
+
+.hint-card strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #145b66;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.hint-card p {
+  margin: 0;
+  color: var(--primary-dark);
+  line-height: 1.4;
+}
+
+.hint-emphasis {
+  color: #a5520b;
+  font-weight: 900;
 }
 
 .word-grid {
