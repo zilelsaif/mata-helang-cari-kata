@@ -1868,6 +1868,14 @@ button.raka-gallery-card:focus-visible {
   box-shadow: 0 6px 14px rgba(12, 76, 148, 0.12);
 }
 
+.game-menu-button:hover,
+.game-menu-button:focus-visible {
+  border-color: var(--primary);
+  background: #fff;
+  outline: 3px solid rgba(29, 111, 214, 0.22);
+  outline-offset: 2px;
+}
+
 .exit-confirmation {
   position: absolute;
   inset: 0;

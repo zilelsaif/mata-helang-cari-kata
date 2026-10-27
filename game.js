@@ -1786,6 +1786,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeExitConfirmation() {
     exitConfirmation.classList.add('hidden');
+    document.body.classList.remove('modal-open');
     gameMenuButton.focus();
   }
 
@@ -1803,6 +1804,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chainTransitioning = false;
     wordGrid.classList.remove('word-grid--transitioning');
     exitConfirmation.classList.add('hidden');
+    document.body.classList.remove('modal-open');
     showCategoryScreen();
   }
 
@@ -1812,8 +1814,35 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // A modal or navigation change must never leave a half-finished drag active.
+    resetActivePointer();
     exitConfirmation.classList.remove('hidden');
+    document.body.classList.add('modal-open');
     continueGameButton.focus();
+  }
+
+  function handleExitConfirmationKeydown(event) {
+    if (exitConfirmation.classList.contains('hidden')) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeExitConfirmation();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusable = [continueGameButton, exitGameButton];
+    const currentIndex = focusable.indexOf(document.activeElement);
+    const nextIndex = event.shiftKey
+      ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+      : (currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
+    event.preventDefault();
+    focusable[nextIndex].focus();
   }
 
   function getRandomLetter() {
@@ -2756,6 +2785,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function beginChainTransition() {
+    const transitionPuzzleId = currentPuzzleId;
     chainTransitioning = true;
     chainStatus.textContent = 'Bagus! Papan sedang berubah untuk sasaran seterusnya.';
     chainTarget.textContent = 'PAPAN SEDANG BERUBAH…';
@@ -2763,14 +2793,21 @@ document.addEventListener('DOMContentLoaded', () => {
     clearSelection();
 
     const updateBoard = () => {
+      if (currentPuzzleId !== transitionPuzzleId || selectedGameMode !== 'chain') {
+        return;
+      }
       chainStageIndex += 1;
       applyChainFrame(chainStageIndex);
       renderChainPanel();
       chainStatus.textContent = `Sasaran ${chainStageIndex + 1} sudah tersedia.`;
     };
     const finishTransition = () => {
+      if (currentPuzzleId !== transitionPuzzleId || selectedGameMode !== 'chain') {
+        return;
+      }
       wordGrid.classList.remove('word-grid--transitioning');
       chainTransitioning = false;
+      chainTransitionTimer = null;
     };
 
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
@@ -2791,6 +2828,20 @@ document.addEventListener('DOMContentLoaded', () => {
       cell.classList.remove('selected');
     });
     currentSelection = [];
+  }
+
+  function resetActivePointer(releaseCapture = true) {
+    clearSelection();
+    if (
+      releaseCapture
+      && activePointerId !== null
+      && wordGrid.hasPointerCapture?.(activePointerId)
+    ) {
+      wordGrid.releasePointerCapture(activePointerId);
+    }
+    isDragging = false;
+    activePointerId = null;
+    dragStartCell = null;
   }
 
   function clearFeedback() {
@@ -2917,13 +2968,7 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    if (activePointerId !== null && wordGrid.hasPointerCapture(activePointerId)) {
-      wordGrid.releasePointerCapture(activePointerId);
-    }
-
-    isDragging = false;
-    activePointerId = null;
-    dragStartCell = null;
+    resetActivePointer();
   }
 
   function getLineBetweenCells(startCell, endCell) {
@@ -3093,11 +3138,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chainStatus.textContent = '';
     hintStatus.textContent = '';
     assignWordColors();
-    clearSelection();
+    resetActivePointer();
     clearFeedback();
-    isDragging = false;
-    activePointerId = null;
-    dragStartCell = null;
     victoryPanel.classList.add('hidden');
     victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
     victoryProgress.classList.remove('hidden');
@@ -3514,6 +3556,10 @@ document.addEventListener('DOMContentLoaded', () => {
   startBrandIntro();
 
   document.addEventListener('keydown', (event) => {
+    if (!exitConfirmation.classList.contains('hidden')) {
+      handleExitConfirmationKeydown(event);
+      return;
+    }
     if (!cardReveal.classList.contains('hidden')) {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -3575,9 +3621,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    clearSelection();
-    isDragging = false;
-    activePointerId = null;
-    dragStartCell = null;
+    resetActivePointer(false);
+  });
+
+  wordGrid.addEventListener('lostpointercapture', (event) => {
+    if (isDragging && event.pointerId === activePointerId) {
+      resetActivePointer(false);
+    }
+  });
+
+  window.addEventListener('blur', () => resetActivePointer(false));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      resetActivePointer(false);
+    }
   });
 });
