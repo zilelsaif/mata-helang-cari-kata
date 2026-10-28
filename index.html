@@ -72,7 +72,7 @@
       </section>
 
       <section id="player-screen" class="panel profile-panel" aria-labelledby="player-title" aria-hidden="true">
-        <p class="eyebrow">Ruang Pemain</p>
+        <p class="eyebrow">Ruang Pengembara</p>
         <h2 id="player-title">PILIH PEMAIN</h2>
         <p id="profile-storage-message" class="profile-message" aria-live="polite"></p>
 
@@ -245,22 +245,27 @@
 
         <div class="mode-list" aria-label="Pilihan mod permainan">
           <button class="mode-button" data-mode="classic" type="button">
+            <span class="mode-emblem" aria-hidden="true">✦</span>
             <strong>KLASIK</strong>
             <span>Cari perkataan berdasarkan senarai kata.</span>
           </button>
           <button class="mode-button mode-button--secret" data-mode="secret" type="button">
+            <span class="mode-emblem" aria-hidden="true">?</span>
             <strong>PENCARIAN RAHSIA</strong>
             <span>Cari semua perkataan tanpa senarai kata!</span>
           </button>
           <button class="mode-button mode-button--hidden" data-mode="hidden" type="button">
+            <span class="mode-emblem" aria-hidden="true">◐</span>
             <strong>HURUF TERSEMBUNYI</strong>
             <span>Cari perkataan walaupun sebahagian huruf disembunyikan!</span>
           </button>
           <button class="mode-button mode-button--combined" data-mode="combined" type="button">
+            <span class="mode-emblem" aria-hidden="true">◆</span>
             <strong>MISTERI BERGANDA</strong>
             <span>Cari perkataan tanpa senarai kata, dengan sebahagian huruf tersembunyi!</span>
           </button>
           <button class="mode-button mode-button--chain" data-mode="chain" type="button">
+            <span class="mode-emblem" aria-hidden="true">↻</span>
             <strong>RANTAIAN KATA</strong>
             <span>Cari satu perkataan demi satu. Setiap penemuan mengubah papan!</span>
           </button>
@@ -310,7 +315,7 @@
         </div>
 
         <div id="victory-panel" class="victory-panel hidden" aria-live="polite">
-          <h3>TAHNIAH!</h3>
+          <h3 id="victory-title">TAHNIAH!</h3>
           <p>Semua kata ditemui.</p>
           <p id="victory-summary" class="victory-summary">0/0 kata ditemui</p>
           <div id="victory-progress" class="victory-progress">
@@ -442,7 +447,7 @@
     </div>
 
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.23.0 by Zil-el-Saif
+      v0.24.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>

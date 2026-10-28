@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chainProgressFill = document.getElementById('chain-progress-fill');
   const chainStatus = document.getElementById('chain-status');
   const victoryPanel = document.getElementById('victory-panel');
+  const victoryTitle = document.getElementById('victory-title');
   const victorySummary = document.getElementById('victory-summary');
   const victoryProgress = document.getElementById('victory-progress');
   const victoryJejakEarned = document.getElementById('victory-jejak-earned');
@@ -1530,8 +1531,31 @@ document.addEventListener('DOMContentLoaded', () => {
       const status = document.createElement('span');
       const progress = getProgressForProfile(profile.id);
       const rank = getRankForJejak(progress.totalJejak);
-      status.textContent = `${progress.totalJejak} Jejak • Tahap ${rank.level} • ${rank.name}`;
-      details.append(name, status);
+      const nextRank = getNextRank(rank);
+      status.className = 'profile-rank';
+      status.textContent = `Tahap ${rank.level} • ${rank.name}`;
+
+      const jejak = document.createElement('span');
+      jejak.className = 'profile-jejak';
+      jejak.textContent = `${progress.totalJejak} Jejak Helang`;
+
+      const rankProgress = document.createElement('div');
+      rankProgress.className = 'profile-rank-progress';
+      const rankProgressFill = document.createElement('span');
+      const rankProgressText = document.createElement('small');
+      if (nextRank) {
+        const range = nextRank.threshold - rank.threshold;
+        const earnedInRank = progress.totalJejak - rank.threshold;
+        const percentage = Math.max(0, Math.min(100, (earnedInRank / range) * 100));
+        rankProgressFill.style.width = `${percentage}%`;
+        rankProgressText.textContent = `${nextRank.threshold - progress.totalJejak} Jejak lagi ke Tahap ${nextRank.level}`;
+      } else {
+        rankProgress.classList.add('profile-rank-progress--complete');
+        rankProgressFill.style.width = '100%';
+        rankProgressText.textContent = 'Tahap tertinggi dicapai';
+      }
+      rankProgress.append(rankProgressFill);
+      details.append(name, status, jejak, rankProgress, rankProgressText);
 
       const controls = document.createElement('div');
       controls.className = 'profile-card-controls';
@@ -3141,6 +3165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetActivePointer();
     clearFeedback();
     victoryPanel.classList.add('hidden');
+    victoryTitle.textContent = selectedGameMode === 'chain' ? 'RANTAIAN LENGKAP!' : 'TAHNIAH!';
     victorySummary.textContent = `0/${getTargetWords().length} kata ditemui`;
     victoryProgress.classList.remove('hidden');
     victoryJejakEarned.textContent = '';
