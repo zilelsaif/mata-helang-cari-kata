@@ -1,0 +1,250 @@
+{
+  "project": "Mata Helang: Cari Kata",
+  "batch": "04 — Ikon Mod & Tindakan",
+  "source": "Generated transparent icon sheet",
+  "note": "Images have decorative label ribbons embedded; keep real HTML button text and accessibility labels. Do not substitute PNG text for semantic controls.",
+  "dimensions": [
+    256,
+    256
+  ],
+  "icons": [
+    {
+      "id": "mod-klasik",
+      "file": "mod-klasik.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 28328,
+      "source_bbox": [
+        10,
+        72,
+        320,
+        462
+      ]
+    },
+    {
+      "id": "mod-pencarian-rahsia",
+      "file": "mod-pencarian-rahsia.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 28856,
+      "source_bbox": [
+        320,
+        72,
+        618,
+        461
+      ]
+    },
+    {
+      "id": "mod-huruf-tersembunyi",
+      "file": "mod-huruf-tersembunyi.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 28780,
+      "source_bbox": [
+        618,
+        72,
+        917,
+        460
+      ]
+    },
+    {
+      "id": "mod-misteri-berganda",
+      "file": "mod-misteri-berganda.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 29506,
+      "source_bbox": [
+        919,
+        73,
+        1221,
+        461
+      ]
+    },
+    {
+      "id": "mod-rantaian-kata",
+      "file": "mod-rantaian-kata.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 27992,
+      "source_bbox": [
+        1221,
+        72,
+        1527,
+        462
+      ]
+    },
+    {
+      "id": "btn-main",
+      "file": "btn-main.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 21942,
+      "source_bbox": [
+        23,
+        498,
+        308,
+        718
+      ]
+    },
+    {
+      "id": "btn-koleksi",
+      "file": "btn-koleksi.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 23804,
+      "source_bbox": [
+        317,
+        499,
+        537,
+        709
+      ]
+    },
+    {
+      "id": "btn-ubah",
+      "file": "btn-ubah.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 22486,
+      "source_bbox": [
+        546,
+        497,
+        773,
+        709
+      ]
+    },
+    {
+      "id": "btn-padam",
+      "file": "btn-padam.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 22450,
+      "source_bbox": [
+        777,
+        497,
+        1004,
+        709
+      ]
+    },
+    {
+      "id": "btn-tambah-profil",
+      "file": "btn-tambah-profil.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 25064,
+      "source_bbox": [
+        1020,
+        496,
+        1260,
+        709
+      ]
+    },
+    {
+      "id": "btn-main-tanpa-profil",
+      "file": "btn-main-tanpa-profil.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 26080,
+      "source_bbox": [
+        1270,
+        497,
+        1513,
+        709
+      ]
+    },
+    {
+      "id": "btn-kenali-zilteroka",
+      "file": "btn-kenali-zilteroka.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 31002,
+      "source_bbox": [
+        27,
+        736,
+        273,
+        959
+      ]
+    },
+    {
+      "id": "btn-menu",
+      "file": "btn-menu.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 22882,
+      "source_bbox": [
+        279,
+        732,
+        518,
+        957
+      ]
+    },
+    {
+      "id": "btn-kembali",
+      "file": "btn-kembali.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 23772,
+      "source_bbox": [
+        525,
+        732,
+        762,
+        957
+      ]
+    },
+    {
+      "id": "btn-teruskan",
+      "file": "btn-teruskan.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 24350,
+      "source_bbox": [
+        770,
+        732,
+        1012,
+        957
+      ]
+    },
+    {
+      "id": "btn-keluar",
+      "file": "btn-keluar.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 23878,
+      "source_bbox": [
+        1020,
+        732,
+        1260,
+        957
+      ]
+    },
+    {
+      "id": "btn-main-lagi",
+      "file": "btn-main-lagi.webp",
+      "size": "256x256",
+      "format": "WEBP",
+      "alpha": true,
+      "bytes": 26164,
+      "source_bbox": [
+        1268,
+        732,
+        1514,
+        957
+      ]
+    }
+  ]
+}

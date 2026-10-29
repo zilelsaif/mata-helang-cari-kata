@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressPlayerName = document.getElementById('progress-player-name');
   const progressStorageStatus = document.getElementById('progress-storage-status');
   const progressTotalJejak = document.getElementById('progress-total-jejak');
+  const progressRankEmblem = document.getElementById('progress-rank-emblem');
   const progressRankName = document.getElementById('progress-rank-name');
   const progressLevel = document.getElementById('progress-level');
   const rankProgressTrack = document.querySelector('.rank-progress-track');
@@ -156,6 +157,63 @@ document.addEventListener('DOMContentLoaded', () => {
     { threshold: 800, level: 6, name: 'Helang Unggul' },
     { threshold: 1100, level: 7, name: 'Legenda Helang' }
   ];
+
+  // Premium artwork is mapped centrally so UI components never depend on file order.
+  const RANK_ARTWORK = {
+    1: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-01.webp' },
+    2: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-02.webp' },
+    3: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-03.webp' },
+    4: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-04.webp' },
+    5: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-05.webp' },
+    6: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-06.webp' },
+    7: { src: 'assets/pangkat/pangkat-helang/pangkat-helang-tahap-07.webp' }
+  };
+
+  const ACHIEVEMENT_ARTWORK = {
+    'first-puzzle': { src: 'assets/lencana/achievements/jejak-pertama.webp', lockedSrc: null, fallback: '★' },
+    'category-explorer': { src: 'assets/lencana/achievements/peneroka-kategori.webp', lockedSrc: null, fallback: '✦' },
+    'hundred-words': { src: 'assets/lencana/achievements/pemburu-100-kata.webp', lockedSrc: null, fallback: 'A' },
+    'four-ages': { src: 'assets/lencana/achievements/penjelajah-empat-tahap.webp', lockedSrc: null, fallback: '◆' }
+  };
+
+  // New IDs deliberately avoid colliding with the six legacy IDs stored in profiles.
+  const PREMIUM_AVATAR_ASSET_PLAN = [
+    { id: 'premium-awan', name: 'Awan', src: 'assets/avatar/avatar-awan.png' },
+    { id: 'premium-bintang', name: 'Bintang', src: 'assets/avatar/avatar-bintang.png' },
+    { id: 'premium-bulan', name: 'Bulan', src: 'assets/avatar/avatar-bulan.png' },
+    { id: 'premium-kristal', name: 'Kristal', src: 'assets/avatar/avatar-kristal.png' },
+    { id: 'premium-daun', name: 'Daun', src: 'assets/avatar/avatar-daun.png' },
+    { id: 'premium-helang', name: 'Helang', src: 'assets/avatar/avatar-helang.png' },
+    { id: 'premium-rubah', name: 'Rubah', src: 'assets/avatar/avatar-rubah.png' },
+    { id: 'premium-arnab', name: 'Arnab', src: 'assets/avatar/avatar-arnab.png' },
+    { id: 'premium-kucing', name: 'Kucing', src: 'assets/avatar/avatar-kucing.png' },
+    { id: 'premium-robot', name: 'Robot', src: 'assets/avatar/avatar-robot.png' },
+    { id: 'premium-roket', name: 'Roket', src: 'assets/avatar/avatar-roket.png' },
+    { id: 'premium-mentari', name: 'Mentari', src: 'assets/avatar/avatar-mentari.png' }
+  ];
+
+  const MODE_ARTWORK = {
+    classic: 'assets/ikon/mod-klasik.webp',
+    secret: 'assets/ikon/mod-pencarian-rahsia.webp',
+    hidden: 'assets/ikon/mod-huruf-tersembunyi.webp',
+    combined: 'assets/ikon/mod-misteri-berganda.webp',
+    chain: 'assets/ikon/mod-rantaian-kata.webp'
+  };
+
+  const ACTION_ARTWORK = {
+    main: 'assets/ikon/btn-main.webp',
+    collection: 'assets/ikon/btn-koleksi.webp',
+    edit: 'assets/ikon/btn-ubah.webp',
+    delete: 'assets/ikon/btn-padam.webp',
+    addProfile: 'assets/ikon/btn-tambah-profil.webp',
+    guest: 'assets/ikon/btn-main-tanpa-profil.webp',
+    zilteroka: 'assets/ikon/btn-kenali-zilteroka.webp',
+    menu: 'assets/ikon/btn-menu.webp',
+    back: 'assets/ikon/btn-kembali.webp',
+    continue: 'assets/ikon/btn-teruskan.webp',
+    exit: 'assets/ikon/btn-keluar.webp',
+    playAgain: 'assets/ikon/btn-main-lagi.webp'
+  };
 
   const ACHIEVEMENTS = [
     { id: 'first-puzzle', name: 'Jejak Pertama', description: 'Selesaikan teka kata pertama.' },
@@ -381,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let profileData = createEmptyProfileData();
   let storageIsAvailable = true;
   let editingProfileId = null;
-  let selectedAvatarId = AVATARS[0].id;
+  let selectedAvatarId = PREMIUM_AVATAR_ASSET_PLAN[0].id;
   let pendingDeleteProfileId = null;
   let isSavingProfile = false;
   let progressionData = createEmptyProgressionData();
@@ -986,10 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const unlocked = progress.unlockedAchievements.includes(achievement.id);
       const item = document.createElement('article');
       item.className = `badge-card ${unlocked ? 'badge-card--unlocked' : 'badge-card--locked'}`;
-      const icon = document.createElement('span');
-      icon.className = 'badge-icon';
-      icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = unlocked ? '★' : '◇';
+      const icon = createAchievementArtwork(achievement, unlocked, 'badge-icon');
       const copy = document.createElement('div');
       const name = document.createElement('strong');
       name.textContent = achievement.name;
@@ -1278,6 +1333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextRank = getNextRank(rank);
 
     setAvatarArt(progressAvatar, activeProfile?.avatarId || AVATARS[0].id);
+    progressRankEmblem.replaceChildren(createRankArtwork(rank, 'rank-emblem--progress'));
     progressPlayerName.textContent = activeProfile?.nickname || 'Tetamu';
     progressStorageStatus.textContent = activeProfile
       ? (progressionStorageIsAvailable ? 'Kemajuan disimpan pada peranti ini' : 'Kemajuan sesi sahaja')
@@ -1334,14 +1390,30 @@ document.addEventListener('DOMContentLoaded', () => {
       : `Jumlah terkini: ${reward.totalJejak} Jejak`;
 
     if (reward.newRank.level > reward.previousRank.level) {
-      victoryPromotion.textContent = `Naik pangkat! Tahap ${reward.newRank.level} • ${reward.newRank.name}`;
+      const rankUnlock = document.createElement('div');
+      rankUnlock.className = 'victory-rank-unlock';
+      const rankCopy = document.createElement('div');
+      const rankHeading = document.createElement('strong');
+      rankHeading.textContent = 'NAIK PANGKAT!';
+      const rankName = document.createElement('span');
+      rankName.textContent = `Tahap ${reward.newRank.level} • ${reward.newRank.name}`;
+      rankCopy.append(rankHeading, rankName);
+      rankUnlock.append(createRankArtwork(reward.newRank, 'rank-emblem--victory'), rankCopy);
+      victoryPromotion.appendChild(rankUnlock);
     }
 
     reward.newlyUnlockedIds.forEach((achievementId) => {
       const achievement = ACHIEVEMENTS.find((item) => item.id === achievementId);
       if (achievement) {
-        const badge = document.createElement('p');
-        badge.textContent = `Lencana baharu: ${achievement.name}`;
+        const badge = document.createElement('div');
+        badge.className = 'victory-achievement-unlock';
+        const badgeCopy = document.createElement('div');
+        const badgeHeading = document.createElement('strong');
+        badgeHeading.textContent = 'LENCANA BAHARU!';
+        const badgeName = document.createElement('span');
+        badgeName.textContent = achievement.name;
+        badgeCopy.append(badgeHeading, badgeName);
+        badge.append(createAchievementArtwork(achievement, true, 'badge-icon--victory'), badgeCopy);
         victoryBadges.appendChild(badge);
       }
     });
@@ -1349,7 +1421,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function isKnownAvatar(avatarId) {
-    return AVATARS.some((avatar) => avatar.id === avatarId);
+    return getAllAvatars().some((avatar) => avatar.id === avatarId);
   }
 
   function normalizeStoredProfile(profile) {
@@ -1455,7 +1527,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getAvatar(avatarId) {
-    return AVATARS.find((avatar) => avatar.id === avatarId) || AVATARS[0];
+    return getAllAvatars().find((avatar) => avatar.id === avatarId) || PREMIUM_AVATAR_ASSET_PLAN[0];
+  }
+
+  function getAllAvatars() {
+    // Legacy definitions remain available so existing stored profiles never change identity.
+    return [...AVATARS, ...PREMIUM_AVATAR_ASSET_PLAN];
+  }
+
+  function getSelectableAvatars() {
+    // New and edited profiles choose from the coherent premium collection only.
+    return PREMIUM_AVATAR_ASSET_PLAN.filter((avatar) => Boolean(avatar.src));
   }
 
   function getAvatarSymbol(symbol, accent) {
@@ -1482,8 +1564,150 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   }
 
+  function createArtworkImage(src, alt, className) {
+    const image = document.createElement('img');
+    image.className = className;
+    image.src = src;
+    image.alt = alt;
+    image.width = 256;
+    image.height = 256;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    return image;
+  }
+
+  function decorateActionButton(button, artworkKey) {
+    const src = ACTION_ARTWORK[artworkKey];
+    if (!button || !src || button.dataset.premiumArtwork === artworkKey) {
+      return;
+    }
+
+    const labelText = button.textContent.trim();
+    const label = document.createElement('span');
+    label.className = 'premium-action-label';
+    label.textContent = labelText;
+    const image = createArtworkImage(src, '', 'premium-action-image');
+    image.setAttribute('aria-hidden', 'true');
+    image.addEventListener('error', () => button.classList.add('artwork-fallback-active'), { once: true });
+    button.textContent = '';
+    button.dataset.premiumArtwork = artworkKey;
+    button.classList.add('premium-action-button');
+    button.append(image, label);
+  }
+
+  function setActionButtonLabel(button, labelText) {
+    const premiumLabel = button?.querySelector('.premium-action-label');
+    if (premiumLabel) {
+      premiumLabel.textContent = labelText;
+    } else if (button) {
+      button.textContent = labelText;
+    }
+  }
+
+  function decoratePremiumControls() {
+    const staticActions = [
+      [addProfileButton, 'addProfile'],
+      [guestButton, 'guest'],
+      [playerZilterokaButton, 'zilteroka'],
+      [ageGalleryButton, 'collection'],
+      [retroactiveGalleryButton, 'collection'],
+      [progressGalleryButton, 'collection'],
+      [playerBackButton, 'back'],
+      [ageBackButton, 'back'],
+      [categoryBackButton, 'back'],
+      [modeBackButton, 'back'],
+      [progressBackButton, 'back'],
+      [galleryBackButton, 'back'],
+      [gameMenuButton, 'menu'],
+      [menuButton, 'menu'],
+      [continueGameButton, 'continue'],
+      [continueCardRevealButton, 'continue'],
+      [exitGameButton, 'exit'],
+      [confirmDeleteButton, 'delete'],
+      [playAgainButton, 'playAgain']
+    ];
+    staticActions.forEach(([button, key]) => decorateActionButton(button, key));
+
+    modeButtons.forEach((button) => {
+      const src = MODE_ARTWORK[button.dataset.mode];
+      const emblem = button.querySelector('.mode-emblem');
+      const title = button.querySelector('strong');
+      if (!src || !emblem || !title) {
+        return;
+      }
+      const image = createArtworkImage(src, '', 'mode-artwork-image');
+      image.setAttribute('aria-hidden', 'true');
+      image.addEventListener('error', () => button.classList.add('artwork-fallback-active'), { once: true });
+      emblem.textContent = '';
+      emblem.classList.add('mode-emblem--artwork');
+      emblem.appendChild(image);
+      title.classList.add('mode-visible-title');
+      button.classList.add('mode-button--premium-artwork');
+    });
+  }
+
+  function createRankArtwork(rank, extraClass = '') {
+    const artwork = RANK_ARTWORK[rank.level];
+    const frame = document.createElement('div');
+    frame.className = `rank-emblem rank-emblem--level-${rank.level} ${extraClass}`.trim();
+    frame.setAttribute('role', 'img');
+    frame.setAttribute('aria-label', `Pangkat Tahap ${rank.level}, ${rank.name}`);
+
+    if (artwork?.src) {
+      frame.classList.add('rank-emblem--has-image');
+      const image = createArtworkImage(artwork.src, '', 'rank-emblem-image');
+      image.setAttribute('aria-hidden', 'true');
+      image.addEventListener('error', () => frame.classList.add('artwork-fallback-active'), { once: true });
+      frame.appendChild(image);
+    }
+
+    const fallback = document.createElement('span');
+    fallback.className = 'rank-emblem-fallback';
+    fallback.setAttribute('aria-hidden', 'true');
+    fallback.textContent = String(rank.level);
+    frame.appendChild(fallback);
+    return frame;
+  }
+
+  function createAchievementArtwork(achievement, unlocked, extraClass = '') {
+    const artwork = ACHIEVEMENT_ARTWORK[achievement.id];
+    const frame = document.createElement('span');
+    frame.className = `achievement-emblem ${unlocked ? 'achievement-emblem--unlocked' : 'achievement-emblem--locked'} ${extraClass}`.trim();
+    frame.setAttribute('aria-hidden', 'true');
+
+    const artworkSource = unlocked ? artwork?.src : (artwork?.lockedSrc || artwork?.src);
+    if (artworkSource) {
+      frame.classList.add('achievement-emblem--has-image');
+      if (!unlocked && !artwork.lockedSrc) {
+        frame.classList.add('achievement-emblem--generated-locked');
+      }
+      const image = createArtworkImage(artworkSource, '', 'achievement-emblem-image');
+      image.setAttribute('aria-hidden', 'true');
+      image.addEventListener('error', () => frame.classList.add('artwork-fallback-active'), { once: true });
+      frame.appendChild(image);
+    }
+
+    const fallback = document.createElement('span');
+    fallback.className = 'achievement-emblem-fallback';
+    fallback.textContent = unlocked ? (artwork?.fallback || '★') : '🔒';
+    frame.appendChild(fallback);
+    return frame;
+  }
+
   function setAvatarArt(element, avatarId) {
-    element.innerHTML = getAvatarSvg(avatarId);
+    const avatar = getAvatar(avatarId);
+    element.innerHTML = '';
+    if (avatar.src) {
+      const image = createArtworkImage(avatar.src, '', 'avatar-image');
+      image.setAttribute('aria-hidden', 'true');
+      image.addEventListener('error', () => {
+        element.innerHTML = getAvatarSvg(AVATARS[0].id);
+        element.classList.add('artwork-fallback-active');
+      }, { once: true });
+      element.appendChild(image);
+    } else {
+      element.innerHTML = getAvatarSvg(avatar.id);
+    }
     element.dataset.avatarId = avatarId;
   }
 
@@ -1508,9 +1732,9 @@ document.addEventListener('DOMContentLoaded', () => {
     profileList.innerHTML = '';
     emptyProfileMessage.hidden = profileData.profiles.length > 0;
     addProfileButton.disabled = profileData.profiles.length >= MAX_PROFILES;
-    addProfileButton.textContent = addProfileButton.disabled
+    setActionButtonLabel(addProfileButton, addProfileButton.disabled
       ? 'HAD 5 PROFIL DICAPAI'
-      : 'TAMBAH PROFIL';
+      : 'TAMBAH PROFIL');
 
     profileData.profiles.forEach((profile) => {
       const card = document.createElement('article');
@@ -1535,6 +1759,10 @@ document.addEventListener('DOMContentLoaded', () => {
       status.className = 'profile-rank';
       status.textContent = `Tahap ${rank.level} • ${rank.name}`;
 
+      const rankRow = document.createElement('div');
+      rankRow.className = 'profile-rank-row';
+      rankRow.append(createRankArtwork(rank, 'rank-emblem--profile'), status);
+
       const jejak = document.createElement('span');
       jejak.className = 'profile-jejak';
       jejak.textContent = `${progress.totalJejak} Jejak Helang`;
@@ -1555,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rankProgressText.textContent = 'Tahap tertinggi dicapai';
       }
       rankProgress.append(rankProgressFill);
-      details.append(name, status, jejak, rankProgress, rankProgressText);
+      details.append(name, rankRow, jejak, rankProgress, rankProgressText);
 
       const controls = document.createElement('div');
       controls.className = 'profile-card-controls';
@@ -1565,6 +1793,7 @@ document.addEventListener('DOMContentLoaded', () => {
       playButton.type = 'button';
       playButton.textContent = 'MAIN';
       playButton.setAttribute('aria-label', `Main sebagai ${profile.nickname}`);
+      decorateActionButton(playButton, 'main');
       playButton.addEventListener('click', () => selectProfile(profile.id));
 
       const editButton = document.createElement('button');
@@ -1572,6 +1801,7 @@ document.addEventListener('DOMContentLoaded', () => {
       editButton.type = 'button';
       editButton.textContent = 'UBAH';
       editButton.setAttribute('aria-label', `Ubah profil ${profile.nickname}`);
+      decorateActionButton(editButton, 'edit');
       editButton.addEventListener('click', () => openProfileEditor(profile.id));
 
       const deleteButton = document.createElement('button');
@@ -1579,6 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteButton.type = 'button';
       deleteButton.textContent = 'PADAM';
       deleteButton.setAttribute('aria-label', `Padam profil ${profile.nickname}`);
+      decorateActionButton(deleteButton, 'delete');
       deleteButton.addEventListener('click', () => requestProfileDeletion(profile.id));
 
       const collectionButton = document.createElement('button');
@@ -1586,6 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
       collectionButton.type = 'button';
       collectionButton.textContent = 'KOLEKSI';
       collectionButton.setAttribute('aria-label', `Buka Koleksi Kata Raka ${profile.nickname}`);
+      decorateActionButton(collectionButton, 'collection');
       collectionButton.addEventListener('click', () => (
         showKataRakaGallery(playerScreen, profile.id)
       ));
@@ -1599,7 +1831,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderAvatarOptions() {
     avatarOptions.innerHTML = '';
 
-    AVATARS.forEach((avatar) => {
+    getSelectableAvatars().forEach((avatar) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'avatar-option';
@@ -1643,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const profile = profileData.profiles.find((item) => item.id === profileId);
     editingProfileId = profile ? profile.id : null;
-    selectedAvatarId = profile ? profile.avatarId : AVATARS[0].id;
+    selectedAvatarId = profile ? profile.avatarId : PREMIUM_AVATAR_ASSET_PLAN[0].id;
     nicknameInput.value = profile ? profile.nickname : '';
     profileFormTitle.textContent = profile ? 'UBAH PROFIL' : 'TAMBAH PROFIL';
     saveProfileButton.textContent = profile ? 'SIMPAN PERUBAHAN' : 'SIMPAN PROFIL';
@@ -3577,6 +3809,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProfiles();
   loadProgression();
   loadKataRaka();
+  decoratePremiumControls();
   updateActivePlayerLabel();
   startBrandIntro();
 

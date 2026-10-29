@@ -1,0 +1,34 @@
+[
+  {
+    "id": "jejak-pertama",
+    "path": "jejak-pertama.webp",
+    "width": 256,
+    "height": 256,
+    "transparent": true,
+    "size_bytes": 96938
+  },
+  {
+    "id": "peneroka-kategori",
+    "path": "peneroka-kategori.webp",
+    "width": 256,
+    "height": 256,
+    "transparent": true,
+    "size_bytes": 101702
+  },
+  {
+    "id": "pemburu-100-kata",
+    "path": "pemburu-100-kata.webp",
+    "width": 256,
+    "height": 256,
+    "transparent": true,
+    "size_bytes": 96050
+  },
+  {
+    "id": "penjelajah-empat-tahap",
+    "path": "penjelajah-empat-tahap.webp",
+    "width": 256,
+    "height": 256,
+    "transparent": true,
+    "size_bytes": 96596
+  }
+]

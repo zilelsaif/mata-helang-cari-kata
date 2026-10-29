@@ -3050,6 +3050,612 @@ body {
   }
 }
 
+/* Premium artwork integration with semantic HTML and text fallbacks. */
+.rank-emblem,
+.achievement-emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  isolation: isolate;
+}
+
+.rank-emblem {
+  width: 64px;
+  aspect-ratio: 1;
+  border: 3px solid #f9d675;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.8), transparent 20%),
+    linear-gradient(145deg, #2e83df, #124b9d 62%, #102852);
+  box-shadow: 0 0 0 2px #b87918, 0 9px 20px rgba(16, 40, 82, 0.22);
+}
+
+.rank-emblem::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 50%;
+}
+
+.rank-emblem-fallback {
+  color: #fff5ce;
+  font-size: 1.45rem;
+  font-weight: 900;
+  text-shadow: 0 2px 0 #8b570c;
+}
+
+.rank-emblem-image,
+.achievement-emblem-image,
+.avatar-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.rank-emblem--has-image {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.rank-emblem--has-image::before {
+  display: none;
+}
+
+.rank-emblem--has-image .rank-emblem-fallback,
+.achievement-emblem--has-image .achievement-emblem-fallback {
+  display: none;
+}
+
+.rank-emblem.artwork-fallback-active .rank-emblem-image,
+.achievement-emblem.artwork-fallback-active .achievement-emblem-image {
+  display: none;
+}
+
+.rank-emblem.artwork-fallback-active .rank-emblem-fallback,
+.achievement-emblem.artwork-fallback-active .achievement-emblem-fallback {
+  display: inline;
+}
+
+.rank-emblem--level-2 { background: linear-gradient(145deg, #29b9d5, #1762c5 62%, #102852); }
+.rank-emblem--level-3 { background: linear-gradient(145deg, #5ab7ed, #2352b2 62%, #102852); }
+.rank-emblem--level-4 { background: linear-gradient(145deg, #f3c45e, #1762c5 58%, #102852); }
+.rank-emblem--level-5 { background: linear-gradient(145deg, #7d50c7, #1762c5 58%, #102852); }
+.rank-emblem--level-6 { border-color: #ffe597; background: linear-gradient(145deg, #f3c45e, #bf7518 52%, #1762c5); }
+.rank-emblem--level-7 {
+  border-color: #ffe9a8;
+  background: linear-gradient(145deg, #fff0a8, #f3c45e 28%, #7d50c7 68%, #1762c5);
+  box-shadow: 0 0 0 2px #b87918, 0 0 18px rgba(125, 80, 199, 0.35), 0 9px 20px rgba(16, 40, 82, 0.22);
+}
+
+.rank-emblem--profile {
+  width: 38px;
+  border-width: 2px;
+  box-shadow: 0 0 0 1px #b87918, 0 4px 9px rgba(16, 40, 82, 0.18);
+}
+
+.rank-emblem--profile::before { inset: 4px; }
+.rank-emblem--profile .rank-emblem-fallback { font-size: 0.92rem; }
+
+.profile-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.profile-rank-row .profile-rank {
+  min-width: 0;
+}
+
+.progress-rank-emblem {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.rank-emblem--progress {
+  width: 104px;
+}
+
+.rank-emblem--progress .rank-emblem-fallback {
+  font-size: 2.25rem;
+}
+
+.achievement-emblem {
+  width: 56px;
+  aspect-ratio: 1;
+  border: 2px solid #c3d4e8;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #edf2f7, #cfd9e5);
+  color: #526175;
+  box-shadow: 0 5px 12px rgba(16, 40, 82, 0.13);
+}
+
+.achievement-emblem--unlocked {
+  border-color: #e2b94f;
+  background: linear-gradient(145deg, #fff2a9, #f0ae35 62%, #1762c5);
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(243, 196, 94, 0.25), 0 7px 16px rgba(155, 101, 5, 0.2);
+}
+
+.achievement-emblem--locked {
+  opacity: 0.76;
+}
+
+.achievement-emblem--generated-locked .achievement-emblem-image {
+  filter: grayscale(1) saturate(0.15) brightness(0.78);
+}
+
+.achievement-emblem--locked::after {
+  content: '🔒';
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  aspect-ratio: 1;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #526175;
+  font-size: 0.7rem;
+  filter: none;
+}
+
+.achievement-emblem-fallback {
+  font-size: 1.35rem;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(16, 40, 82, 0.24);
+}
+
+.badge-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.badge-card {
+  align-items: flex-start;
+  min-height: 92px;
+  padding: 13px;
+}
+
+.badge-card--unlocked {
+  box-shadow: 0 9px 20px rgba(155, 101, 5, 0.12);
+}
+
+.victory-rank-unlock,
+.victory-achievement-unlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 390px);
+  margin: 10px auto;
+  padding: 11px 13px;
+  border: 1px solid rgba(218, 170, 62, 0.44);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  text-align: left;
+}
+
+.victory-rank-unlock > div,
+.victory-achievement-unlock > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.victory-rank-unlock strong,
+.victory-achievement-unlock strong {
+  color: #8a5708;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.victory-rank-unlock span,
+.victory-achievement-unlock span {
+  color: var(--adventure-navy);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.rank-emblem--victory,
+.badge-icon--victory {
+  width: 58px;
+}
+
+.avatar-option {
+  position: relative;
+  min-height: 104px;
+  border: 2px solid #d3e1ef;
+  background: linear-gradient(145deg, #fff, #edf6ff);
+}
+
+.avatar-option .avatar-image {
+  border-radius: 18px;
+}
+
+.premium-action-button {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 64px;
+  min-height: 58px;
+  padding: 4px 8px;
+  overflow: visible;
+}
+
+.premium-action-image {
+  display: block;
+  width: clamp(54px, 7vw, 76px);
+  height: clamp(54px, 7vw, 76px);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.premium-action-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.premium-action-button.artwork-fallback-active .premium-action-image {
+  display: none;
+}
+
+.premium-action-button.artwork-fallback-active .premium-action-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+.profile-card-controls .premium-action-button {
+  width: 100%;
+  min-height: 66px;
+  padding: 2px;
+}
+
+.profile-card-controls .premium-action-image {
+  width: 64px;
+  height: 64px;
+}
+
+.game-menu-button.premium-action-button,
+.exit-confirmation-card .premium-action-button,
+.victory-actions .premium-action-button {
+  min-width: 72px;
+  min-height: 62px;
+  padding: 2px 5px;
+}
+
+.mode-button--premium-artwork {
+  grid-template-columns: minmax(112px, 144px) minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  align-items: center;
+  min-height: 172px;
+  padding: 14px 18px;
+}
+
+.mode-emblem--artwork {
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+}
+
+.mode-artwork-image {
+  display: block;
+  width: clamp(112px, 13vw, 144px);
+  height: clamp(112px, 13vw, 144px);
+  object-fit: contain;
+}
+
+.mode-button--premium-artwork > span:last-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.mode-button--premium-artwork .mode-visible-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.mode-button--premium-artwork.artwork-fallback-active {
+  grid-template-columns: 1fr;
+  min-height: 108px;
+}
+
+.mode-button--premium-artwork.artwork-fallback-active .mode-emblem--artwork {
+  display: none;
+}
+
+.mode-button--premium-artwork.artwork-fallback-active .mode-visible-title {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+.mode-button--premium-artwork.artwork-fallback-active > span:last-child {
+  grid-column: 1;
+  grid-row: auto;
+}
+
+.avatar-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--adventure-cyan);
+  color: #fff;
+  font-size: 0.78rem;
+  box-shadow: 0 2px 6px rgba(16, 40, 82, 0.2);
+}
+
+@media (min-width: 600px) {
+  .profile-editor-panel {
+    width: min(100%, 680px);
+  }
+
+  .avatar-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .badge-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rank-emblem--progress {
+    width: 86px;
+  }
+
+  .victory-rank-unlock,
+  .victory-achievement-unlock {
+    align-items: flex-start;
+  }
+
+  .mode-button--premium-artwork {
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 140px;
+    padding: 10px 12px;
+  }
+
+  .mode-artwork-image {
+    width: 104px;
+    height: 104px;
+  }
+
+  .premium-action-image {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* v0.24.0 artwork layout hotfix: artwork owns its shape; buttons keep semantics. */
+.premium-action-button:not(.artwork-fallback-active) {
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.premium-action-button:not(.artwork-fallback-active):hover,
+.premium-action-button:not(.artwork-fallback-active):focus-visible {
+  background: transparent;
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.premium-action-button:not(.artwork-fallback-active):focus-visible {
+  outline: 3px solid var(--adventure-cyan);
+  outline-offset: 4px;
+}
+
+.premium-action-button:not(.artwork-fallback-active) .premium-action-image {
+  width: clamp(82px, 8vw, 104px);
+  height: clamp(82px, 8vw, 104px);
+}
+
+.profile-actions {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.profile-actions .premium-action-button:not(.artwork-fallback-active) {
+  width: auto;
+  min-height: 0;
+  flex: 0 1 auto;
+}
+
+.profile-actions .premium-action-image {
+  width: clamp(92px, 10vw, 116px);
+  height: clamp(92px, 10vw, 116px);
+}
+
+.profile-card-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-items: center;
+  gap: 8px;
+}
+
+.profile-card-controls .premium-action-button:not(.artwork-fallback-active) {
+  width: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+.profile-card-controls .premium-action-image {
+  width: clamp(72px, 8vw, 92px);
+  height: clamp(72px, 8vw, 92px);
+}
+
+.player-feature-actions {
+  align-items: center;
+}
+
+.player-feature-actions .collection-button.premium-action-button:not(.artwork-fallback-active),
+.progress-screen-actions .collection-button.premium-action-button:not(.artwork-fallback-active) {
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.player-feature-actions .premium-action-image,
+.progress-screen-actions .premium-action-image {
+  width: clamp(88px, 9vw, 108px);
+  height: clamp(88px, 9vw, 108px);
+}
+
+.rank-emblem.rank-emblem--has-image {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.rank-emblem.rank-emblem--has-image::before {
+  display: none;
+}
+
+.rank-emblem--profile {
+  width: clamp(52px, 6vw, 60px);
+}
+
+.rank-emblem--progress {
+  width: clamp(112px, 14vw, 136px);
+}
+
+.rank-emblem--victory {
+  width: clamp(72px, 11vw, 104px);
+}
+
+.mode-list {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.mode-button.mode-button--premium-artwork {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 0;
+  padding: 16px 16px 18px;
+  text-align: center;
+}
+
+.mode-button--premium-artwork .mode-emblem--artwork {
+  display: grid;
+  place-items: center;
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mode-button--premium-artwork .mode-artwork-image {
+  display: block;
+  width: clamp(128px, 16vw, 156px);
+  height: clamp(128px, 16vw, 156px);
+  object-fit: contain;
+}
+
+.mode-button--premium-artwork > span:last-child {
+  grid-column: auto;
+  grid-row: auto;
+  align-self: auto;
+  width: 100%;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.mode-button--premium-artwork.artwork-fallback-active {
+  display: grid;
+}
+
+@media (min-width: 700px) {
+  .profile-card-controls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mode-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mode-button--chain {
+    grid-column: 1 / -1;
+    width: calc(50% - 8px);
+    justify-self: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .profile-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: center;
+    gap: 10px;
+  }
+
+  .profile-actions .premium-action-image {
+    width: clamp(78px, 26vw, 94px);
+    height: clamp(78px, 26vw, 94px);
+  }
+
+  .mode-button--premium-artwork .mode-artwork-image {
+    width: clamp(116px, 39vw, 138px);
+    height: clamp(116px, 39vw, 138px);
+  }
+
+  .rank-emblem--progress {
+    width: 108px;
+  }
+}
+
 .zilteroka-dialog {
   position: fixed;
   z-index: 450;
