@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const titleScreen = document.getElementById('title-screen');
+  const supportScreen = document.getElementById('support-screen');
   const playerScreen = document.getElementById('player-screen');
   const profileScreen = document.getElementById('profile-screen');
   const ageScreen = document.getElementById('age-screen');
@@ -9,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeScreen = document.getElementById('mode-screen');
   const gameScreen = document.getElementById('game-screen');
   const startButton = document.getElementById('start-button');
+  const parentSupportButton = document.getElementById('parent-support-button');
+  const supportBackButton = document.getElementById('support-back-button');
+  const parentAcknowledgement = document.getElementById('parent-acknowledgement');
+  const parentAcknowledgementCard = parentAcknowledgement?.querySelector('.parent-acknowledgement-card');
+  const parentAcknowledgementCancel = document.getElementById('parent-acknowledgement-cancel');
+  const parentAcknowledgementContinue = document.getElementById('parent-acknowledgement-continue');
+  const supportQrEnlarge = document.getElementById('support-qr-enlarge');
+  const supportQrLightbox = document.getElementById('support-qr-lightbox');
+  const supportQrLightboxCard = supportQrLightbox?.querySelector('.support-qr-lightbox-card');
+  const supportQrLightboxClose = document.getElementById('support-qr-lightbox-close');
+  const supportQrLightboxDone = document.getElementById('support-qr-lightbox-done');
   const profileList = document.getElementById('profile-list');
   const emptyProfileMessage = document.getElementById('empty-profile-message');
   const profileStorageMessage = document.getElementById('profile-storage-message');
@@ -147,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let brandIntroTimer = null;
   let brandIntroDismissed = false;
   let zilterokaDialogTrigger = null;
+  let parentAcknowledgementTrigger = null;
+  let supportQrLightboxTrigger = null;
 
   const RANKS = [
     { threshold: 0, level: 1, name: 'Pemerhati Baru' },
@@ -1993,6 +2007,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function showScreen(show) {
     const screens = [
       titleScreen,
+      supportScreen,
       playerScreen,
       profileScreen,
       ageScreen,
@@ -2012,6 +2027,154 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showTitleScreen() {
     showScreen(titleScreen);
+  }
+
+  function getParentAcknowledgementFocusables() {
+    if (!parentAcknowledgementCard) {
+      return [];
+    }
+
+    return Array.from(parentAcknowledgementCard.querySelectorAll(
+      'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((element) => !element.hidden && element.getClientRects().length > 0);
+  }
+
+  function openParentAcknowledgement() {
+    if (!parentAcknowledgement) {
+      return;
+    }
+
+    parentAcknowledgementTrigger = document.activeElement;
+    parentAcknowledgement.classList.remove('hidden');
+    parentAcknowledgement.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('parent-acknowledgement-open');
+    document.querySelector('main')?.setAttribute('inert', '');
+    parentAcknowledgementContinue?.focus({ preventScroll: true });
+  }
+
+  function closeParentAcknowledgement(options = {}) {
+    if (!parentAcknowledgement || parentAcknowledgement.classList.contains('hidden')) {
+      return;
+    }
+
+    parentAcknowledgement.classList.add('hidden');
+    parentAcknowledgement.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('parent-acknowledgement-open');
+    document.querySelector('main')?.removeAttribute('inert');
+    if (options.restoreFocus !== false) {
+      parentAcknowledgementTrigger?.focus({ preventScroll: true });
+    }
+    parentAcknowledgementTrigger = null;
+  }
+
+  function showParentSupport() {
+    closeParentAcknowledgement({ restoreFocus: false });
+    showScreen(supportScreen);
+    document.getElementById('support-title')?.focus?.({ preventScroll: true });
+  }
+
+  function handleParentAcknowledgementKeydown(event) {
+    if (!parentAcknowledgement || parentAcknowledgement.classList.contains('hidden')) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeParentAcknowledgement();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusable = getParentAcknowledgementFocusables();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      parentAcknowledgementCard?.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function getSupportQrLightboxFocusables() {
+    if (!supportQrLightboxCard) {
+      return [];
+    }
+
+    return Array.from(supportQrLightboxCard.querySelectorAll(
+      'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((element) => !element.hidden && element.getClientRects().length > 0);
+  }
+
+  function openSupportQrLightbox() {
+    if (!supportQrLightbox) {
+      return;
+    }
+
+    supportQrLightboxTrigger = document.activeElement;
+    supportQrLightbox.classList.remove('hidden');
+    supportQrLightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('support-qr-lightbox-open');
+    document.querySelector('main')?.setAttribute('inert', '');
+    supportQrLightboxClose?.focus({ preventScroll: true });
+  }
+
+  function closeSupportQrLightbox() {
+    if (!supportQrLightbox || supportQrLightbox.classList.contains('hidden')) {
+      return;
+    }
+
+    supportQrLightbox.classList.add('hidden');
+    supportQrLightbox.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('support-qr-lightbox-open');
+    document.querySelector('main')?.removeAttribute('inert');
+    supportQrLightboxTrigger?.focus({ preventScroll: true });
+    supportQrLightboxTrigger = null;
+  }
+
+  function handleSupportQrLightboxKeydown(event) {
+    if (!supportQrLightbox || supportQrLightbox.classList.contains('hidden')) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeSupportQrLightbox();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusable = getSupportQrLightboxFocusables();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      supportQrLightboxCard?.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   function showAgeScreen() {
@@ -3630,6 +3793,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (startButton) {
     startButton.addEventListener('click', showPlayerScreen);
   }
+
+  parentSupportButton?.addEventListener('click', openParentAcknowledgement);
+  parentAcknowledgementCancel?.addEventListener('click', closeParentAcknowledgement);
+  parentAcknowledgementContinue?.addEventListener('click', showParentSupport);
+  supportBackButton?.addEventListener('click', showTitleScreen);
+  document.addEventListener('keydown', handleParentAcknowledgementKeydown, true);
+  supportQrEnlarge?.addEventListener('click', openSupportQrLightbox);
+  supportQrLightboxClose?.addEventListener('click', closeSupportQrLightbox);
+  supportQrLightboxDone?.addEventListener('click', closeSupportQrLightbox);
+  document.addEventListener('keydown', handleSupportQrLightboxKeydown, true);
 
   brandIntroSkip?.addEventListener('click', () => dismissBrandIntro());
   brandIntroLogo?.addEventListener('error', () => dismissBrandIntro({ immediate: true }));

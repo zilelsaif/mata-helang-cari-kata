@@ -69,6 +69,54 @@
         <button id="start-button" type="button" aria-label="Mula permainan">
           MULA
         </button>
+
+        <button id="parent-support-button" class="parent-support-entry" type="button" aria-haspopup="dialog" aria-controls="parent-acknowledgement">
+          UNTUK IBU BAPA
+        </button>
+      </section>
+
+      <section id="support-screen" class="panel support-panel" aria-labelledby="support-title" aria-hidden="true">
+        <div class="support-hero">
+          <img
+            src="assets/raka/raka-hero.webp"
+            alt="Raka, maskot helang Mata Helang: Cari Kata"
+            onerror="this.hidden = true; this.nextElementSibling.hidden = false;"
+          />
+          <p class="support-raka-fallback" hidden>Ilustrasi Raka tidak dapat dimuatkan.</p>
+        </div>
+
+        <div class="support-content">
+          <p class="eyebrow">Untuk Ibu Bapa dan Penjaga</p>
+          <h2 id="support-title" tabindex="-1"><span aria-hidden="true">❤️</span> SOKONG PEMBANGUNAN MATA HELANG</h2>
+          <p>
+            Mata Helang: Cari Kata dibangunkan sebagai permainan pendidikan percuma untuk kanak-kanak Malaysia.
+          </p>
+          <p>
+            Jika anda menghargai usaha ini, anda boleh membantu pembangunan, penyelenggaraan dan penambahbaikan permainan ZilTeroka secara sukarela.
+          </p>
+          <aside class="support-promise" aria-label="Jaminan kandungan percuma">
+            <strong>Semua kandungan permainan kekal percuma.</strong>
+            <span>Sokongan tidak membuka kad, avatar, Jejak Helang, tahap atau kelebihan khas.</span>
+          </aside>
+          <div class="support-payment" aria-labelledby="support-payment-title">
+            <div>
+              <strong id="support-payment-title">Sokongan Sukarela</strong>
+              <span>Imbas menggunakan aplikasi perbankan atau eWallet yang menyokong DuitNow QR.</span>
+              <small>Semak nama penerima dan jumlah dengan teliti sebelum mengesahkan transaksi.</small>
+            </div>
+            <button id="support-qr-enlarge" class="support-qr-preview" type="button" aria-label="Besarkan poster QR sokongan Mata Helang" aria-haspopup="dialog" aria-controls="support-qr-lightbox">
+              <img src="assets/support/mata-helang-support-qr.png" alt="Poster QR sokongan pembangunan Mata Helang melalui Touch 'n Go eWallet" width="1024" height="1536" loading="lazy" decoding="async" />
+              <span>TEKAN UNTUK BESARKAN</span>
+            </button>
+          </div>
+          <div class="support-actions">
+            <a class="primary-button support-feedback-link" href="mailto:zilteroka@gmail.com?subject=Maklum%20Balas%20Mata%20Helang">MAKLUM BALAS</a>
+            <button id="support-back-button" class="secondary-button" type="button">KEMBALI</button>
+          </div>
+          <p class="support-privacy-note">
+            Permainan tidak menghantar profil atau kemajuan pemain. E-mel hanya dibuka apabila anda memilih pautan maklum balas.
+          </p>
+        </div>
       </section>
 
       <section id="player-screen" class="panel profile-panel" aria-labelledby="player-title" aria-hidden="true">
@@ -447,8 +495,31 @@
       </div>
     </div>
 
+    <div id="parent-acknowledgement" class="parent-acknowledgement hidden" role="dialog" aria-modal="true" aria-labelledby="parent-acknowledgement-title" aria-describedby="parent-acknowledgement-description" aria-hidden="true">
+      <div class="parent-acknowledgement-card" tabindex="-1">
+        <p class="eyebrow">Ruangan Khas</p>
+        <h2 id="parent-acknowledgement-title">UNTUK IBU BAPA</h2>
+        <p id="parent-acknowledgement-description">Ruangan ini disediakan untuk ibu bapa atau penjaga.</p>
+        <p class="parent-acknowledgement-note">Pengesahan ini hanya peringatan ringkas dan bukan bukti pengesahan umur.</p>
+        <div class="parent-acknowledgement-actions">
+          <button id="parent-acknowledgement-cancel" class="secondary-button" type="button">BATAL</button>
+          <button id="parent-acknowledgement-continue" class="primary-button" type="button">TERUSKAN</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="support-qr-lightbox" class="support-qr-lightbox hidden" role="dialog" aria-modal="true" aria-labelledby="support-qr-lightbox-title" aria-describedby="support-qr-lightbox-description" aria-hidden="true">
+      <div class="support-qr-lightbox-card" tabindex="-1">
+        <button id="support-qr-lightbox-close" class="support-qr-lightbox-close" type="button" aria-label="Tutup paparan QR sokongan">×</button>
+        <h2 id="support-qr-lightbox-title">QR SOKONGAN MATA HELANG</h2>
+        <p id="support-qr-lightbox-description">Imbas menggunakan aplikasi perbankan atau eWallet. Semak nama penerima dan jumlah sebelum mengesahkan transaksi.</p>
+        <img class="support-qr-large" src="assets/support/mata-helang-support-qr.png" alt="Poster QR sokongan pembangunan Mata Helang dalam paparan besar" width="1024" height="1536" />
+        <button id="support-qr-lightbox-done" class="secondary-button" type="button">TUTUP</button>
+      </div>
+    </div>
+
     <footer class="app-footer" aria-label="Versi dan pencipta permainan">
-      v0.24.0 by Zil-el-Saif
+      v0.25.0 by Zil-el-Saif
     </footer>
 
     <script src="game.js"></script>
